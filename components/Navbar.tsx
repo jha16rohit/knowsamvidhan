@@ -11,7 +11,10 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {/* Circle Logo */}
           <div className="w-10 h-10 rounded-full border flex items-center justify-center">
-            <span className="text-sm font-bold text-orange-500">K</span>
+            <img  src="/image/logo.png"/>
+            {/* <span className="text-sm font-bold text-orange-500" >K</span> */}
+           
+
           </div>
 
           {/* Text */}
@@ -34,16 +37,16 @@ export default function Navbar() {
           <Link href="/schedules" className="hover:text-black">Schedules</Link>
           <Link href="/amendments" className="hover:text-black">Amendments</Link>
           <Link href="/quiz" className="hover:text-black">Quiz</Link>
-          <Link href="/ai-chat" className="hover:text-black">AI Chat</Link>
+          
         </div>
 
         {/* RIGHT: Buttons */}
         <div className="flex items-center gap-3">
-          <button className="text-sm border px-3 py-1 rounded-md hover:bg-gray-100">
+          <button className="text-sm border px-3 py-1 rounded-full whitespace-nowrap hover:bg-gray-100">
             Log in
           </button>
 
-          <button className="text-sm bg-orange-500 text-white px-4 py-1.5 rounded-full hover:bg-orange-600">
+          <button className="text-sm bg-orange-500 text-white px-4 py-1.5 whitespace-nowrap  rounded-full hover:bg-orange-600">
             Get started
           </button>
         </div>
