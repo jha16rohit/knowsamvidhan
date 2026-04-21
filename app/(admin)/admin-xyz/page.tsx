@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
 
       {/* ================= RIGHT SIDE ================= */}
       <div className="w-full md:w-1/2 bg-[#ffffff] flex flex-col items-center justify-center p-6 md:p-12 relative">
-        <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]"></div>
 
         <div className="bg-[#a4aec7] p-0.5 md:p-0.5 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] w-full max-w-md relative z-10">
           <div className="bg-[#f8f9fa] rounded-xl px-6 py-10 md:px-10 w-full text-center shadow-lg border border-white">
@@ -92,7 +92,7 @@ export default function AdminLoginPage() {
               <button
                 type="button"
                 onClick={() => router.push('/ad-dashboard')}
-                className="w-full mt-6 bg-gradient-to-r from-[#f59e0b] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-semibold py-3.5 rounded-lg flex justify-center items-center gap-2 transition-all shadow-md"
+                className="w-full mt-6 bg-linear-to-r from-[#f59e0b] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-semibold py-3.5 rounded-lg flex justify-center items-center gap-2 transition-all shadow-md"
               >
                 Secure Login <ArrowRight className="w-5 h-5" />
               </button>

@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link'; // 1. Imported Link here!
 import { 
   LayoutDashboard, List, FileText, AlignLeft, Book, 
   CalendarDays, History, GraduationCap, Users, BarChart3, 
@@ -8,17 +9,17 @@ import {
 export default function AdminDashboardPage() {
   // Navigation links for the sidebar
   const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, active: true },
-    { name: 'Parts', icon: List, active: false },
-    { name: 'Articles', icon: FileText, active: false },
-    { name: 'Clauses', icon: AlignLeft, active: false },
-    { name: 'Preamble', icon: Book, active: false },
-    { name: 'Schedules', icon: CalendarDays, active: false },
-    { name: 'Amendments', icon: History, active: false },
-    { name: 'Quizzes', icon: GraduationCap, active: false },
-    { name: 'Users', icon: Users, active: false },
-    { name: 'Analytics', icon: BarChart3, active: false },
-    { name: 'Settings', icon: Settings, active: false },
+    { name: 'Dashboard', icon: LayoutDashboard, active: true, href: '/ad-dashboard' },
+    { name: 'Parts', icon: List, active: false, href: '/parts' },
+    { name: 'Articles', icon: FileText, active: false, href: '/articles' },
+    { name: 'Clauses', icon: AlignLeft, active: false, href: '/clauses' },
+    { name: 'Preamble', icon: Book, active: false, href: '/preamble' },
+    { name: 'Schedules', icon: CalendarDays, active: false, href: '/schedules' },
+    { name: 'Amendments', icon: History, active: false, href: '/amendments' },
+    { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
+    { name: 'Users', icon: Users, active: false, href: '/users' },
+    { name: 'Analytics', icon: BarChart3, active: false, href: '/analytics' },
+    { name: 'Settings', icon: Settings, active: false, href: '/settings' },
   ];
 
   // Data for the CSS-based bar chart
@@ -29,7 +30,7 @@ export default function AdminDashboardPage() {
     <div className="min-h-screen flex bg-[#f8fafc] font-sans">
       
       {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col flex-shrink-0 min-h-screen">
+      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
         
         {/* Brand */}
         <div className="p-6 flex items-center gap-3">
@@ -45,9 +46,10 @@ export default function AdminDashboardPage() {
         {/* Navigation */}
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-2">
           {navItems.map((item) => (
-            <a
+            // 2. Replaced <a> with <Link> and used item.href below!
+            <Link
               key={item.name}
-              href="#"
+              href={item.href} 
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 item.active 
                   ? 'bg-[#1e2638] text-[#f59e0b]' 
@@ -56,7 +58,7 @@ export default function AdminDashboardPage() {
             >
               <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
               {item.name}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -87,7 +89,6 @@ export default function AdminDashboardPage() {
 
           {/* Stat Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            {/* Card 1 */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col justify-between h-32">
               <div className="flex justify-between items-start">
                 <p className="text-[11px] font-bold tracking-wider text-gray-400 uppercase">Total Users</p>
@@ -101,7 +102,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Card 2 */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col justify-between h-32">
               <div className="flex justify-between items-start">
                 <p className="text-[11px] font-bold tracking-wider text-gray-400 uppercase">Articles</p>
@@ -115,7 +115,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Card 3 */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col justify-between h-32">
               <div className="flex justify-between items-start">
                 <p className="text-[11px] font-bold tracking-wider text-gray-400 uppercase">Amendments</p>
@@ -129,7 +128,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Card 4 */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col justify-between h-32">
               <div className="flex justify-between items-start">
                 <p className="text-[11px] font-bold tracking-wider text-gray-400 uppercase">Quizzes</p>
@@ -147,7 +145,6 @@ export default function AdminDashboardPage() {
           {/* Middle Section: Chart & Updates */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             
-            {/* Chart Section */}
             <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80">
               <div className="flex justify-between items-center mb-8">
                 <h3 className="text-lg font-serif font-bold text-gray-900">Daily active users</h3>
@@ -156,7 +153,6 @@ export default function AdminDashboardPage() {
                 </span>
               </div>
               
-              {/* CSS Based Bar Chart */}
               <div className="h-48 flex items-end justify-between gap-3 px-2">
                 {chartBars.map((height, i) => (
                   <div key={i} className="flex flex-col items-center flex-1 gap-3 group h-full justify-end">
@@ -176,20 +172,19 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Pending Updates */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col">
               <h3 className="text-lg font-serif font-bold text-gray-900 mb-6">Pending updates</h3>
               <div className="space-y-3 flex-1">
                 <div className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-100 hover:border-orange-200 hover:bg-orange-50/30 transition-colors cursor-pointer">
-                  <AlertCircle className="w-4 h-4 text-[#f59e0b] flex-shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-[#f59e0b] shrink-0" />
                   <span className="text-sm text-gray-700 font-medium">Review AI explanation for Article 32</span>
                 </div>
                 <div className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-100 hover:border-orange-200 hover:bg-orange-50/30 transition-colors cursor-pointer">
-                  <AlertCircle className="w-4 h-4 text-[#f59e0b] flex-shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-[#f59e0b] shrink-0" />
                   <span className="text-sm text-gray-700 font-medium">Approve new 105th amendment entry</span>
                 </div>
                 <div className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-100 hover:border-orange-200 hover:bg-orange-50/30 transition-colors cursor-pointer">
-                  <AlertCircle className="w-4 h-4 text-[#f59e0b] flex-shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-[#f59e0b]  shrink-0" />
                   <span className="text-sm text-gray-700 font-medium">5 user reports awaiting triage</span>
                 </div>
               </div>
@@ -199,7 +194,6 @@ export default function AdminDashboardPage() {
           {/* Bottom Section: Lists */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            {/* Most read articles */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80">
               <h3 className="text-lg font-serif font-bold text-gray-900 mb-5">Most read articles</h3>
               <div className="space-y-4">
@@ -222,7 +216,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Top quizzes */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80">
               <h3 className="text-lg font-serif font-bold text-gray-900 mb-5">Top quizzes</h3>
               <div className="space-y-4">
