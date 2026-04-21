@@ -1,12 +1,23 @@
+"use client";
 import React from 'react';
-import Link from 'next/link'; // 1. Imported Link here!
+import Link from 'next/link'; 
+import { useRouter } from "next/navigation";
 import { 
   LayoutDashboard, List, FileText, AlignLeft, Book, 
   CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, AlertCircle, TrendingUp, Clock, BookOpen, ShieldAlert
+  Settings, AlertCircle, TrendingUp, Clock, BookOpen, ShieldAlert,LogOut
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+
+const handleLogout = async () => {
+  const confirmLogout = confirm("Are you sure you want to logout?");
+  if (!confirmLogout) return;
+
+  await fetch("/api/admin/logout", { method: "POST" });
+  router.push("/admin-xyz");
+};
   // Navigation links for the sidebar
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, active: true, href: '/ad-dashboard' },
@@ -25,6 +36,7 @@ export default function AdminDashboardPage() {
   // Data for the CSS-based bar chart
   const chartBars = [15, 45, 25, 35, 75, 25, 40, 85, 45, 60, 25, 45, 35, 70];
   const days = ['W1·M', 'T', 'W', 'T', 'F', 'S', 'S', 'W2·M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  
 
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans">
@@ -60,7 +72,16 @@ export default function AdminDashboardPage() {
               {item.name}
             </Link>
           ))}
+          {/* 🔥 LOGOUT BUTTON */}
+<button
+  onClick={handleLogout}
+  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 w-full text-left mt-2"
+>
+  <LogOut className="w-4 h-4" />
+  Logout
+</button>
         </nav>
+        
 
         {/* Bottom Warning Widget */}
         <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800 relative">
