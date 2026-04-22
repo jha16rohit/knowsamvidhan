@@ -42,7 +42,7 @@ export default function ClausesPage() {
     <div className="min-h-screen flex bg-[#f8fafc] font-sans">
       
       {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col flex-shrink-0 min-h-screen">
+      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
             <BookOpen className="text-[#c19d60] w-4 h-4" />
@@ -126,7 +126,7 @@ export default function ClausesPage() {
 
             {/* Table */}
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[800px]">
+              <table className="w-full text-left border-collapse min-w-200">
                 
                 {/* Table Header */}
                 <thead>
