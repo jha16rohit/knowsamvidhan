@@ -4,11 +4,15 @@ import jwt from "jsonwebtoken";
 
 export function proxy(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
-  const pathname = request.nextUrl.pathname;
+  const { pathname } = request.nextUrl;
 
-  // protect admin routes
-  if (pathname.startsWith("/ad-dashboard") || pathname.startsWith("/admin")) {
+  // ✅ Allow login page
+  if (pathname === "/admin-xyz") {
+    return NextResponse.next();
+  }
 
+  // ✅ Protect ONLY dashboard
+  if (pathname.startsWith("/ad-dashboard")) {
     if (!token) {
       return NextResponse.redirect(new URL("/admin-xyz", request.url));
     }
@@ -16,12 +20,11 @@ export function proxy(request: NextRequest) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET!);
 
-      // optional role check
       if ((decoded as any).role !== "admin") {
         return NextResponse.redirect(new URL("/admin-xyz", request.url));
       }
 
-    } catch (err) {
+    } catch (error) {
       return NextResponse.redirect(new URL("/admin-xyz", request.url));
     }
   }
