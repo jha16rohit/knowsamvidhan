@@ -36,7 +36,7 @@ export default function PartsPage() {
     <div className="min-h-screen flex bg-[#f8fafc] font-sans">
       
       {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col flex-shrink-0 min-h-screen">
+      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
             <BookOpen className="text-[#c19d60] w-4 h-4" />
@@ -78,14 +78,6 @@ export default function PartsPage() {
 
       {/* ================= MAIN CONTENT ================= */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 flex items-center justify-end px-8 border-b border-gray-200/50 bg-white/50 backdrop-blur-sm">
-          <div className="flex items-center gap-4">
-            <a href="/clauses" className="text-sm font-medium text-gray-500 hover:text-gray-900">View site</a>
-            <div className="w-8 h-8 rounded-full bg-[#0a0f18] text-white flex items-center justify-center text-xs font-bold tracking-wider shadow-sm">
-              AD
-            </div>
-          </div>
-        </header>
         <div className="flex-1 overflow-y-auto p-8 lg:p-10">
           
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -102,7 +94,7 @@ export default function PartsPage() {
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[800px]">
+              <table className="w-full text-left border-collapse min-w-200">
                 <thead>
                   <tr className="border-b border-gray-200 bg-white">
                     <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase">Part</th>

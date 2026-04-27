@@ -178,7 +178,7 @@ const handleLogout = async () => {
                 {chartBars.map((height, i) => (
                   <div key={i} className="flex flex-col items-center flex-1 gap-3 group h-full justify-end">
                     <div 
-                      className="w-full bg-gradient-to-t from-[#f97316] to-[#fbbf24] rounded-t-md opacity-90 group-hover:opacity-100 transition-opacity"
+                      className="w-full bg-linear-to-t from-[#f97316] to-[#fbbf24] rounded-t-md opacity-90 group-hover:opacity-100 transition-opacity"
                       style={{ height: `${height}%` }}
                     ></div>
                   </div>
