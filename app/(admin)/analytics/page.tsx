@@ -3,11 +3,14 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, List, FileText, AlignLeft, Book, 
   CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, BookOpen
+  Settings, ShieldAlert, BookOpen,
+  Bell, ShieldCheck
 } from 'lucide-react';
 
 export default function AnalyticsPage() {
-  // Navigation links (Analytics is now active)
+  // Simulated open alerts count for the prototype
+  const openCount = 4;
+  
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
     { name: 'Parts', icon: List, active: false, href: '/parts' },
@@ -19,6 +22,8 @@ export default function AnalyticsPage() {
     { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
     { name: 'Users', icon: Users, active: false, href: '/users' },
     { name: 'Analytics', icon: BarChart3, active: true, href: '/analytics' }, // Active!
+    { name: 'Alerts', icon: Bell, active: false, href: '/alerts', badge: openCount }, // Badge added here!
+    { name: 'Activity Logs', icon: ShieldCheck, active: false, href: '/activity-logs' },
     { name: 'Settings', icon: Settings, active: false, href: '/settings' },
   ];
 
@@ -58,14 +63,24 @@ export default function AnalyticsPage() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 item.active 
                   ? 'bg-[#1e2638] text-[#f59e0b]' 
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
-              <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-              {item.name}
+              {/* Left side: Icon and Name */}
+              <div className="flex items-center gap-3">
+                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
+                {item.name}
+              </div>
+              
+              {/* Right side: Dynamic Notification Badge */}
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>

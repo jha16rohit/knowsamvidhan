@@ -1,12 +1,18 @@
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
 import { 
   LayoutDashboard, List, FileText, AlignLeft, Book, 
   CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, BookOpen, Save
+  Settings, ShieldAlert, BookOpen, Save,
+  Bell, ShieldCheck
 } from 'lucide-react';
 
 export default function PreamblePage() {
+  // Simulated open alerts count for the prototype
+  const openCount = 4;
+
   // Navigation links (Preamble is now active)
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
@@ -19,6 +25,8 @@ export default function PreamblePage() {
     { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
     { name: 'Users', icon: Users, active: false, href: '/users' },
     { name: 'Analytics', icon: BarChart3, active: false, href: '/analytics' },
+    { name: 'Alerts', icon: Bell, active: false, href: '/alerts', badge: openCount }, // Badge added here!
+    { name: 'Activity Logs', icon: ShieldCheck, active: false, href: '/activity-logs' },
     { name: 'Settings', icon: Settings, active: false, href: '/settings' },
   ];
 
@@ -39,7 +47,7 @@ export default function PreamblePage() {
     <div className="min-h-screen flex bg-[#f8fafc] font-sans">
       
       {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col flex-shrink-0 min-h-screen">
+      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
             <BookOpen className="text-[#c19d60] w-4 h-4" />
@@ -55,14 +63,24 @@ export default function PreamblePage() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 item.active 
                   ? 'bg-[#1e2638] text-[#f59e0b]' 
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
-              <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-              {item.name}
+              {/* Left side: Icon and Name */}
+              <div className="flex items-center gap-3">
+                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
+                {item.name}
+              </div>
+              
+              {/* Right side: Dynamic Notification Badge */}
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>

@@ -5,10 +5,14 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, List, FileText, AlignLeft, Book, 
   CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check
+  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check,
+  Bell, ShieldCheck
 } from 'lucide-react';
 
 export default function AmendmentsPage() {
+  // Simulated open alerts count for the prototype
+  const openCount = 4;
+
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
     { name: 'Parts', icon: List, active: false, href: '/parts' },
@@ -20,6 +24,8 @@ export default function AmendmentsPage() {
     { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
     { name: 'Users', icon: Users, active: false, href: '/users' },
     { name: 'Analytics', icon: BarChart3, active: false, href: '/analytics' },
+    { name: 'Alerts', icon: Bell, active: false, href: '/alerts', badge: openCount }, // Badge added here!
+    { name: 'Activity Logs', icon: ShieldCheck, active: false, href: '/activity-logs' },
     { name: 'Settings', icon: Settings, active: false, href: '/settings' },
   ];
 
@@ -98,8 +104,8 @@ export default function AmendmentsPage() {
       
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-8 right-8 z-[60] bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="fixed bottom-8 right-8 z-60 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
           <span className="text-sm font-bold text-gray-900">{toastMessage}</span>
@@ -123,14 +129,24 @@ export default function AmendmentsPage() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 item.active 
                   ? 'bg-[#1e2638] text-[#f59e0b]' 
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
-              <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-              {item.name}
+              {/* Left side: Icon and Name */}
+              <div className="flex items-center gap-3">
+                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
+                {item.name}
+              </div>
+              
+              {/* Right side: Dynamic Notification Badge */}
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -223,10 +239,9 @@ export default function AmendmentsPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           
-          {/* CHANGED FROM max-w-2xl TO max-w-lg HERE */}
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
             
-            <div className="p-6 md:px-8 md:pt-8 md:pb-4 border-b border-gray-100 flex justify-between items-start flex-shrink-0">
+            <div className="p-6 md:px-8 md:pt-8 md:pb-4 border-b border-gray-100 flex justify-between items-start shrink-0">
               <div>
                 <h3 className="text-2xl font-serif font-bold text-gray-900">
                   {editingId !== null ? 'Edit amendment' : 'New amendment'}
@@ -315,7 +330,7 @@ export default function AmendmentsPage() {
               </form>
             </div>
 
-            <div className="p-6 md:px-8 md:py-5 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0 bg-gray-50 rounded-b-2xl">
+            <div className="p-6 md:px-8 md:py-5 border-t border-gray-100 flex justify-end gap-3 shrink-0 bg-gray-50 rounded-b-2xl">
               <button 
                 type="button" 
                 onClick={handleCloseModal}
@@ -338,7 +353,7 @@ export default function AmendmentsPage() {
 
       {/* ================= DELETE CONFIRMATION MODAL ================= */}
       {deleteId !== null && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-7 animate-in fade-in zoom-in-95 duration-200">
             <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">
               Delete this Amendment?

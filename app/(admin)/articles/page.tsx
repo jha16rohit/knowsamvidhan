@@ -5,10 +5,14 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, List, FileText, AlignLeft, Book, 
   CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, Search, Star, X, Check
+  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, Search, Star, X, Check,
+  Bell, ShieldCheck
 } from 'lucide-react';
 
 export default function ArticlesPage() {
+  // Simulated open alerts count to match the rest of the dashboard
+  const openCount = 4;
+
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
     { name: 'Parts', icon: List, active: false, href: '/parts' },
@@ -20,6 +24,8 @@ export default function ArticlesPage() {
     { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
     { name: 'Users', icon: Users, active: false, href: '/users' },
     { name: 'Analytics', icon: BarChart3, active: false, href: '/analytics' },
+    { name: 'Alerts', icon: Bell, active: false, href: '/alerts', badge: openCount }, // Badge added here!
+    { name: 'Activity Logs', icon: ShieldCheck, active: false, href: '/activity-logs' },
     { name: 'Settings', icon: Settings, active: false, href: '/settings' },
   ];
 
@@ -134,8 +140,8 @@ export default function ArticlesPage() {
       
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-8 right-8 z-[60] bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="fixed bottom-8 right-8 z-60 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
           <span className="text-sm font-bold text-gray-900">{toastMessage}</span>
@@ -143,7 +149,7 @@ export default function ArticlesPage() {
       )}
 
       {/* Sidebar */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col flex-shrink-0 min-h-screen">
+      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
             <BookOpen className="text-[#c19d60] w-4 h-4" />
@@ -159,14 +165,24 @@ export default function ArticlesPage() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 item.active 
                   ? 'bg-[#1e2638] text-[#f59e0b]' 
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
-              <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-              {item.name}
+              {/* Left side: Icon and Name */}
+              <div className="flex items-center gap-3">
+                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
+                {item.name}
+              </div>
+              
+              {/* Right side: Dynamic Notification Badge */}
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -226,7 +242,7 @@ export default function ArticlesPage() {
           ) : (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[800px]">
+                <table className="w-full text-left border-collapse min-w-200">
                   <thead>
                     <tr className="border-b border-gray-200 bg-white">
                       <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase">Article</th>
@@ -242,7 +258,7 @@ export default function ArticlesPage() {
                         <td className="px-6 py-5 text-sm font-medium text-gray-900">{article.id}</td>
                         <td className="px-6 py-5 text-sm text-gray-600">{article.title}</td>
                         <td className="px-6 py-5">
-                          <span className="px-3 py-1 bg-white border border-[#f59e0b]/30 text-[#f59e0b] rounded-full text-xs font-semibold truncate max-w-[200px] inline-block" title={article.part}>
+                          <span className="px-3 py-1 bg-white border border-[#f59e0b]/30 text-[#f59e0b] rounded-full text-xs font-semibold truncate max-w-50 inline-block" title={article.part}>
                             {article.part.split('—')[0].trim()}
                           </span>
                         </td>
@@ -294,7 +310,7 @@ export default function ArticlesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
             
-            <div className="p-6 md:px-8 md:pt-8 md:pb-4 border-b border-gray-100 flex justify-between items-start flex-shrink-0">
+            <div className="p-6 md:px-8 md:pt-8 md:pb-4 border-b border-gray-100 flex justify-between items-start shrink-0">
               <div>
                 <h3 className="text-2xl font-serif font-bold text-gray-900">
                   {editingId !== null ? 'Edit article' : 'New article'}
@@ -319,7 +335,6 @@ export default function ArticlesPage() {
                     className="w-full px-4 py-2.5 bg-white border border-[#f59e0b] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/50 text-sm text-gray-800 shadow-sm appearance-none"
                     style={{ backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1em' }}
                   >
-                    {/* 2. Here is where the magic happens! We loop through availableParts */}
                     <option value="" disabled>Select a Part...</option>
                     {availableParts.map((partOption) => (
                       <option 
@@ -410,7 +425,7 @@ export default function ArticlesPage() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-semibold text-transparent select-none mb-2 hidden md:block">Toggle</label>
+                    <label className="text-sm font-semibold text-transparent select-none mb-2 hidden md:block">Toggle</label>
                     <div className="border border-gray-200 rounded-xl p-3 flex justify-between items-center bg-gray-50/50 shadow-sm">
                       <div>
                         <p className="text-sm font-semibold text-gray-900">Featured</p>
@@ -431,7 +446,7 @@ export default function ArticlesPage() {
               </form>
             </div>
 
-            <div className="p-6 md:px-8 md:py-5 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0 bg-gray-50 rounded-b-2xl">
+            <div className="p-6 md:px-8 md:py-5 border-t border-gray-100 flex justify-end gap-3 shrink-0 bg-gray-50 rounded-b-2xl">
               <button 
                 type="button" 
                 onClick={handleCloseModal}
@@ -454,7 +469,7 @@ export default function ArticlesPage() {
 
       {/* ================= DELETE CONFIRMATION MODAL ================= */}
       {deleteId !== null && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-7 animate-in fade-in zoom-in-95 duration-200">
             <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">
               Delete this Article?
