@@ -1,5 +1,6 @@
-import Navbar from "@/components/Navbar";
 
+import Navbar from "@/components/Navbar";
+// import FooterSection from "@/components/Footersection";
 export default function UserLayout({
   children,
 }: {
@@ -9,6 +10,9 @@ export default function UserLayout({
     <>
       <Navbar />
       {children}
+      
     </>
+    
+    
   );
 }
