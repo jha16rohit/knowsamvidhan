@@ -137,8 +137,6 @@
 //           {/* ════ LEFT COLUMN ════ */}
 //           <div className="w-full lg:flex-1 lg:max-w-[600px]">
 
-            
-
 //             {/* Headline */}
 //             <h1 className="mb-6 leading-[1.05] tracking-tight">
 //               <span className="block font-['Playfair_Display'] text-[3rem] sm:text-[3.6rem] lg:text-[4rem] xl:text-[4.5rem] font-black text-neutral-900">
@@ -237,12 +235,9 @@
 //             </div>
 //           </div>
 
-          
 //             </div>
 //           </div>
 
-        
-      
 //     </section>
 //   );
 // }
@@ -403,8 +398,6 @@
 //           {/* ════ LEFT COLUMN ════ */}
 //           <div className="w-full lg:flex-1 lg:max-w-[680px]">
 
-            
-
 //             <div>
 //             <h1
 //               className="text-5xl lg:text-6xl font-bold leading-tight text-gray-900 max-w-175"
@@ -529,9 +522,6 @@
 //                 style={{ borderRadius: "10px" }}
 //               />
 
-              
-              
-
 //               {/* Satyamev Jayate label under book */}
 //               <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
 //                 <span className="text-[0.75rem] font-['DM_Sans'] text-neutral-400 tracking-[0.18em] uppercase">
@@ -553,7 +543,7 @@
 import { useState, useEffect, MouseEvent } from "react";
 
 export default function Hero() {
-  const rotatingWords = ["the Smart Way","Simply","Smartly","Effectively"];  
+  const rotatingWords = ["the Smart Way", "Simply", "Smartly", "Effectively"];
   const [wordIndex, setWordIndex] = useState(0);
   const [Animation, setAnimation] = useState(false);
 
@@ -571,7 +561,6 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen bg-[#f4ead8] flex items-center overflow-hidden">
-
       {/* ── KEYFRAMES ── */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
@@ -588,17 +577,38 @@ export default function Hero() {
 
       {/* ── BG CHAKRA — top right (large) ── */}
       <div className="absolute  -right-80 pointer-events-none z-0 opacity-[0.08]">
-        <img src="image/ashoka.png" alt="" aria-hidden="true" className="chakra-cw" width={900} height={900} />
+        <img
+          src="image/ashoka.png"
+          alt=""
+          aria-hidden="true"
+          className="chakra-cw"
+          width={900}
+          height={900}
+        />
       </div>
 
       {/* ── BG CHAKRA — bottom left (small) ── */}
       <div className="absolute -bottom-52 -left-52 pointer-events-none z-0 opacity-[0.06]">
-        <img src="image/ashoka.png" alt="" aria-hidden="true" className="chakra-ccw" width={700} height={500} />
+        <img
+          src="image/ashoka.png"
+          alt=""
+          aria-hidden="true"
+          className="chakra-ccw"
+          width={700}
+          height={500}
+        />
       </div>
 
       {/* ── BG CHAKRA — mid left (tiny accent) ── */}
       <div className="absolute top-1/2 -translate-y-1/2 -left-40 pointer-events-none z-0 opacity-[0.04]">
-        <img src="image/ashoka.png" alt="" aria-hidden="true" className="chakra-sm" width={480} height={280} />
+        <img
+          src="image/ashoka.png"
+          alt=""
+          aria-hidden="true"
+          className="chakra-sm"
+          width={480}
+          height={280}
+        />
       </div>
 
       {/* ── Hindi watermark ── */}
@@ -620,12 +630,8 @@ export default function Hero() {
       {/* ── MAIN CONTENT ── */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-16 py-16 lg:py-20">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 xl:gap-24">
-
           {/* ════ LEFT COLUMN ════ */}
           <div className="w-full lg:flex-1 lg:max-w-170">
-
-            
-
             {/* <div>
             <h1
               className="text-5xl lg:text-6xl font-bold leading-tight text-gray-900 max-w-175"
@@ -651,50 +657,60 @@ export default function Hero() {
               </button>
             </h1>
           </div> */}
-          <div className="max-w-7xl w-full">
-
-  <h1
-    className="text-[56px] lg:text-[72px] font-bold leading-[1.1] text-gray-900"
-    style={{
-      fontFamily: "'Georgia', serif",
-      letterSpacing: "-0.02em",
-    }}
-  >
-    Learn the <br/> Constitution of India,<br/>{" "}
-
-    <span className="inline-block mt-2">
-      <button
-        onClick={handleWordClick}
-        className="px-5 py-2 rounded-xl text-orange-400 transition-all duration-300"
-        style={{
-          
-          opacity: Animation ? 0 : 1,
-          transform: Animation ? "translateY(10px)" : "translateY(0)",
-          border: "none",
-          fontFamily: "'Georgia', serif",
-          fontSize: "inherit",
-          fontWeight: "inherit",
-        }}
-      >
-        {rotatingWords[wordIndex]}
-      </button>
-    </span>
-
-  </h1>
-
-</div>
+            <div className="max-w-7xl w-full">
+              <h1
+                className="text-[56px] lg:text-[72px] font-bold leading-[1.1] text-gray-900"
+                style={{
+                  fontFamily: "'Georgia', serif",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Learn the <br /> Constitution of India,
+                <br />{" "}
+                <span className="inline-block mt-2">
+                  <button
+                    onClick={handleWordClick}
+                    className="px-5 py-2 rounded-xl text-orange-400 transition-all duration-300"
+                    style={{
+                      opacity: Animation ? 0 : 1,
+                      transform: Animation
+                        ? "translateY(10px)"
+                        : "translateY(0)",
+                      border: "none",
+                      fontFamily: "'Georgia', serif",
+                      fontSize: "inherit",
+                      fontWeight: "inherit",
+                    }}
+                  >
+                    {rotatingWords[wordIndex]}
+                  </button>
+                </span>
+              </h1>
+            </div>
 
             {/* Sub-text */}
             <p className="text-[0.97rem] sm:text-[1.02rem] text-neutral-500 leading-[1.78] mb-8 max-w-122.5 font-['DM_Sans']">
-              Search articles, ask AI doubts, practice quizzes, and master amendments with{" "}
-              <strong className="text-neutral-800 font-semibold">KnowSamvidhan</strong>
-              {" "}— built for students, citizens, and aspirants.
+              Search articles, ask AI doubts, practice quizzes, and master
+              amendments with{" "}
+              <strong className="text-neutral-800 font-semibold">
+                KnowSamvidhan
+              </strong>{" "}
+              — built for students, citizens, and aspirants.
             </p>
 
             {/* Search bar */}
             <div className="flex items-center bg-white/90 backdrop-blur-sm border border-[#ddd0b0] rounded-2xl px-4 py-3.5 gap-3 mb-5 shadow-[0_4px_24px_rgba(0,0,0,0.07)] transition-shadow hover:shadow-[0_6px_32px_rgba(0,0,0,0.1)]">
-              <svg className="text-neutral-400 shrink-0" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              <svg
+                className="text-neutral-400 shrink-0"
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
               </svg>
               <input
                 type="text"
@@ -711,7 +727,13 @@ export default function Hero() {
               <span className="text-[0.67rem] font-bold text-neutral-400 tracking-[0.14em] uppercase font-['DM_Sans']">
                 Quick Access:
               </span>
-              {["Preamble", "Fundamental Rights", "Directive Principles", "Recent Amendments", "Schedules"].map((tag) => (
+              {[
+                "Preamble",
+                "Fundamental Rights",
+                "Directive Principles",
+                "Recent Amendments",
+                "Schedules",
+              ].map((tag) => (
                 <button
                   key={tag}
                   className="bg-white/75 border border-[#ddd0b0] rounded-full px-3.5 py-1.5 text-[0.8rem] text-neutral-600 hover:bg-neutral-900 hover:text-white hover:border-neutral-900 transition-all duration-200 font-['DM_Sans'] cursor-pointer active:scale-95"
@@ -724,14 +746,29 @@ export default function Hero() {
             {/* CTA Buttons */}
             <div className="flex flex-wrap gap-3 mb-11">
               <button className="flex items-center gap-2.5 bg-amber-500 hover:bg-amber-600 active:scale-[0.97] text-white rounded-2xl px-7 py-4 text-[0.94rem] font-semibold shadow-[0_8px_28px_rgba(180,105,0,0.32)] hover:-translate-y-0.5 transition-all duration-200 font-['DM_Sans']">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
                 Try AI Chat →
               </button>
               <button className="flex items-center gap-2.5 bg-white/80 backdrop-blur-sm text-neutral-800 border border-[#ddd0b0] hover:border-neutral-700 hover:bg-white active:scale-[0.97] rounded-2xl px-7 py-4 text-[0.94rem] font-semibold hover:-translate-y-0.5 transition-all duration-200 font-['DM_Sans']">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                >
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                 </svg>
                 Browse Parts
               </button>
@@ -740,19 +777,67 @@ export default function Hero() {
             {/* Stats row */}
             <div className="flex flex-wrap gap-6 sm:gap-8">
               {[
-                { icon: (
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                  ), bold: "100%", text: "Source-cited answers" },
-                { icon: (
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                  ), bold: "42,000+", text: "Learners onboard" },
-                { icon: (
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                  ), bold: "395", text: "Articles · 12 Schedules" },
+                {
+                  icon: (
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                  ),
+                  bold: "100%",
+                  text: "Source-cited answers",
+                },
+                {
+                  icon: (
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  ),
+                  bold: "42,000+",
+                  text: "Learners onboard",
+                },
+                {
+                  icon: (
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                    </svg>
+                  ),
+                  bold: "395",
+                  text: "Articles · 12 Schedules",
+                },
               ].map((s) => (
-                <div key={s.bold} className="flex items-center gap-2 text-[0.82rem] text-neutral-500 font-['DM_Sans']">
+                <div
+                  key={s.bold}
+                  className="flex items-center gap-2 text-[0.82rem] text-neutral-500 font-['DM_Sans']"
+                >
                   <span className="text-amber-600">{s.icon}</span>
-                  <strong className="text-neutral-900 font-semibold">{s.bold}</strong>
+                  <strong className="text-neutral-900 font-semibold">
+                    {s.bold}
+                  </strong>
                   <span>{s.text}</span>
                 </div>
               ))}
@@ -762,27 +847,28 @@ export default function Hero() {
           {/* ════ RIGHT COLUMN — Constitution Book Image ════ */}
           <div className="w-full lg:w-auto lg:shrink-0 flex mt-95  justify-center lg:justify-end">
             <div className="relative">
-
               {/* Warm radial glow behind image */}
               <div
                 className="absolute -inset-8 -z-10 blur-3xl rounded-full"
-                style={{ background: "radial-gradient(ellipse at 60% 50%, rgba(251,191,36,0.22) 0%, rgba(244,186,100,0.12) 40%, transparent 70%)" }}
+                style={{
+                  background:
+                    "radial-gradient(ellipse at 60% 50%, rgba(251,191,36,0.22) 0%, rgba(244,186,100,0.12) 40%, transparent 70%)",
+                }}
               />
 
               {/* Soft shadow plate */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[75%] h-8 blur-2xl rounded-full -z-10"
+              <div
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[75%] h-8 blur-2xl rounded-full -z-10"
                 style={{ background: "rgba(120,80,10,0.18)" }}
               />
 
               {/* The book image */}
               <img
-                src="image/con.png"
+                src="image/book.png"
                 alt="Constitution of India"
                 className="float-card relative z-10 w-75 sm:w-90 lg:w-100 xl:w-110 object-contain drop-shadow-[0_32px_48px_rgba(0,0,0,0.28)]"
                 style={{ borderRadius: "20px" }}
               />
-
-              
 
               {/* Satyamev Jayate label under book */}
               <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap">
@@ -790,10 +876,8 @@ export default function Hero() {
                   सत्यमेव जयते
                 </span>
               </div>
-
             </div>
           </div>
-
         </div>
       </div>
     </section>
