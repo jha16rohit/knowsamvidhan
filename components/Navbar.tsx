@@ -32,12 +32,12 @@ export default function Navbar() {
         {/* CENTER: Nav Links */}
         <div className="hidden md:flex items-center gap-6 text-sm text-gray-700 font-medium">
           <Link href="/" className="hover:text-black">Home</Link>
-          <Link href="/preamble" className="hover:text-black">Preamble</Link>
-          <Link href="/parts" className="hover:text-black">Parts</Link>
-          <Link href="/articles" className="hover:text-black">Articles</Link>
-          <Link href="/schedules" className="hover:text-black">Schedules</Link>
-          <Link href="/amendments" className="hover:text-black">Amendments</Link>
-          <Link href="/quiz" className="hover:text-black">Quiz</Link>
+          <Link href="/user_preamble" className="hover:text-black">Preamble</Link>
+          <Link href="/user_parts" className="hover:text-black">Parts</Link>
+          <Link href="/user_articles" className="hover:text-black">Articles</Link>
+          <Link href="/user_schedules" className="hover:text-black">Schedules</Link>
+          <Link href="/user_amendments" className="hover:text-black">Amendments</Link>
+          <Link href="/user_quiz" className="hover:text-black">Quiz</Link>
           
         </div>
 
