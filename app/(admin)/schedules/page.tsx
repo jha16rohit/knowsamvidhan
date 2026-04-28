@@ -1,138 +1,198 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   LayoutDashboard, List, FileText, AlignLeft, Book, 
   CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check
+  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check, Loader2
 } from 'lucide-react';
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface Schedule {
+  id: string;         // UUID from DB
+  shortId: string;    // e.g. "7th"
+  schedule: string;   // e.g. "Seventh Schedule"
+  title: string;
+  description: string;
+  topics: string[];
+}
+
+interface FormData {
+  shortId: string;
+  schedule: string;
+  title: string;
+  description: string;
+  topicsStr: string;  // comma-separated string for the input
+}
+
+// ─── Nav ──────────────────────────────────────────────────────────────────────
+const navItems = [
+  { name: 'Dashboard',  icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
+  { name: 'Parts',      icon: List,            active: false, href: '/parts' },
+  { name: 'Articles',   icon: FileText,        active: false, href: '/articles' },
+  { name: 'Clauses',    icon: AlignLeft,       active: false, href: '/clauses' },
+  { name: 'Preamble',   icon: Book,            active: false, href: '/preamble' },
+  { name: 'Schedules',  icon: CalendarDays,    active: true,  href: '/schedules' },
+  { name: 'Amendments', icon: History,         active: false, href: '/amendments' },
+  { name: 'Quizzes',    icon: GraduationCap,   active: false, href: '/quizzes' },
+  { name: 'Users',      icon: Users,           active: false, href: '/users' },
+  { name: 'Analytics',  icon: BarChart3,       active: false, href: '/analytics' },
+  { name: 'Settings',   icon: Settings,        active: false, href: '/settings' },
+];
+
+const EMPTY_FORM: FormData = {
+  shortId: '', schedule: '', title: '', description: '', topicsStr: ''
+};
+
+const API = '/api/admin/schedules';
+
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function SchedulesPage() {
-  const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
-    { name: 'Parts', icon: List, active: false, href: '/parts' },
-    { name: 'Articles', icon: FileText, active: false, href: '/articles' },
-    { name: 'Clauses', icon: AlignLeft, active: false, href: '/clauses' },
-    { name: 'Preamble', icon: Book, active: false, href: '/preamble' },
-    { name: 'Schedules', icon: CalendarDays, active: true, href: '/schedules' }, // Active!
-    { name: 'Amendments', icon: History, active: false, href: '/amendments' },
-    { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
-    { name: 'Users', icon: Users, active: false, href: '/users' },
-    { name: 'Analytics', icon: BarChart3, active: false, href: '/analytics' },
-    { name: 'Settings', icon: Settings, active: false, href: '/settings' },
-  ];
-
-  // Moving mock data into State. Added 'description' to match the new form.
-  const [schedules, setSchedules] = useState([
-    { id: '1st', schedule: 'First Schedule', title: 'States and Union Territories', description: '', topics: ['States', 'Union Territories', 'Territory'] },
-    { id: '2nd', schedule: 'Second Schedule', title: 'Salaries and Allowances', description: '', topics: ['President', 'Governor', 'Judges'] },
-    { id: '3rd', schedule: 'Third Schedule', title: 'Forms of Oaths and Affirmations', description: '', topics: ['Oaths', 'Constitutional Officers'] },
-    { id: '4th', schedule: 'Fourth Schedule', title: 'Allocation of Rajya Sabha Seats', description: '', topics: ['Rajya Sabha', 'Federalism'] },
-    { id: '5th', schedule: 'Fifth Schedule', title: 'Scheduled Areas and Tribes', description: '', topics: ['Tribal Areas', 'Administration'] },
-    { id: '6th', schedule: 'Sixth Schedule', title: 'Tribal Areas of the North-East', description: '', topics: ['North-East', 'Autonomy'] },
-    { id: '7th', schedule: 'Seventh Schedule', title: 'Union, State and Concurrent Lists', description: '', topics: ['Federalism', 'Lists', 'Powers'] },
-    { id: '8th', schedule: 'Eighth Schedule', title: 'Recognised Languages', description: '', topics: ['Languages', 'Culture'] },
-    { id: '9th', schedule: 'Ninth Schedule', title: 'Validation of Land Reform Laws', description: '', topics: ['Land Reform', 'Judicial Review'] },
-    { id: '10th', schedule: 'Tenth Schedule', title: 'Anti-Defection Law', description: '', topics: ['Anti-Defection', 'Politics'] },
-    { id: '11th', schedule: 'Eleventh Schedule', title: 'Powers of Panchayats', description: '', topics: ['Panchayats', 'Local Government'] },
-    { id: '12th', schedule: 'Twelfth Schedule', title: 'Powers of Municipalities', description: '', topics: ['Municipalities', 'Urban Government'] },
-  ]);
-
-  // --- States ---
+  const [schedules, setSchedules]     = useState<Schedule[]>([]);
+  const [loading, setLoading]         = useState(true);
+  const [saving, setSaving]           = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  
-  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [editingId, setEditingId]     = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Schedule | null>(null);
+  const [toast, setToast]             = useState<string | null>(null);
+  const [formData, setFormData]       = useState<FormData>(EMPTY_FORM);
 
-  // Notice 'topicsStr' - we use a string for the input box, and convert it to an array on save
-  const [formData, setFormData] = useState({
-    id: '', schedule: '', title: '', description: '', topicsStr: ''
-  });
-
-  // --- Handlers ---
-  const handleOpenModal = (index: number | null = null) => {
-    if (index !== null) {
-      const sched = schedules[index];
-      setFormData({
-        ...sched,
-        topicsStr: sched.topics.join(', ') // Convert array back to comma-separated string for the form
-      });
-      setEditingIndex(index);
-    } else {
-      setFormData({ id: '', schedule: '', title: '', description: '', topicsStr: '' });
-      setEditingIndex(null);
+  // ── Fetch all schedules ──────────────────────────────────────────────────
+  const fetchSchedules = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(API);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch');
+      setSchedules(data.schedules);
+    } catch (err) {
+      showToast('Error loading schedules');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  }, []);
+
+  useEffect(() => { fetchSchedules(); }, [fetchSchedules]);
+
+  // ── Toast ────────────────────────────────────────────────────────────────
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  // ── Modal helpers ────────────────────────────────────────────────────────
+  const openCreateModal = () => {
+    setFormData(EMPTY_FORM);
+    setEditingId(null);
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingIndex(null);
+  const openEditModal = (sched: Schedule) => {
+    setFormData({
+      shortId:     sched.shortId,
+      schedule:    sched.schedule,
+      title:       sched.title,
+      description: sched.description,
+      topicsStr:   sched.topics.join(', '),
+    });
+    setEditingId(sched.id);
+    setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Process the comma-separated string into an array of clean strings
-    const processedTopics = formData.topicsStr
-      .split(',')
-      .map(t => t.trim())
-      .filter(t => t.length > 0);
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingId(null);
+    setFormData(EMPTY_FORM);
+  };
 
-    const finalData = {
-      id: formData.id,
-      schedule: formData.schedule,
-      title: formData.title,
+  // ── Save (Create or Update) ──────────────────────────────────────────────
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+
+    const topics = formData.topicsStr
+      .split(',')
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+
+    const payload = {
+      shortId:     formData.shortId,
+      schedule:    formData.schedule,
+      title:       formData.title,
       description: formData.description,
-      topics: processedTopics
+      topics,
     };
 
-    if (editingIndex !== null) {
-      const updatedSchedules = [...schedules];
-      updatedSchedules[editingIndex] = finalData;
-      setSchedules(updatedSchedules);
-      showToast(`Updated ${finalData.schedule}`);
-    } else {
-      setSchedules([...schedules, finalData]);
-      showToast(`Created ${finalData.schedule}`);
+    try {
+      if (editingId) {
+        // ── UPDATE
+        const res = await fetch(`${API}/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Update failed');
+
+        setSchedules((prev) =>
+          prev.map((s) => (s.id === editingId ? data.schedule : s))
+        );
+        showToast(`Updated "${data.schedule.schedule}"`);
+      } else {
+        // ── CREATE
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Create failed');
+
+        setSchedules((prev) => [...prev, data.schedule]);
+        showToast(`Created "${data.schedule.schedule}"`);
+      }
+      closeModal();
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setSaving(false);
     }
-    handleCloseModal();
   };
 
-  const handleDeleteClick = (index: number) => {
-    setDeleteIndex(index);
-  };
+  // ── Delete ───────────────────────────────────────────────────────────────
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      const res = await fetch(`${API}/${deleteTarget.id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Delete failed');
 
-  const confirmDelete = () => {
-    if (deleteIndex !== null) {
-      const deletedName = schedules[deleteIndex].schedule;
-      setSchedules(schedules.filter((_, index) => index !== deleteIndex));
-      setDeleteIndex(null); 
-      showToast(`Deleted ${deletedName}`);
+      setSchedules((prev) => prev.filter((s) => s.id !== deleteTarget.id));
+      showToast(`Deleted "${deleteTarget.schedule}"`);
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
-  const showToast = (message: string) => {
-    setToastMessage(message);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
-      
-      {/* ================= TOAST NOTIFICATION ================= */}
-      {toastMessage && (
+
+      {/* ── Toast ── */}
+      {toast && (
         <div className="fixed bottom-8 right-8 z-[60] bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
           <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center flex-shrink-0">
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
-          <span className="text-sm font-bold text-gray-900">{toastMessage}</span>
+          <span className="text-sm font-bold text-gray-900">{toast}</span>
         </div>
       )}
 
-      {/* ================= SIDEBAR ================= */}
+      {/* ── Sidebar ── */}
       <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
@@ -150,8 +210,8 @@ export default function SchedulesPage() {
               key={item.name}
               href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                item.active 
-                  ? 'bg-[#1e2638] text-[#f59e0b]' 
+                item.active
+                  ? 'bg-[#1e2638] text-[#f59e0b]'
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
@@ -161,30 +221,29 @@ export default function SchedulesPage() {
           ))}
         </nav>
 
-        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800 relative">
+        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800">
           <div className="flex items-center gap-2 mb-1">
             <ShieldAlert className="w-4 h-4 text-[#f59e0b]" />
             <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
           </div>
           <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You're managing live content.<br />Edit with care.
+            You&apos;re managing live content.<br />Edit with care.
           </p>
         </div>
       </aside>
 
-      {/* ================= MAIN CONTENT ================= */}
+      {/* ── Main ── */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <div className="flex-1 overflow-y-auto p-8 lg:p-10">
-          
-          {/* Header Section */}
+
+          {/* Header */}
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
             <div>
               <h2 className="text-4xl font-serif text-gray-900 mb-2 font-bold">Schedules</h2>
               <p className="text-sm text-gray-500">Twelve Schedules of the Constitution — lists, forms and tables.</p>
             </div>
-            
-            <button 
-              onClick={() => handleOpenModal(null)}
+            <button
+              onClick={openCreateModal}
               className="bg-[#f59e0b] hover:bg-[#ea580c] text-gray-900 px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-sm self-start md:self-auto"
             >
               <Plus className="w-5 h-5" />
@@ -192,66 +251,75 @@ export default function SchedulesPage() {
             </button>
           </div>
 
-          {/* Table Container */}
+          {/* Table */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[1000px]">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-white">
-                    <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase w-16">#</th>
-                    <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase w-48">Schedule</th>
-                    <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase">Title</th>
-                    <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase">Topics</th>
-                    <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {schedules.map((row, index) => (
-                    <tr key={index} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4 text-sm font-semibold text-gray-900">{row.id}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{row.schedule}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{row.title}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-2">
-                          {row.topics.map((topic, tIndex) => (
-                            <span 
-                              key={tIndex} 
-                              className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold tracking-wide"
-                            >
-                              {topic}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-4">
-                          <button 
-                            onClick={() => handleOpenModal(index)}
-                            className="text-gray-500 hover:text-gray-900 transition-colors" 
-                            aria-label="Edit"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteClick(index)}
-                            className="text-red-500 hover:text-red-700 transition-colors" 
-                            aria-label="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+            {loading ? (
+              <div className="flex items-center justify-center py-24 text-gray-400">
+                <Loader2 className="w-6 h-6 animate-spin mr-3" />
+                <span className="text-sm">Loading schedules…</span>
+              </div>
+            ) : schedules.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 text-gray-400">
+                <CalendarDays className="w-10 h-10 mb-3 opacity-30" />
+                <p className="text-sm">No schedules yet. Click &quot;New Schedule&quot; to add one.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[1000px]">
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-white">
+                      <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase w-16">#</th>
+                      <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase w-48">Schedule</th>
+                      <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase">Title</th>
+                      <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase">Topics</th>
+                      <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {schedules.map((row) => (
+                      <tr key={row.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-semibold text-gray-900">{row.shortId}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600">{row.schedule}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600">{row.title}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-wrap gap-2">
+                            {row.topics.map((topic, i) => (
+                              <span key={i} className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold tracking-wide">
+                                {topic}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-4">
+                            <button
+                              onClick={() => openEditModal(row)}
+                              className="text-gray-500 hover:text-gray-900 transition-colors"
+                              aria-label="Edit"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteTarget(row)}
+                              className="text-red-500 hover:text-red-700 transition-colors"
+                              aria-label="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
         </div>
       </main>
 
-      {/* ================= EDIT / CREATE MODAL ================= */}
+      {/* ── Create / Edit Modal ── */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -259,13 +327,13 @@ export default function SchedulesPage() {
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h3 className="text-2xl font-serif font-bold text-gray-900">
-                    {editingIndex !== null ? 'Edit Schedule' : 'New Schedule'}
+                    {editingId ? 'Edit Schedule' : 'New Schedule'}
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    {editingIndex !== null ? 'Update schedule details.' : 'Add a new schedule entry.'}
+                    {editingId ? 'Update schedule details.' : 'Add a new schedule entry.'}
                   </p>
                 </div>
-                <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-800 transition-colors p-1">
+                <button onClick={closeModal} className="text-gray-400 hover:text-gray-800 transition-colors p-1">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -274,23 +342,23 @@ export default function SchedulesPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-800 mb-2">Short number</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       required
-                      placeholder="e.g. 7th" 
-                      value={formData.id}
-                      onChange={(e) => setFormData({...formData, id: e.target.value})}
+                      placeholder="e.g. 7th"
+                      value={formData.shortId}
+                      onChange={(e) => setFormData({ ...formData, shortId: e.target.value })}
                       className="w-full px-4 py-2.5 bg-white border border-[#f59e0b] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/50 text-sm text-gray-800 shadow-sm"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-800 mb-2">Schedule</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       required
-                      placeholder="e.g. Seventh Schedule" 
+                      placeholder="e.g. Seventh Schedule"
                       value={formData.schedule}
-                      onChange={(e) => setFormData({...formData, schedule: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
                       className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-sm text-gray-800 shadow-sm"
                     />
                   </div>
@@ -298,80 +366,82 @@ export default function SchedulesPage() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-800 mb-2">Title</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
-                    placeholder="e.g. Union, State and Concurrent Lists" 
+                    placeholder="e.g. Union, State and Concurrent Lists"
                     value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-sm text-gray-800 shadow-sm"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-800 mb-2">Description</label>
-                  <textarea 
+                  <textarea
                     rows={3}
-                    placeholder="Short summary of this Schedule." 
+                    placeholder="Short summary of this Schedule."
                     value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-sm text-gray-800 shadow-sm resize-y"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-800 mb-2">Topics</label>
-                  <input 
-                    type="text" 
-                    placeholder="Comma-separated, e.g. Federalism, Lists" 
+                  <input
+                    type="text"
+                    placeholder="Comma-separated, e.g. Federalism, Lists"
                     value={formData.topicsStr}
-                    onChange={(e) => setFormData({...formData, topicsStr: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, topicsStr: e.target.value })}
                     className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-sm text-gray-800 shadow-sm"
                   />
                 </div>
               </form>
             </div>
 
-            <div className="p-6 md:p-8 mt-2 flex justify-end gap-3 flex-shrink-0">
-              <button 
-                type="button" 
-                onClick={handleCloseModal}
+            <div className="p-6 md:p-8 mt-2 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeModal}
                 className="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
               >
                 Cancel
               </button>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 form="schedule-form"
-                className="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-900 bg-[#f59e0b] hover:bg-[#ea580c] transition-colors shadow-sm"
+                disabled={saving}
+                className="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-900 bg-[#f59e0b] hover:bg-[#ea580c] transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {editingIndex !== null ? 'Save Changes' : 'Create Schedule'}
+                {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                {editingId ? 'Save Changes' : 'Create Schedule'}
               </button>
             </div>
-
           </div>
         </div>
       )}
 
-      {/* ================= DELETE CONFIRMATION MODAL ================= */}
-      {deleteIndex !== null && (
+      {/* ── Delete Confirmation Modal ── */}
+      {deleteTarget && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-7 animate-in fade-in zoom-in-95 duration-200">
             <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">
               Delete this Schedule?
             </h3>
-            <p className="text-[15px] text-gray-500 leading-relaxed mb-8">
-              This will remove the schedule from the platform. This action cannot be undone.
+            <p className="text-[15px] text-gray-500 leading-relaxed mb-2">
+              You&apos;re about to delete{' '}
+              <span className="font-semibold text-gray-800">{deleteTarget.schedule}</span>.
             </p>
-            
+            <p className="text-[13px] text-gray-400 mb-8">This action cannot be undone.</p>
             <div className="flex justify-end gap-3">
-              <button 
-                onClick={() => setDeleteIndex(null)}
+              <button
+                onClick={() => setDeleteTarget(null)}
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={confirmDelete}
                 className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[#e11d48] hover:bg-[#be123c] transition-colors shadow-sm"
               >

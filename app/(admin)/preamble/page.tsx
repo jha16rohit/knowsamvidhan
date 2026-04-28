@@ -1,44 +1,119 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { 
-  LayoutDashboard, List, FileText, AlignLeft, Book, 
-  CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, BookOpen, Save
+import {
+  LayoutDashboard, List, FileText, AlignLeft, Book,
+  CalendarDays, History, GraduationCap, Users, BarChart3,
+  Settings, ShieldAlert, BookOpen, Save, Plus, Trash2, Check, Loader2
 } from 'lucide-react';
 
 export default function PreamblePage() {
-  // Navigation links (Preamble is now active)
   const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
-    { name: 'Parts', icon: List, active: false, href: '/parts' },
-    { name: 'Articles', icon: FileText, active: false, href: '/articles' },
-    { name: 'Clauses', icon: AlignLeft, active: false, href: '/clauses' },
-    { name: 'Preamble', icon: Book, active: true, href: '/preamble' }, // Active!
-    { name: 'Schedules', icon: CalendarDays, active: false, href: '/schedules' },
-    { name: 'Amendments', icon: History, active: false, href: '/amendments' },
-    { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
-    { name: 'Users', icon: Users, active: false, href: '/users' },
-    { name: 'Analytics', icon: BarChart3, active: false, href: '/analytics' },
-    { name: 'Settings', icon: Settings, active: false, href: '/settings' },
+    { name: 'Dashboard',  icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
+    { name: 'Parts',      icon: List,            active: false, href: '/parts'        },
+    { name: 'Articles',   icon: FileText,        active: false, href: '/articles'     },
+    { name: 'Clauses',    icon: AlignLeft,       active: false, href: '/clauses'      },
+    { name: 'Preamble',   icon: Book,            active: true,  href: '/preamble'     },
+    { name: 'Schedules',  icon: CalendarDays,    active: false, href: '/schedules'    },
+    { name: 'Amendments', icon: History,         active: false, href: '/amendments'   },
+    { name: 'Quizzes',    icon: GraduationCap,   active: false, href: '/quizzes'      },
+    { name: 'Users',      icon: Users,           active: false, href: '/users'        },
+    { name: 'Analytics',  icon: BarChart3,       active: false, href: '/analytics'    },
+    { name: 'Settings',   icon: Settings,        active: false, href: '/settings'     },
   ];
 
-  // Mock data for the keywords list
-  const keywords = [
-    { word: 'Justice', definition: 'Social, economic and political fairness for every citizen.' },
-    { word: 'Liberty', definition: 'Freedom of thought, expression, belief, faith and worship.' },
-    { word: 'Equality', definition: 'Equal status and opportunity, regardless of background.' },
-    { word: 'Fraternity', definition: 'A sense of brotherhood that protects dignity and national unity.' },
-    { word: 'Sovereign', definition: 'India is independent and free from external control.' },
-    { word: 'Socialist', definition: 'Commitment to social and economic equality.' },
-    { word: 'Secular', definition: 'The State has no official religion and treats all faiths equally.' },
-    { word: 'Democratic', definition: 'Government of, by and for the people through elected representatives.' },
-    { word: 'Republic', definition: 'Head of State is elected, not hereditary.' },
-  ];
+  // ─── State ───────────────────────────────────────────────────────────────
+  const [officialText,      setOfficialText]      = useState('');
+  const [simpleExplanation, setSimpleExplanation] = useState('');
+  const [whyItMatters,      setWhyItMatters]      = useState('');
+  const [keywords, setKeywords] = useState<{ word: string; definition: string }[]>([]);
 
+  const [isLoading, setIsLoading]   = useState(true);
+  const [isSaving,  setIsSaving]    = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType,    setToastType]    = useState<'success' | 'error'>('success');
+
+  // ─── Fetch on mount ───────────────────────────────────────────────────────
+  useEffect(() => {
+    fetch('/api/admin/preamble')
+      .then((res) => res.json())
+      .then((data) => {
+        setOfficialText(data.officialText      ?? '');
+        setSimpleExplanation(data.simpleExplanation ?? '');
+        setWhyItMatters(data.whyItMatters      ?? '');
+        // keywords stored as JSON string in DB: "[{word,definition},...]"
+        try {
+          const parsed = typeof data.keywords === 'string'
+            ? JSON.parse(data.keywords)
+            : data.keywords ?? [];
+          setKeywords(parsed);
+        } catch {
+          setKeywords([]);
+        }
+      })
+      .catch(() => showToast('Failed to load preamble data.', 'error'))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  // ─── Toast helper ─────────────────────────────────────────────────────────
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // ─── Save ─────────────────────────────────────────────────────────────────
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/admin/preamble', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          officialText,
+          simpleExplanation,
+          whyItMatters,
+          keywords: JSON.stringify(keywords),
+        }),
+      });
+      if (!res.ok) throw new Error('Save failed');
+      showToast('Preamble saved successfully.');
+    } catch {
+      showToast('Something went wrong. Please try again.', 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // ─── Keyword helpers ─────────────────────────────────────────────────────
+  const updateKeyword = (index: number, field: 'word' | 'definition', value: string) => {
+    setKeywords((prev) => prev.map((kw, i) => i === index ? { ...kw, [field]: value } : kw));
+  };
+
+  const addKeyword = () => {
+    setKeywords((prev) => [...prev, { word: '', definition: '' }]);
+  };
+
+  const removeKeyword = (index: number) => {
+    setKeywords((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex bg-[#f8fafc] font-sans">
-      
-      {/* ================= SIDEBAR ================= */}
+    <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
+
+      {/* Toast */}
+      {toastMessage && (
+        <div className="fixed bottom-8 right-8 z-[60] bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${toastType === 'error' ? 'bg-red-500' : 'bg-[#1a1a1a]'}`}>
+            <Check className="w-4 h-4 text-white" strokeWidth={3} />
+          </div>
+          <span className="text-sm font-bold text-gray-900">{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Sidebar */}
       <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col flex-shrink-0 min-h-screen">
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
@@ -56,8 +131,8 @@ export default function PreamblePage() {
               key={item.name}
               href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                item.active 
-                  ? 'bg-[#1e2638] text-[#f59e0b]' 
+                item.active
+                  ? 'bg-[#1e2638] text-[#f59e0b]'
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
@@ -67,7 +142,7 @@ export default function PreamblePage() {
           ))}
         </nav>
 
-        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800 relative">
+        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800">
           <div className="flex items-center gap-2 mb-1">
             <ShieldAlert className="w-4 h-4 text-[#f59e0b]" />
             <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
@@ -78,94 +153,148 @@ export default function PreamblePage() {
         </div>
       </aside>
 
-      {/* ================= MAIN CONTENT ================= */}
+      {/* Main */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-        {/* Scrollable Area */}
         <div className="flex-1 overflow-y-auto p-8 lg:p-10">
-          
-          {/* Header Section */}
+
+          {/* Header */}
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
             <div>
-              <h2 className="text-4xl font-serif text-gray-900 mb-2 font-bold">Preamble Content</h2>
+              <p className="text-[#f59e0b] text-xs font-bold tracking-widest uppercase mb-2">Content</p>
+              <h2 className="text-4xl font-serif text-gray-900 mb-2 font-bold">Preamble content</h2>
               <p className="text-sm text-gray-500">Edit the foundational Preamble page shown to learners.</p>
             </div>
-            
-            <button className="bg-[#f59e0b] hover:bg-[#ea580c] text-gray-900 px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-sm self-start md:self-auto">
-              <Save className="w-5 h-5" />
-              Save changes
+
+            <button
+              onClick={handleSave}
+              disabled={isSaving || isLoading}
+              className="bg-[#f59e0b] hover:bg-[#ea580c] disabled:opacity-60 disabled:cursor-not-allowed text-gray-900 px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-sm self-start md:self-auto mt-4 md:mt-0"
+            >
+              {isSaving
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <Save className="w-5 h-5" />
+              }
+              {isSaving ? 'Saving…' : 'Save changes'}
             </button>
           </div>
 
-          {/* Two Column Layout for Forms */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-            
-            {/* Left Column: Text Areas */}
-            <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 flex flex-col gap-6">
-              
-              {/* Official Text */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Official text</label>
-                <textarea 
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-700 shadow-sm resize-y"
-                  rows={8}
-                  defaultValue="WE, THE PEOPLE OF INDIA, having solemnly resolved to constitute India into a SOVEREIGN SOCIALIST SECULAR DEMOCRATIC REPUBLIC and to secure to all its citizens: JUSTICE, social, economic and political; LIBERTY of thought, expression, belief, faith and worship; EQUALITY of status and of opportunity; and to promote among them all FRATERNITY assuring the dignity of the individual and the unity and integrity of the Nation; IN OUR CONSTITUENT ASSEMBLY this twenty-sixth day of November, 1949, do HEREBY ADOPT, ENACT AND GIVE TO OURSELVES THIS CONSTITUTION."
-                />
-              </div>
-
-              {/* Simple Explanation */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Simple explanation</label>
-                <textarea 
-                  className="w-full px-4 py-3 bg-white border border-[#f59e0b] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-700 shadow-sm resize-y"
-                  rows={5}
-                  defaultValue="The Preamble is the soul and identity card of the Indian Constitution. It declares the source of authority (the people), the nature of the State (sovereign, socialist, secular, democratic, republican), the objectives (justice, liberty, equality, fraternity), and the date of adoption."
-                />
-              </div>
-
-              {/* Why it matters */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Why it matters</label>
-                <textarea 
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-700 shadow-sm resize-y"
-                  rows={4}
-                  defaultValue="Though not enforceable in court, the Preamble guides the interpretation of the Constitution. The Supreme Court has held that the Preamble is part of the Constitution and reflects its basic structure."
-                />
-              </div>
-
+          {/* Loading skeleton */}
+          {isLoading ? (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+              {[1, 2].map((i) => (
+                <div key={i} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-4 animate-pulse">
+                  {[8, 5, 4].map((rows) => (
+                    <div key={rows} className="space-y-2">
+                      <div className="h-4 bg-gray-100 rounded w-1/4" />
+                      <div className="h-4 bg-gray-100 rounded w-full" style={{ height: `${rows * 12}px` }} />
+                    </div>
+                  ))}
+                </div>
+              ))}
             </div>
+          ) : (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
 
-            {/* Right Column: Keywords */}
-            <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 flex flex-col">
-              <h3 className="text-lg font-serif font-bold text-gray-900 mb-6">Keywords</h3>
-              
-              <div className="flex-1 space-y-3">
-                {keywords.map((kw, index) => (
-                  <div key={index} className="flex flex-col sm:flex-row gap-3">
-                    <input 
-                      type="text" 
-                      defaultValue={kw.word}
-                      className="w-full sm:w-1/3 px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-800 shadow-sm"
-                    />
-                    <input 
-                      type="text" 
-                      defaultValue={kw.definition}
-                      className="w-full sm:w-2/3 px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-600 shadow-sm"
-                    />
+              {/* ── Left: Text fields ── */}
+              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 flex flex-col gap-6">
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">Official text</label>
+                  <textarea
+                    rows={8}
+                    value={officialText}
+                    onChange={(e) => setOfficialText(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-700 shadow-sm resize-y"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">Simple explanation</label>
+                  <textarea
+                    rows={5}
+                    value={simpleExplanation}
+                    onChange={(e) => setSimpleExplanation(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-[#f59e0b] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-700 shadow-sm resize-y"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">Why it matters</label>
+                  <textarea
+                    rows={4}
+                    value={whyItMatters}
+                    onChange={(e) => setWhyItMatters(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-700 shadow-sm resize-y"
+                  />
+                </div>
+              </div>
+
+              {/* ── Right: Keywords ── */}
+              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 flex flex-col">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-serif font-bold text-gray-900">Keywords</h3>
+                  <span className="text-xs text-gray-400 font-medium">{keywords.length} word{keywords.length !== 1 ? 's' : ''}</span>
+                </div>
+
+                {/* Header labels */}
+                {keywords.length > 0 && (
+                  <div className="flex gap-3 mb-2 px-1">
+                    <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase w-1/3">Word</span>
+                    <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase flex-1">Definition</span>
                   </div>
-                ))}
+                )}
+
+                <div className="flex-1 space-y-2.5 overflow-y-auto max-h-[420px] pr-1">
+                  {keywords.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                        <Book className="w-4 h-4 text-gray-400" />
+                      </div>
+                      <p className="text-sm text-gray-400">No keywords yet. Click "Add keyword" to start.</p>
+                    </div>
+                  ) : (
+                    keywords.map((kw, index) => (
+                      <div key={index} className="flex gap-2.5 items-center group">
+                        <input
+                          type="text"
+                          placeholder="Word"
+                          value={kw.word}
+                          onChange={(e) => updateKeyword(index, 'word', e.target.value)}
+                          className="w-1/3 px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-sm text-gray-800 shadow-sm"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Definition"
+                          value={kw.definition}
+                          onChange={(e) => updateKeyword(index, 'definition', e.target.value)}
+                          className="flex-1 px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-sm text-gray-600 shadow-sm"
+                        />
+                        <button
+                          onClick={() => removeKeyword(index)}
+                          className="p-1.5 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
+                          aria-label="Remove keyword"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <button
+                  onClick={addKeyword}
+                  className="w-full mt-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors flex justify-center items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add keyword
+                </button>
               </div>
 
-              <button className="w-full mt-6 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors flex justify-center items-center gap-2">
-                Add keyword
-              </button>
             </div>
-
-          </div>
+          )}
 
         </div>
       </main>
-
     </div>
   );
 }

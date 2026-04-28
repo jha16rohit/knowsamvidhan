@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { 
-  LayoutDashboard, List, FileText, AlignLeft, Book, 
-  CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check
+import {
+  LayoutDashboard, List, FileText, AlignLeft, Book,
+  CalendarDays, History, GraduationCap, Users, BarChart3,
+  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2,
+  Search, X, Check, Filter, ChevronLeft, ChevronRight
 } from 'lucide-react';
+
+const CLAUSES_PER_PAGE = 10;
 
 export default function ClausesPage() {
   const navItems = [
@@ -23,121 +26,224 @@ export default function ClausesPage() {
     { name: 'Settings', icon: Settings, active: false, href: '/settings' },
   ];
 
-  // 1. This perfectly mirrors the data from your articles/page.tsx file!
-  const availableArticles = [
-    'Article 1 — Name and territory of the Union',
-    'Article 5 — Citizenship at the commencement of the Constitution',
-    'Article 14 — Equality before law',
-    'Article 15 — Prohibition of discrimination',
-    'Article 19 — Six freedoms',
-    'Article 21 — Right to life and personal liberty',
-    'Article 32 — Right to constitutional remedies',
-    'Article 44 — Uniform Civil Code',
-    'Article 51A — Fundamental Duties',
-  ];
+  // ─── State ────────────────────────────────────────────────────────────────
+  const [availableArticles, setAvailableArticles] = useState<any[]>([]);
+  const [clauses, setClauses] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const [clauses, setClauses] = useState([
-    { 
-      uid: 'c1',
-      articleStr: 'Article 15 — Prohibition of discrimination',
-      id: '(1)', 
-      text: 'The State shall not discriminate against any citizen on grounds only of religion, race, caste, sex, place of birth or any of them.' 
-    },
-    { 
-      uid: 'c2',
-      articleStr: 'Article 15 — Prohibition of discrimination',
-      id: '(3)', 
-      text: 'Nothing in this article shall prevent the State from making any special provision for women and children.' 
-    },
-    { 
-      uid: 'c3',
-      articleStr: 'Article 15 — Prohibition of discrimination',
-      id: '(4)', 
-      text: 'Special provisions for the advancement of socially and educationally backward classes.' 
-    },
-  ]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [selectedArticleFilter, setSelectedArticleFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // --- States ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Dropdown open states
+  const [isArticleDropdownOpen, setIsArticleDropdownOpen] = useState(false);
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
   const [formData, setFormData] = useState({
-    articleStr: availableArticles[0], // Defaults to the first article
-    id: '',
-    text: ''
+    articleId: '',
+    clauseNumber: '',
+    text: '',
   });
 
-  // --- Grouping Logic ---
-  const groupedClauses = clauses.reduce((acc, clause) => {
-    if (!acc[clause.articleStr]) {
-      acc[clause.articleStr] = [];
-    }
-    acc[clause.articleStr].push(clause);
-    return acc;
-  }, {} as Record<string, typeof clauses>);
+  // Refs for click-outside
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const articleDropdownRef = useRef<HTMLDivElement>(null);
+  const filterDropdownRef = useRef<HTMLDivElement>(null);
 
-  // --- Handlers ---
-  const handleOpenModal = (uid: string | null = null) => {
-    if (uid !== null) {
-      const clauseToEdit = clauses.find(c => c.uid === uid);
-      if (clauseToEdit) {
-        setFormData(clauseToEdit);
-        setEditingId(uid);
+  // ─── Click outside to close dropdowns ────────────────────────────────────
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (articleDropdownRef.current && !articleDropdownRef.current.contains(e.target as Node)) {
+        setIsArticleDropdownOpen(false);
+      }
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(e.target as Node)) {
+        setIsFilterDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // ─── Debounce search ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1);
+    }, 350);
+    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
+  }, [searchQuery]);
+
+  useEffect(() => { setCurrentPage(1); }, [selectedArticleFilter]);
+
+  // ─── Fetch articles for dropdown (once) ──────────────────────────────────
+  useEffect(() => {
+    fetch('/api/admin/articles?limit=200')
+      .then((res) => res.json())
+      .then((data) => {
+        // API returns { articles: [], total } or plain array
+        const list = data.articles ?? data;
+        const formatted = list.map((a: any) => ({
+          id: a.id,
+          label: `${a.articleNumber} — ${a.title}`,
+          articleNumber: a.articleNumber,
+          title: a.title,
+        }));
+        setAvailableArticles(formatted);
+      })
+      .catch(console.error);
+  }, []);
+
+  // Set default article in form once list loads
+  useEffect(() => {
+    if (availableArticles.length > 0 && !formData.articleId) {
+      setFormData((prev) => ({ ...prev, articleId: availableArticles[0].id }));
+    }
+  }, [availableArticles]);
+
+  // ─── Fetch clauses (server-side: search + filter + pagination) ────────────
+  const fetchClauses = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(currentPage),
+        limit: String(CLAUSES_PER_PAGE),
+        ...(debouncedSearch && { search: debouncedSearch }),
+        ...(selectedArticleFilter !== 'all' && { articleId: selectedArticleFilter }),
+      });
+      const res = await fetch(`/api/admin/clauses?${params.toString()}`);
+      const data = await res.json();
+      setClauses(data.clauses ?? data);
+      setTotalCount(data.total ?? data.length ?? 0);
+    } catch (err) {
+      console.error('Failed to fetch clauses:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, debouncedSearch, selectedArticleFilter]);
+
+  useEffect(() => { fetchClauses(); }, [fetchClauses]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / CLAUSES_PER_PAGE));
+
+  // ─── Helpers ─────────────────────────────────────────────────────────────
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const getArticleLabel = (articleId: string) => {
+    const found = availableArticles.find((a) => a.id === articleId);
+    return found ? found.label : '';
+  };
+
+  const getFilterLabel = () => {
+    if (selectedArticleFilter === 'all') return 'All Articles';
+    const found = availableArticles.find((a) => a.id === selectedArticleFilter);
+    return found ? found.label : 'All Articles';
+  };
+
+  // Group fetched clauses by article for display
+  const groupedClauses = clauses.reduce((acc: Record<string, any[]>, clause: any) => {
+    const key = clause.articleId;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(clause);
+    return acc;
+  }, {});
+
+  // ─── Modal ────────────────────────────────────────────────────────────────
+  const handleOpenModal = (id: string | null = null) => {
+    if (id !== null) {
+      const toEdit = clauses.find((c) => c.id === id);
+      if (toEdit) {
+        setFormData({
+          articleId: toEdit.articleId,
+          clauseNumber: toEdit.clauseNumber,
+          text: toEdit.text,
+        });
+        setEditingId(id);
       }
     } else {
       setFormData({
-        articleStr: availableArticles[0],
-        id: '',
-        text: ''
+        articleId: availableArticles[0]?.id ?? '',
+        clauseNumber: '',
+        text: '',
       });
       setEditingId(null);
     }
+    setIsArticleDropdownOpen(false);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingId(null);
+    setIsArticleDropdownOpen(false);
+    setIsFilterDropdownOpen(false);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingId !== null) {
-      setClauses(clauses.map(c => c.uid === editingId ? { ...formData, uid: editingId } : c));
-      showToast(`Updated Clause ${formData.id}`);
-    } else {
-      const newClause = { ...formData, uid: Date.now().toString() };
-      setClauses([...clauses, newClause]);
-      showToast(`Created Clause ${formData.id}`);
+    const payload = {
+      articleId: formData.articleId,
+      clauseNumber: formData.clauseNumber,
+      text: formData.text,
+    };
+    try {
+      if (editingId) {
+        await fetch(`/api/admin/clauses/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        showToast('Clause updated successfully.');
+      } else {
+        await fetch('/api/admin/clauses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        showToast('Clause created successfully.');
+      }
+      handleCloseModal();
+      await fetchClauses();
+    } catch (err) {
+      console.error('Save failed:', err);
+      showToast('Something went wrong. Please try again.');
     }
-    handleCloseModal();
   };
 
-  const handleDeleteClick = (uid: string) => {
-    setDeleteId(uid);
-  };
+  // ─── Delete ───────────────────────────────────────────────────────────────
+  const handleDeleteClick = (id: string) => setDeleteId(id);
 
-  const confirmDelete = () => {
-    if (deleteId !== null) {
-      const clauseToDelete = clauses.find(c => c.uid === deleteId);
-      setClauses(clauses.filter(c => c.uid !== deleteId));
-      if (clauseToDelete) showToast(`Deleted Clause ${clauseToDelete.id}`);
-      setDeleteId(null); 
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await fetch(`/api/admin/clauses/${deleteId}`, { method: 'DELETE' });
+      showToast('Clause deleted.');
+      setDeleteId(null);
+      if (clauses.length === 1 && currentPage > 1) {
+        setCurrentPage((p) => p - 1);
+      } else {
+        await fetchClauses();
+      }
+    } catch (err) {
+      console.error('Delete failed:', err);
     }
   };
 
-  const showToast = (message: string) => {
-    setToastMessage(message);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
-      
-      {/* Toast Notification */}
+
+      {/* Toast */}
       {toastMessage && (
         <div className="fixed bottom-8 right-8 z-[60] bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
           <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center flex-shrink-0">
@@ -148,7 +254,7 @@ export default function ClausesPage() {
       )}
 
       {/* Sidebar */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
+      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col flex-shrink-0 min-h-screen">
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
             <BookOpen className="text-[#c19d60] w-4 h-4" />
@@ -165,8 +271,8 @@ export default function ClausesPage() {
               key={item.name}
               href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                item.active 
-                  ? 'bg-[#1e2638] text-[#f59e0b]' 
+                item.active
+                  ? 'bg-[#1e2638] text-[#f59e0b]'
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
@@ -176,7 +282,7 @@ export default function ClausesPage() {
           ))}
         </nav>
 
-        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800 relative">
+        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800">
           <div className="flex items-center gap-2 mb-1">
             <ShieldAlert className="w-4 h-4 text-[#f59e0b]" />
             <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
@@ -187,181 +293,359 @@ export default function ClausesPage() {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        
-        <header className="h-16 flex items-center justify-end px-8 border-b border-gray-200/50 bg-white/50 backdrop-blur-sm">
-          <div className="flex items-center gap-4">
-            <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-900">View site</a>
-            <div className="w-8 h-8 rounded-full bg-[#0a0f18] text-white flex items-center justify-center text-xs font-bold tracking-wider shadow-sm">
-              AD
-            </div>
-          </div>
-        </header>
-
         <div className="flex-1 overflow-y-auto p-8 lg:p-10">
-          
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
+
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-4xl font-serif text-gray-900 mb-2 font-bold">Clauses</h2>
-              <p className="text-sm text-gray-500">Sub-clauses inside Articles. Pick an Article to add or edit clauses.</p>
+              <p className="text-[#f59e0b] text-xs font-bold tracking-widest uppercase mb-2">Content</p>
+              <h2 className="text-4xl font-serif text-gray-900 mb-2 font-bold">Manage clauses</h2>
+              <p className="text-sm text-gray-500">Sub-clauses inside articles. Pick an article to add or edit clauses.</p>
             </div>
-            
-            <button 
+            <button
               onClick={() => handleOpenModal(null)}
-              className="bg-[#f59e0b] hover:bg-[#ea580c] text-gray-900 px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-sm self-start md:self-auto mt-2 md:mt-0"
+              className="bg-[#f59e0b] hover:bg-[#ea580c] text-gray-900 px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-sm self-start md:self-auto mt-4 md:mt-0"
             >
               <Plus className="w-5 h-5" />
-              New Clause
+              New clause
             </button>
           </div>
 
-          {Object.keys(groupedClauses).length === 0 ? (
-             <div className="w-full bg-white border border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center py-24 shadow-sm">
-               <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                 <AlignLeft className="w-5 h-5 text-gray-500" />
-               </div>
-               <h3 className="text-lg font-serif font-bold text-gray-900 mb-1">No clauses found</h3>
-               <p className="text-sm text-gray-500">Click "New Clause" to add one.</p>
-             </div>
-          ) : (
-            Object.entries(groupedClauses).map(([articleStr, articleClauses]) => {
-              const [artId, artTitle] = articleStr.split(' — ');
+          {/* ── Search + Filter row ── */}
+          <div className="mb-6 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+            {/* Search */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search by clause number or text…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-800 shadow-sm"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
 
-              return (
-                <div key={articleStr} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-                  
-                  <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
-                    <div>
-                      <p className="text-[#f59e0b] text-[10px] font-bold tracking-widest uppercase mb-1">{artId}</p>
-                      <h3 className="text-lg font-semibold text-gray-900">{artTitle}</h3>
-                    </div>
-                    <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-semibold">
-                      {articleClauses.length} {articleClauses.length === 1 ? 'clause' : 'clauses'}
-                    </span>
+            {/* Filter — custom dropdown matching the modal */}
+            <div ref={filterDropdownRef} className="relative flex-shrink-0">
+              <div
+                onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+                className={`flex items-center gap-2 px-4 py-2.5 bg-white border rounded-xl cursor-pointer shadow-sm transition min-w-[200px] justify-between ${
+                  isFilterDropdownOpen ? 'border-[#f59e0b]' : 'border-gray-200 hover:border-[#f59e0b]'
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm text-gray-800 truncate max-w-[160px]">{getFilterLabel()}</span>
+                </div>
+                <svg
+                  className={`w-4 h-4 text-gray-500 flex-shrink-0 transition-transform ${isFilterDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </div>
+
+              {isFilterDropdownOpen && (
+                <div className="absolute z-50 mt-2 w-full min-w-[260px] bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  <div
+                    onClick={() => { setSelectedArticleFilter('all'); setIsFilterDropdownOpen(false); }}
+                    className={`px-4 py-3 text-sm cursor-pointer transition flex items-center justify-between ${
+                      selectedArticleFilter === 'all'
+                        ? 'bg-[#f59e0b]/10 text-[#f59e0b] font-semibold'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    All Articles
+                    {selectedArticleFilter === 'all' && <Check className="w-4 h-4 text-[#f59e0b]" />}
                   </div>
+                  {availableArticles.map((article) => (
+                    <div
+                      key={article.id}
+                      onClick={() => { setSelectedArticleFilter(article.id); setIsFilterDropdownOpen(false); }}
+                      className={`px-4 py-3 text-sm cursor-pointer transition flex items-center justify-between ${
+                        selectedArticleFilter === article.id
+                          ? 'bg-[#f59e0b]/10 text-[#f59e0b] font-semibold'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span className="truncate pr-2">{article.label}</span>
+                      {selectedArticleFilter === article.id && <Check className="w-4 h-4 text-[#f59e0b] flex-shrink-0" />}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-200">
-                      <thead>
-                        <tr className="border-b border-gray-100 bg-white">
-                          <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase w-24">Clause</th>
-                          <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase">Text</th>
-                          <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase text-right w-32">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {articleClauses.map((clause) => (
-                          <tr key={clause.uid} className="hover:bg-gray-50/50 transition-colors">
-                            <td className="px-6 py-5 text-sm font-semibold text-gray-900 align-top pt-6">{clause.id}</td>
-                            <td className="px-6 py-5 text-sm text-gray-600 leading-relaxed pr-10">{clause.text}</td>
-                            <td className="px-6 py-5 align-top pt-6">
-                              <div className="flex items-center justify-end gap-4">
-                                <button 
-                                  onClick={() => handleOpenModal(clause.uid)}
-                                  className="text-gray-500 hover:text-gray-900 transition-colors" 
-                                  aria-label="Edit"
-                                >
-                                  <Pencil className="w-4 h-4" />
-                                </button>
-                                <button 
-                                  onClick={() => handleDeleteClick(clause.uid)}
-                                  className="text-red-500 hover:text-red-700 transition-colors" 
-                                  aria-label="Delete"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
+            {/* Count */}
+            <span className="text-sm text-gray-400 whitespace-nowrap self-center">
+              {totalCount} clause{totalCount !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          {/* ── Content ── */}
+          {isLoading ? (
+            <div className="w-full bg-white border border-gray-200 rounded-2xl flex items-center justify-center py-24 shadow-sm">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-2 border-[#f59e0b] border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm text-gray-400">Loading clauses…</p>
+              </div>
+            </div>
+          ) : clauses.length === 0 ? (
+            <div className="w-full bg-white border border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center py-24 shadow-sm">
+              <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                <AlignLeft className="w-5 h-5 text-gray-500" />
+              </div>
+              <h3 className="text-lg font-serif font-bold text-gray-900 mb-1">No clauses found</h3>
+              <p className="text-sm text-gray-500">Try a different search or filter, or click "New clause".</p>
+            </div>
+          ) : (
+            <>
+              {/* Grouped by article */}
+              {Object.entries(groupedClauses).map(([articleId, articleClauses]) => {
+                const articleMeta = (articleClauses as any[])[0]?.article;
+                const artNumber = articleMeta?.articleNumber ?? '';
+                const artTitle = articleMeta?.title ?? '';
+
+                return (
+                  <div key={articleId} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    {/* Group header */}
+                    <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
+                      <div>
+                        <p className="text-[#f59e0b] text-[10px] font-bold tracking-widest uppercase mb-1">{artNumber}</p>
+                        <h3 className="text-lg font-semibold text-gray-900">{artTitle}</h3>
+                      </div>
+                      <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-semibold">
+                        {(articleClauses as any[]).length} {(articleClauses as any[]).length === 1 ? 'clause' : 'clauses'}
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-gray-100 bg-white">
+                            <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase w-28">Clause</th>
+                            <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase">Text</th>
+                            <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase text-right w-32">Actions</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {(articleClauses as any[]).map((clause) => (
+                            <tr key={clause.id} className="hover:bg-gray-50/50 transition-colors">
+                              <td className="px-6 py-5 text-sm font-semibold text-gray-900 align-top pt-5">{clause.clauseNumber}</td>
+                              <td className="px-6 py-5 text-sm text-gray-600 leading-relaxed pr-10">{clause.text}</td>
+                              <td className="px-6 py-5 align-top pt-5">
+                                <div className="flex items-center justify-end gap-4">
+                                  <button
+                                    onClick={() => handleOpenModal(clause.id)}
+                                    className="text-gray-500 hover:text-gray-900 transition-colors"
+                                    aria-label="Edit"
+                                  >
+                                    <Pencil className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteClick(clause.id)}
+                                    className="text-red-500 hover:text-red-700 transition-colors"
+                                    aria-label="Delete"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-6 flex items-center justify-between">
+                  <p className="text-sm text-gray-500">
+                    Page <span className="font-semibold text-gray-800">{currentPage}</span> of{' '}
+                    <span className="font-semibold text-gray-800">{totalPages}</span>
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="p-2 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                      .reduce<(number | '...')[]>((acc, p, idx, arr) => {
+                        if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('...');
+                        acc.push(p);
+                        return acc;
+                      }, [])
+                      .map((p, idx) =>
+                        p === '...' ? (
+                          <span key={`ellipsis-${idx}`} className="px-2 text-gray-400 text-sm">…</span>
+                        ) : (
+                          <button
+                            key={p}
+                            onClick={() => setCurrentPage(p as number)}
+                            className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+                              currentPage === p
+                                ? 'bg-[#f59e0b] text-gray-900 font-bold'
+                                : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        )
+                      )}
+
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="p-2 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-              );
-            })
+              )}
+            </>
           )}
 
         </div>
       </main>
 
-      {/* ================= EDIT / CREATE CLAUSE MODAL ================= */}
+      {/* ═══ MODAL: Create / Edit ═══ */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col animate-in fade-in zoom-in-95 duration-200">
-            
-            <div className="p-6 md:p-8 pb-0">
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-2xl font-serif font-bold text-gray-900">
-                    {editingId !== null ? 'Edit clause' : 'New clause'}
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Pick the parent Article and write the clause text.
-                  </p>
-                </div>
-                <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-800 transition-colors p-1">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
 
+            {/* Modal header */}
+            <div className="px-6 md:px-8 pt-6 md:pt-8 pb-4 border-b border-gray-100 flex justify-between items-start flex-shrink-0">
+              <div>
+                <h3 className="text-2xl font-serif font-bold text-gray-900">
+                  {editingId !== null ? 'Edit clause' : 'New clause'}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {editingId !== null
+                    ? 'Update the clause details.'
+                    : 'Select the parent article, then fill in the clause details.'}
+                </p>
+              </div>
+              <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-800 transition-colors p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <div className="p-6 md:p-8 overflow-y-auto">
               <form id="clause-form" onSubmit={handleSave} className="space-y-5">
-                
+
+                {/* Article selector — custom dropdown */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-800 mb-2">Article</label>
-                  <select 
-                    required
-                    value={formData.articleStr}
-                    onChange={(e) => setFormData({...formData, articleStr: e.target.value})}
-                    className="w-full px-4 py-2.5 bg-white border border-[#f59e0b] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/50 text-sm text-gray-800 shadow-sm appearance-none"
-                    style={{ backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1em' }}
-                  >
-                    <option value="" disabled>Select an Article...</option>
-                    {/* Maps over the available articles defined at the top of the file */}
-                    {availableArticles.map((art) => (
-                      <option key={art} value={art}>
-                        {art}
-                      </option>
-                    ))}
-                  </select>
+                  <div ref={articleDropdownRef} className="relative">
+                    {/* Trigger */}
+                    <div
+                      onClick={() => setIsArticleDropdownOpen(!isArticleDropdownOpen)}
+                      className={`w-full px-4 py-2.5 bg-white border rounded-xl flex items-center justify-between cursor-pointer shadow-sm transition ${
+                        isArticleDropdownOpen ? 'border-[#f59e0b]' : 'border-[#f59e0b] hover:border-[#ea580c]'
+                      }`}
+                    >
+                      <span className="text-sm text-gray-800 truncate pr-2">
+                        {getArticleLabel(formData.articleId) || 'Select an article…'}
+                      </span>
+                      <svg
+                        className={`w-4 h-4 text-gray-500 flex-shrink-0 transition-transform ${isArticleDropdownOpen ? 'rotate-180' : ''}`}
+                        fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+                      >
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </div>
+
+                    {/* Options list */}
+                    {isArticleDropdownOpen && (
+                      <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                        {availableArticles.length === 0 ? (
+                          <div className="px-4 py-3 text-sm text-gray-400">Loading articles…</div>
+                        ) : (
+                          availableArticles.map((article) => (
+                            <div
+                              key={article.id}
+                              onClick={() => {
+                                setFormData({ ...formData, articleId: article.id });
+                                setIsArticleDropdownOpen(false);
+                              }}
+                              className={`px-4 py-3 text-sm cursor-pointer transition flex items-center justify-between ${
+                                formData.articleId === article.id
+                                  ? 'bg-[#f59e0b]/10 text-[#f59e0b] font-semibold'
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              <span className="truncate pr-2">{article.label}</span>
+                              {formData.articleId === article.id && (
+                                <Check className="w-4 h-4 text-[#f59e0b] flex-shrink-0" />
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
+                {/* Clause number */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-800 mb-2">Clause number</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
-                    placeholder="e.g. (1)" 
-                    value={formData.id}
-                    onChange={(e) => setFormData({...formData, id: e.target.value})}
+                    placeholder="e.g. (1) or (a)"
+                    value={formData.clauseNumber}
+                    onChange={(e) => setFormData({ ...formData, clauseNumber: e.target.value })}
                     className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-sm text-gray-800 shadow-sm"
                   />
                 </div>
 
+                {/* Text */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-800 mb-2">Text</label>
-                  <textarea 
+                  <textarea
                     required
-                    rows={4}
+                    rows={5}
+                    placeholder="Enter the official clause text…"
                     value={formData.text}
-                    onChange={(e) => setFormData({...formData, text: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, text: e.target.value })}
                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-sm text-gray-800 shadow-sm resize-y"
                   />
                 </div>
+
               </form>
             </div>
 
-            <div className="p-6 md:px-8 mt-2 flex justify-end gap-3 flex-shrink-0">
-              <button 
-                type="button" 
+            {/* Modal footer */}
+            <div className="p-6 md:px-8 md:py-5 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0 bg-gray-50 rounded-b-2xl">
+              <button
+                type="button"
                 onClick={handleCloseModal}
-                className="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
+                className="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-100 transition-colors shadow-sm"
               >
                 Cancel
               </button>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 form="clause-form"
                 className="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-900 bg-[#f59e0b] hover:bg-[#ea580c] transition-colors shadow-sm"
               >
@@ -373,25 +657,22 @@ export default function ClausesPage() {
         </div>
       )}
 
-      {/* ================= DELETE CONFIRMATION MODAL ================= */}
+      {/* ═══ MODAL: Delete confirm ═══ */}
       {deleteId !== null && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-7 animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">
-              Delete this Clause?
-            </h3>
+            <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">Delete this clause?</h3>
             <p className="text-[15px] text-gray-500 leading-relaxed mb-8">
               This will permanently remove the clause from the platform. This action cannot be undone.
             </p>
-            
             <div className="flex justify-end gap-3">
-              <button 
+              <button
                 onClick={() => setDeleteId(null)}
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={confirmDelete}
                 className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[#e11d48] hover:bg-[#be123c] transition-colors shadow-sm"
               >

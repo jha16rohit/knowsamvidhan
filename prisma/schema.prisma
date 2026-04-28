@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")   // 👈 ADD THIS LINE
+  url      = env("DATABASE_URL")   
 }
 
 model User {
@@ -43,4 +43,81 @@ model PasswordResetOTP {
   email     String
   otp       String
   expiresAt DateTime
+}
+
+model Part {
+  id          String  @id @default(uuid())
+  partNumber  String
+  title       String
+  range       String
+  articles    Int
+  description String?
+  createdAt   DateTime @default(now())
+  articlesList Article[]
+}
+
+model Article {
+  id               String   @id @default(uuid())
+  articleNumber    String
+  title            String
+  shortSummary     String?
+  officialText     String?
+  simpleExplanation String?
+  example          String?
+  tags             String?
+  featured         Boolean  @default(false)
+
+  // 🔗 relation
+  partId String
+  part   Part   @relation(fields: [partId], references: [id])
+
+  clauses Clause[]
+
+  createdAt DateTime @default(now())
+}
+
+model Clause {
+  id           String   @id @default(uuid())
+  clauseNumber String                        
+  text         String
+  createdAt    DateTime @default(now())
+
+  // 🔗 Relation to Article
+  articleId    String
+  article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
+
+model Preamble {
+  id                String   @id @default("singleton")
+  officialText      String   @db.Text
+  simpleExplanation String   @db.Text
+  whyItMatters      String   @db.Text
+  // Keywords stored as a JSON string: "[{\"word\":\"...\",\"definition\":\"...\"}]"
+  // Using String keeps the schema simple — no extra join table needed for a small list.
+  keywords          String   @db.Text @default("[]")
+  updatedAt         DateTime @updatedAt
+}
+
+model Schedule {
+  id          String   @id @default(uuid())
+  shortId     String   // e.g. "7th"
+  schedule    String   // e.g. "Seventh Schedule"
+  title       String
+  description String?  @db.Text
+  // Topics stored as comma-separated string for simplicity (consistent with tags pattern above)
+  topics      String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Amendment {
+  id              String   @id @default(uuid())
+  number          String            // e.g. "42nd"
+  year            String            // e.g. "1976"
+  title           String
+  summary         String   @db.Text
+  whyItMatters    String?  @db.Text
+  relatedArticles String?           // comma-separated e.g. "article-21, article-19"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

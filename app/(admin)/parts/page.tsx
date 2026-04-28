@@ -1,12 +1,22 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect , useState } from 'react';
 import Link from 'next/link';
 import { 
   LayoutDashboard, List, FileText, AlignLeft, Book, 
   CalendarDays, History, GraduationCap, Users, BarChart3, 
   Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check
 } from 'lucide-react';
+
+type Part = {
+  id: string;
+  partNumber: string;
+  title: string;
+  range: string;
+  articles: number;
+  description: string;
+};
+
 
 export default function PartsPage() {
   const navItems = [
@@ -23,15 +33,7 @@ export default function PartsPage() {
     { name: 'Settings', icon: Settings, active: false, href: '/settings' },
   ];
 
-  const [parts, setParts] = useState([
-    { id: 'Part I', title: 'The Union and its Territory', range: 'Articles 1 – 4', articles: 4, description: '' },
-    { id: 'Part II', title: 'Citizenship', range: 'Articles 5 – 11', articles: 7, description: '' },
-    { id: 'Part III', title: 'Fundamental Rights', range: 'Articles 12 – 35', articles: 24, description: '' },
-    { id: 'Part IV', title: 'Directive Principles of State Policy', range: 'Articles 36 – 51', articles: 16, description: '' },
-    { id: 'Part IV-A', title: 'Fundamental Duties', range: 'Article 51A', articles: 1, description: '' },
-    { id: 'Part V', title: 'The Union', range: 'Articles 52 – 151', articles: 100, description: '' },
-    { id: 'Part VI', title: 'The States', range: 'Articles 152 – 237', articles: 86, description: '' },
-  ]);
+const [parts, setParts] = useState<Part[]>([]);
 
   // --- States ---
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,11 +46,29 @@ export default function PartsPage() {
     id: '', title: '', range: '', description: '', articles: 0
   });
 
+  useEffect(() => {
+  fetch("/api/admin/parts")
+    .then(res => res.json())
+    .then(data => {
+      const fixedData = data.map((item: any) => ({
+        ...item,
+        description: item.description || ""
+      }));
+      setParts(fixedData);
+    });
+}, []);
+
   // --- Handlers ---
 
   const handleOpenModal = (index: number | null = null) => {
     if (index !== null) {
-      setFormData(parts[index]);
+      setFormData({
+  id: parts[index].partNumber,
+  title: parts[index].title,
+  range: parts[index].range,
+  description: parts[index].description || "",
+  articles: parts[index].articles
+});
       setEditingIndex(index);
     } else {
       setFormData({ id: '', title: '', range: '', description: '', articles: 0 });
@@ -82,45 +102,74 @@ export default function PartsPage() {
     return 0;
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Automatically calculate the articles based on the range input!
-    const autoCalculatedArticles = calculateArticlesFromRange(formData.range);
-    
-    const finalData = {
-      ...formData,
-      articles: autoCalculatedArticles
-    };
+const handleSave = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (editingIndex !== null) {
-      const updatedParts = [...parts];
-      updatedParts[editingIndex] = finalData;
-      setParts(updatedParts);
-    } else {
-      setParts([...parts, finalData]);
-    }
-    handleCloseModal();
+  const autoCalculatedArticles = calculateArticlesFromRange(formData.range);
+
+  const finalData = {
+    partNumber: formData.id,
+    title: formData.title,
+    range: formData.range,
+    description: formData.description,
+    articles: autoCalculatedArticles,
   };
+
+  if (editingIndex !== null) {
+    // ✅ UPDATE
+    const part = parts[editingIndex];
+
+    await fetch(`/api/admin/parts/${part.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(finalData),
+    });
+  } else {
+    // ✅ CREATE
+    await fetch("/api/admin/parts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(finalData),
+    });
+  }
+
+  // 🔄 Reload data
+  const res = await fetch("/api/admin/parts");
+  const data = await res.json();
+
+  const fixedData = data.map((item: any) => ({
+    ...item,
+    description: item.description || "",
+  }));
+
+  setParts(fixedData);
+
+  handleCloseModal();
+};
 
   const handleDeleteClick = (index: number) => {
     setDeleteIndex(index);
   };
 
-  const confirmDelete = () => {
-    if (deleteIndex !== null) {
-      const deletedPartName = parts[deleteIndex].id;
-      
-      setParts(parts.filter((_, index) => index !== deleteIndex));
-      setDeleteIndex(null); 
-      
-      setToastMessage(`Deleted ${deletedPartName}`);
-      
-      setTimeout(() => {
-        setToastMessage(null);
-      }, 3000);
-    }
-  };
+const confirmDelete = async () => {
+  if (deleteIndex !== null) {
+    const part = parts[deleteIndex];
+
+await fetch(`/api/admin/parts/${part.id}`, {
+  method: "DELETE",
+});
+
+    const res = await fetch("/api/admin/parts");
+    const data = await res.json();
+    setParts(data);
+
+    setDeleteIndex(null);
+  }
+};
 
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
@@ -209,7 +258,7 @@ export default function PartsPage() {
                 <tbody className="divide-y divide-gray-100">
                   {parts.map((part, index) => (
                     <tr key={index} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-5 text-sm font-medium text-gray-900">{part.id}</td>
+                      <td className="px-6 py-5 text-sm font-medium text-gray-900">{part.partNumber}</td>
                       <td className="px-6 py-5 text-sm text-gray-600">{part.title}</td>
                       <td className="px-6 py-5 text-sm text-gray-500">{part.range}</td>
                       <td className="px-6 py-5 text-sm text-gray-500">{part.articles}</td>
