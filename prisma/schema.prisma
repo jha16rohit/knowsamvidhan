@@ -121,3 +121,30 @@ model Amendment {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
+model Quiz {
+  id          String       @id @default(uuid())
+  title       String
+  level       String       // "basic" | "intermediate" | "advanced"
+  status      String       @default("draft") // "draft" | "published"
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  questions   Question[]
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  questionText  String   @db.Text
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctAnswer String   // "A" | "B" | "C" | "D"
+  explanation   String?  @db.Text
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
