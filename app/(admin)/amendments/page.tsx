@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { 
-  LayoutDashboard, List, FileText, AlignLeft, Book, 
-  CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check, Loader2, BookMarked, Lightbulb
+import {
+  LayoutDashboard, List, FileText, AlignLeft, Book,
+  CalendarDays, History, GraduationCap, Users, BarChart3,
+  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check, Loader2,
+  BookMarked, Lightbulb, Bell, ShieldCheck,
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
 interface Amendment {
   id: string;
   number: string;
@@ -28,39 +30,57 @@ interface FormData {
   relatedArticles: string;
 }
 
-// ─── Nav ──────────────────────────────────────────────────────────────────────
-const navItems = [
-  { name: 'Dashboard',  icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
-  { name: 'Parts',      icon: List,            active: false, href: '/parts' },
-  { name: 'Articles',   icon: FileText,        active: false, href: '/articles' },
-  { name: 'Clauses',    icon: AlignLeft,       active: false, href: '/clauses' },
-  { name: 'Preamble',   icon: Book,            active: false, href: '/preamble' },
-  { name: 'Schedules',  icon: CalendarDays,    active: false, href: '/schedules' },
-  { name: 'Amendments', icon: History,         active: true,  href: '/amendments' },
-  { name: 'Quizzes',    icon: GraduationCap,   active: false, href: '/quizzes' },
-  { name: 'Users',      icon: Users,           active: false, href: '/users' },
-  { name: 'Analytics',  icon: BarChart3,       active: false, href: '/analytics' },
-  { name: 'Settings',   icon: Settings,        active: false, href: '/settings' },
-];
+interface NavItem {
+  name: string;
+  icon: React.ElementType;
+  active: boolean;
+  href: string;
+  badge?: number;
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const EMPTY_FORM: FormData = {
-  number: '', year: '', title: '', summary: '', whyItMatters: '', relatedArticles: ''
+  number: '', year: '', title: '', summary: '', whyItMatters: '', relatedArticles: '',
 };
 
 const API = '/api/admin/amendments';
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export default function AmendmentsPage() {
-  const [amendments, setAmendments]     = useState<Amendment[]>([]);
-  const [loading, setLoading]           = useState(true);
-  const [saving, setSaving]             = useState(false);
-  const [isModalOpen, setIsModalOpen]   = useState(false);
-  const [editingId, setEditingId]       = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Amendment | null>(null);
-  const [toast, setToast]               = useState<string | null>(null);
-  const [formData, setFormData]         = useState<FormData>(EMPTY_FORM);
 
-  // ── Fetch ────────────────────────────────────────────────────────────────
+export default function AmendmentsPage() {
+  // Simulated open alerts count for the prototype
+  const openCount = 4;
+
+  const navItems: NavItem[] = [
+    { name: 'Dashboard',     icon: LayoutDashboard, active: false, href: '/ad-dashboard'  },
+    { name: 'Parts',         icon: List,            active: false, href: '/parts'         },
+    { name: 'Articles',      icon: FileText,        active: false, href: '/articles'      },
+    { name: 'Clauses',       icon: AlignLeft,       active: false, href: '/clauses'       },
+    { name: 'Preamble',      icon: Book,            active: false, href: '/preamble'      },
+    { name: 'Schedules',     icon: CalendarDays,    active: false, href: '/schedules'     },
+    { name: 'Amendments',    icon: History,         active: true,  href: '/amendments'    },
+    { name: 'Quizzes',       icon: GraduationCap,   active: false, href: '/quizzes'       },
+    { name: 'Users',         icon: Users,           active: false, href: '/users'         },
+    { name: 'Analytics',     icon: BarChart3,       active: false, href: '/analytics'     },
+    { name: 'Alerts',        icon: Bell,            active: false, href: '/alerts', badge: openCount },
+    { name: 'Activity Logs', icon: ShieldCheck,     active: false, href: '/activity-logs' },
+    { name: 'Settings',      icon: Settings,        active: false, href: '/settings'      },
+  ];
+
+  // ─── State ──────────────────────────────────────────────────────────────────
+
+  const [amendments,   setAmendments]   = useState<Amendment[]>([]);
+  const [loading,      setLoading]      = useState(true);
+  const [saving,       setSaving]       = useState(false);
+  const [isModalOpen,  setIsModalOpen]  = useState(false);
+  const [editingId,    setEditingId]    = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Amendment | null>(null);
+  const [toast,        setToast]        = useState<string | null>(null);
+  const [formData,     setFormData]     = useState<FormData>(EMPTY_FORM);
+
+  // ─── Fetch ───────────────────────────────────────────────────────────────────
+
   const fetchAmendments = useCallback(async () => {
     try {
       setLoading(true);
@@ -78,13 +98,15 @@ export default function AmendmentsPage() {
 
   useEffect(() => { fetchAmendments(); }, [fetchAmendments]);
 
-  // ── Toast ────────────────────────────────────────────────────────────────
+  // ─── Toast ───────────────────────────────────────────────────────────────────
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   };
 
-  // ── Modal helpers ────────────────────────────────────────────────────────
+  // ─── Modal helpers ───────────────────────────────────────────────────────────
+
   const openCreateModal = () => {
     setFormData(EMPTY_FORM);
     setEditingId(null);
@@ -110,14 +132,14 @@ export default function AmendmentsPage() {
     setFormData(EMPTY_FORM);
   };
 
-  // ── Save ─────────────────────────────────────────────────────────────────
+  // ─── Save ────────────────────────────────────────────────────────────────────
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
     try {
       if (editingId) {
-        // UPDATE
         const res = await fetch(`${API}/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -125,13 +147,9 @@ export default function AmendmentsPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Update failed');
-
-        setAmendments((prev) =>
-          prev.map((a) => (a.id === editingId ? data.amendment : a))
-        );
+        setAmendments((prev) => prev.map((a) => (a.id === editingId ? data.amendment : a)));
         showToast(`Updated ${data.amendment.number} Amendment`);
       } else {
-        // CREATE
         const res = await fetch(API, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -139,7 +157,6 @@ export default function AmendmentsPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Create failed');
-
         setAmendments((prev) => [data.amendment, ...prev]);
         showToast(`Created ${data.amendment.number} Amendment`);
       }
@@ -151,14 +168,14 @@ export default function AmendmentsPage() {
     }
   };
 
-  // ── Delete ───────────────────────────────────────────────────────────────
+  // ─── Delete ──────────────────────────────────────────────────────────────────
+
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     try {
       const res = await fetch(`${API}/${deleteTarget.id}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Delete failed');
-
       setAmendments((prev) => prev.filter((a) => a.id !== deleteTarget.id));
       showToast(`Deleted ${deleteTarget.number} Amendment`);
     } catch (err: unknown) {
@@ -168,21 +185,22 @@ export default function AmendmentsPage() {
     }
   };
 
-  // ─── Render ───────────────────────────────────────────────────────────────
+  // ─── Render ──────────────────────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
 
-      {/* ── Toast ── */}
+      {/* Toast */}
       {toast && (
-        <div className="fixed bottom-8 right-8 z-[60] bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="fixed bottom-8 right-8 z-60 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
           <span className="text-sm font-bold text-gray-900">{toast}</span>
         </div>
       )}
 
-      {/* ── Sidebar ── */}
+      {/* Sidebar */}
       <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
@@ -199,14 +217,22 @@ export default function AmendmentsPage() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 item.active
                   ? 'bg-[#1e2638] text-[#f59e0b]'
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
-              <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-              {item.name}
+              <div className="flex items-center gap-3">
+                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
+                {item.name}
+              </div>
+
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -222,7 +248,7 @@ export default function AmendmentsPage() {
         </div>
       </aside>
 
-      {/* ── Main ── */}
+      {/* Main */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <div className="flex-1 overflow-y-auto p-8 lg:p-10">
 
@@ -291,15 +317,13 @@ export default function AmendmentsPage() {
                     <h3 className="text-xl font-serif font-bold text-gray-900 mb-2">
                       {amendment.number} — {amendment.title}
                     </h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">
-                      {amendment.summary}
-                    </p>
+                    <p className="text-sm text-gray-500 leading-relaxed">{amendment.summary}</p>
                   </div>
 
                   {/* Why it matters */}
                   {amendment.whyItMatters && (
                     <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
-                      <Lightbulb className="w-4 h-4 text-[#f59e0b] flex-shrink-0 mt-0.5" />
+                      <Lightbulb className="w-4 h-4 text-[#f59e0b] shrink-0 mt-0.5" />
                       <div>
                         <p className="text-[10px] font-bold tracking-widest text-[#f59e0b] uppercase mb-1">Why it matters</p>
                         <p className="text-sm text-amber-900 leading-relaxed">{amendment.whyItMatters}</p>
@@ -310,15 +334,12 @@ export default function AmendmentsPage() {
                   {/* Related articles */}
                   {amendment.relatedArticles && (
                     <div className="flex gap-3 items-start">
-                      <BookMarked className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                      <BookMarked className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
                       <div>
                         <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">Related Articles</p>
                         <div className="flex flex-wrap gap-1.5">
                           {amendment.relatedArticles.split(',').map((a, i) => (
-                            <span
-                              key={i}
-                              className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold tracking-wide"
-                            >
+                            <span key={i} className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold tracking-wide">
                               {a.trim()}
                             </span>
                           ))}
@@ -334,12 +355,12 @@ export default function AmendmentsPage() {
         </div>
       </main>
 
-      {/* ── Create / Edit Modal ── */}
+      {/* Create / Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
 
-            <div className="p-6 md:px-8 md:pt-8 md:pb-4 border-b border-gray-100 flex justify-between items-start flex-shrink-0">
+            <div className="p-6 md:px-8 md:pt-8 md:pb-4 border-b border-gray-100 flex justify-between items-start shrink-0">
               <div>
                 <h3 className="text-2xl font-serif font-bold text-gray-900">
                   {editingId ? 'Edit Amendment' : 'New Amendment'}
@@ -430,7 +451,7 @@ export default function AmendmentsPage() {
               </form>
             </div>
 
-            <div className="p-6 md:px-8 md:py-5 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0 bg-gray-50 rounded-b-2xl">
+            <div className="p-6 md:px-8 md:py-5 border-t border-gray-100 flex justify-end gap-3 shrink-0 bg-gray-50 rounded-b-2xl">
               <button
                 type="button"
                 onClick={closeModal}
@@ -453,16 +474,18 @@ export default function AmendmentsPage() {
         </div>
       )}
 
-      {/* ── Delete Confirmation Modal ── */}
+      {/* Delete Confirmation Modal */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-7 animate-in fade-in zoom-in-95 duration-200">
             <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">
               Delete this Amendment?
             </h3>
             <p className="text-[15px] text-gray-500 leading-relaxed mb-2">
               You&apos;re about to delete{' '}
-              <span className="font-semibold text-gray-800">{deleteTarget.number} — {deleteTarget.title}</span>.
+              <span className="font-semibold text-gray-800">
+                {deleteTarget.number} — {deleteTarget.title}
+              </span>.
             </p>
             <p className="text-[13px] text-gray-400 mb-8">This action cannot be undone.</p>
             <div className="flex justify-end gap-3">

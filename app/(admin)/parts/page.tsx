@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, List, FileText, AlignLeft, Book, 
   CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check
+  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check,
+  Bell, ShieldCheck
 } from 'lucide-react';
 
 type Part = {
@@ -19,6 +20,9 @@ type Part = {
 
 
 export default function PartsPage() {
+  // Simulated open alerts count
+  const openCount = 4;
+
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
     { name: 'Parts', icon: List, active: true, href: '/parts' },
@@ -30,10 +34,12 @@ export default function PartsPage() {
     { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
     { name: 'Users', icon: Users, active: false, href: '/users' },
     { name: 'Analytics', icon: BarChart3, active: false, href: '/analytics' },
+    { name: 'Alerts', icon: Bell, active: false, href: '/alerts', badge: openCount },
+    { name: 'Activity Logs', icon: ShieldCheck, active: false, href: '/activity-logs' },
     { name: 'Settings', icon: Settings, active: false, href: '/settings' },
   ];
 
-const [parts, setParts] = useState<Part[]>([]);
+  const [parts, setParts] = useState<Part[]>([]);
 
   // --- States ---
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,28 +53,27 @@ const [parts, setParts] = useState<Part[]>([]);
   });
 
   useEffect(() => {
-  fetch("/api/admin/parts")
-    .then(res => res.json())
-    .then(data => {
-      const fixedData = data.map((item: any) => ({
-        ...item,
-        description: item.description || ""
-      }));
-      setParts(fixedData);
-    });
-}, []);
+    fetch("/api/admin/parts")
+      .then(res => res.json())
+      .then(data => {
+        const fixedData = data.map((item: any) => ({
+          ...item,
+          description: item.description || ""
+        }));
+        setParts(fixedData);
+      });
+  }, []);
 
   // --- Handlers ---
-
   const handleOpenModal = (index: number | null = null) => {
     if (index !== null) {
       setFormData({
-  id: parts[index].partNumber,
-  title: parts[index].title,
-  range: parts[index].range,
-  description: parts[index].description || "",
-  articles: parts[index].articles
-});
+        id: parts[index].partNumber,
+        title: parts[index].title,
+        range: parts[index].range,
+        description: parts[index].description || "",
+        articles: parts[index].articles
+      });
       setEditingIndex(index);
     } else {
       setFormData({ id: '', title: '', range: '', description: '', articles: 0 });
@@ -82,102 +87,99 @@ const [parts, setParts] = useState<Part[]>([]);
     setEditingIndex(null);
   };
 
-  // NEW: Smart function to calculate articles from the text string
+  // Smart function to calculate articles from the text string
   const calculateArticlesFromRange = (rangeText: string) => {
-    // Look for a pattern like "12 - 35" or "12-35" or "12 – 35"
     const rangeMatch = rangeText.match(/(\d+)\s*[-–]\s*(\d+)/);
     if (rangeMatch) {
       const start = parseInt(rangeMatch[1], 10);
       const end = parseInt(rangeMatch[2], 10);
-      return Math.abs(end - start) + 1; // Example: 35 - 12 + 1 = 24
+      return Math.abs(end - start) + 1;
     }
     
-    // Look for a single number pattern like "Article 51A"
     const singleMatch = rangeText.match(/(\d+)/);
     if (singleMatch) {
       return 1;
     }
     
-    // Default to 0 if no numbers are typed
     return 0;
   };
 
-const handleSave = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const autoCalculatedArticles = calculateArticlesFromRange(formData.range);
+    const autoCalculatedArticles = calculateArticlesFromRange(formData.range);
 
-  const finalData = {
-    partNumber: formData.id,
-    title: formData.title,
-    range: formData.range,
-    description: formData.description,
-    articles: autoCalculatedArticles,
+    const finalData = {
+      partNumber: formData.id,
+      title: formData.title,
+      range: formData.range,
+      description: formData.description,
+      articles: autoCalculatedArticles,
+    };
+
+    if (editingIndex !== null) {
+      // UPDATE
+      const part = parts[editingIndex];
+
+      await fetch(`/api/admin/parts/${part.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(finalData),
+      });
+    } else {
+      // CREATE
+      await fetch("/api/admin/parts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(finalData),
+      });
+    }
+
+    // Reload data
+    const res = await fetch("/api/admin/parts");
+    const data = await res.json();
+
+    const fixedData = data.map((item: any) => ({
+      ...item,
+      description: item.description || "",
+    }));
+
+    setParts(fixedData);
+
+    handleCloseModal();
   };
-
-  if (editingIndex !== null) {
-    // ✅ UPDATE
-    const part = parts[editingIndex];
-
-    await fetch(`/api/admin/parts/${part.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(finalData),
-    });
-  } else {
-    // ✅ CREATE
-    await fetch("/api/admin/parts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(finalData),
-    });
-  }
-
-  // 🔄 Reload data
-  const res = await fetch("/api/admin/parts");
-  const data = await res.json();
-
-  const fixedData = data.map((item: any) => ({
-    ...item,
-    description: item.description || "",
-  }));
-
-  setParts(fixedData);
-
-  handleCloseModal();
-};
 
   const handleDeleteClick = (index: number) => {
     setDeleteIndex(index);
   };
 
-const confirmDelete = async () => {
-  if (deleteIndex !== null) {
-    const part = parts[deleteIndex];
+  const confirmDelete = async () => {
+    if (deleteIndex !== null) {
+      const part = parts[deleteIndex];
 
-await fetch(`/api/admin/parts/${part.id}`, {
-  method: "DELETE",
-});
+      await fetch(`/api/admin/parts/${part.id}`, {
+        method: "DELETE",
+      });
 
-    const res = await fetch("/api/admin/parts");
-    const data = await res.json();
-    setParts(data);
+      const res = await fetch("/api/admin/parts");
+      const data = await res.json();
+      setParts(data);
 
-    setDeleteIndex(null);
-  }
-};
+      setDeleteIndex(null);
+    }
+  };
 
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
       
       {/* ================= TOAST NOTIFICATION ================= */}
       {toastMessage && (
-        <div className="fixed bottom-8 right-8 z-[60] bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="fixed bottom-8 right-8 z-60 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
           <span className="text-sm font-bold text-gray-900">{toastMessage}</span>
@@ -201,14 +203,24 @@ await fetch(`/api/admin/parts/${part.id}`, {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 item.active 
                   ? 'bg-[#1e2638] text-[#f59e0b]' 
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
-              <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-              {item.name}
+              {/* Left side: Icon and Name */}
+              <div className="flex items-center gap-3">
+                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
+                {item.name}
+              </div>
+              
+              {/* Right side: Dynamic Notification Badge */}
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -381,7 +393,7 @@ await fetch(`/api/admin/parts/${part.id}`, {
 
       {/* ================= DELETE CONFIRMATION MODAL ================= */}
       {deleteIndex !== null && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-7 animate-in fade-in zoom-in-95 duration-200">
             <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">
               Delete this Part?

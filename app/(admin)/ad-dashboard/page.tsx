@@ -1,49 +1,65 @@
 "use client";
+
 import React from 'react';
-import Link from 'next/link'; 
-import { useRouter } from "next/navigation";
-import { 
-  LayoutDashboard, List, FileText, AlignLeft, Book, 
-  CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, AlertCircle, TrendingUp, Clock, BookOpen, ShieldAlert,LogOut
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import {
+  LayoutDashboard, List, FileText, AlignLeft, Book,
+  CalendarDays, History, GraduationCap, Users, BarChart3,
+  Settings, AlertCircle, TrendingUp, Clock, BookOpen, ShieldAlert,
+  Bell, ShieldCheck, LogOut,
 } from 'lucide-react';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface NavItem {
+  name: string;
+  icon: React.ElementType;
+  active: boolean;
+  href: string;
+  badge?: number;
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function AdminDashboardPage() {
   const router = useRouter();
 
-const handleLogout = async () => {
-  const confirmLogout = confirm("Are you sure you want to logout?");
-  if (!confirmLogout) return;
+  const handleLogout = async () => {
+    const confirmLogout = confirm('Are you sure you want to logout?');
+    if (!confirmLogout) return;
+    await fetch('/api/admin/logout', { method: 'POST' });
+    router.push('/admin-xyz');
+  };
 
-  await fetch("/api/admin/logout", { method: "POST" });
-  router.push("/admin-xyz");
-};
-  // Navigation links for the sidebar
-  const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, active: true, href: '/ad-dashboard' },
-    { name: 'Parts', icon: List, active: false, href: '/parts' },
-    { name: 'Articles', icon: FileText, active: false, href: '/articles' },
-    { name: 'Clauses', icon: AlignLeft, active: false, href: '/clauses' },
-    { name: 'Preamble', icon: Book, active: false, href: '/preamble' },
-    { name: 'Schedules', icon: CalendarDays, active: false, href: '/schedules' },
-    { name: 'Amendments', icon: History, active: false, href: '/amendments' },
-    { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
-    { name: 'Users', icon: Users, active: false, href: '/users' },
-    { name: 'Analytics', icon: BarChart3, active: false, href: '/analytics' },
-    { name: 'Settings', icon: Settings, active: false, href: '/settings' },
+  // Simulated open alerts count for the prototype
+  const openCount = 4;
+
+  const navItems: NavItem[] = [
+    { name: 'Dashboard',     icon: LayoutDashboard, active: true,  href: '/ad-dashboard'  },
+    { name: 'Parts',         icon: List,            active: false, href: '/parts'         },
+    { name: 'Articles',      icon: FileText,        active: false, href: '/articles'      },
+    { name: 'Clauses',       icon: AlignLeft,       active: false, href: '/clauses'       },
+    { name: 'Preamble',      icon: Book,            active: false, href: '/preamble'      },
+    { name: 'Schedules',     icon: CalendarDays,    active: false, href: '/schedules'     },
+    { name: 'Amendments',    icon: History,         active: false, href: '/amendments'    },
+    { name: 'Quizzes',       icon: GraduationCap,   active: false, href: '/quizzes'       },
+    { name: 'Users',         icon: Users,           active: false, href: '/users'         },
+    { name: 'Analytics',     icon: BarChart3,       active: false, href: '/analytics'     },
+    { name: 'Alerts',        icon: Bell,            active: false, href: '/alerts', badge: openCount },
+    { name: 'Activity Logs', icon: ShieldCheck,     active: false, href: '/activity-logs' },
+    { name: 'Settings',      icon: Settings,        active: false, href: '/settings'      },
   ];
 
-  // Data for the CSS-based bar chart
   const chartBars = [15, 45, 25, 35, 75, 25, 40, 85, 45, 60, 25, 45, 35, 70];
   const days = ['W1·M', 'T', 'W', 'T', 'F', 'S', 'S', 'W2·M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  
 
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans">
-      
-      {/* ================= SIDEBAR ================= */}
+
+      {/* Sidebar */}
       <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
-        
+
         {/* Brand */}
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
@@ -58,49 +74,54 @@ const handleLogout = async () => {
         {/* Navigation */}
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-2">
           {navItems.map((item) => (
-            // 2. Replaced <a> with <Link> and used item.href below!
             <Link
               key={item.name}
-              href={item.href} 
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                item.active 
-                  ? 'bg-[#1e2638] text-[#f59e0b]' 
+              href={item.href}
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                item.active
+                  ? 'bg-[#1e2638] text-[#f59e0b]'
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
-              <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-              {item.name}
+              <div className="flex items-center gap-3">
+                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
+                {item.name}
+              </div>
+
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
-          {/* 🔥 LOGOUT BUTTON */}
-<button
-  onClick={handleLogout}
-  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 w-full text-left mt-2"
->
-  <LogOut className="w-4 h-4" />
-  Logout
-</button>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 w-full text-left mt-2 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
         </nav>
-        
 
         {/* Bottom Warning Widget */}
-        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800 relative">
+        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800">
           <div className="flex items-center gap-2 mb-1">
             <ShieldAlert className="w-4 h-4 text-[#f59e0b]" />
             <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
           </div>
           <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You're managing live content.<br />Edit with care.
+            You&apos;re managing live content.<br />Edit with care.
           </p>
         </div>
       </aside>
 
-      {/* ================= MAIN CONTENT ================= */}
+      {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-        {/* Scrollable Dashboard Area */}
         <div className="flex-1 overflow-y-auto p-8">
-          
+
           {/* Page Title */}
           <div className="mb-8">
             <p className="text-[#f59e0b] text-xs font-bold tracking-widest uppercase mb-2">Overview</p>
@@ -108,7 +129,7 @@ const handleLogout = async () => {
             <p className="text-sm text-gray-500">Platform health at a glance — users, content and engagement.</p>
           </div>
 
-          {/* Stat Cards Grid */}
+          {/* Stat Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col justify-between h-32">
               <div className="flex justify-between items-start">
@@ -163,9 +184,9 @@ const handleLogout = async () => {
             </div>
           </div>
 
-          {/* Middle Section: Chart & Updates */}
+          {/* Chart & Pending Updates */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            
+
             <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80">
               <div className="flex justify-between items-center mb-8">
                 <h3 className="text-lg font-serif font-bold text-gray-900">Daily active users</h3>
@@ -173,14 +194,14 @@ const handleLogout = async () => {
                   Last 14 days
                 </span>
               </div>
-              
+
               <div className="h-48 flex items-end justify-between gap-3 px-2">
                 {chartBars.map((height, i) => (
                   <div key={i} className="flex flex-col items-center flex-1 gap-3 group h-full justify-end">
-                    <div 
+                    <div
                       className="w-full bg-linear-to-t from-[#f97316] to-[#fbbf24] rounded-t-md opacity-90 group-hover:opacity-100 transition-opacity"
                       style={{ height: `${height}%` }}
-                    ></div>
+                    />
                   </div>
                 ))}
               </div>
@@ -196,65 +217,60 @@ const handleLogout = async () => {
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col">
               <h3 className="text-lg font-serif font-bold text-gray-900 mb-6">Pending updates</h3>
               <div className="space-y-3 flex-1">
-                <div className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-100 hover:border-orange-200 hover:bg-orange-50/30 transition-colors cursor-pointer">
-                  <AlertCircle className="w-4 h-4 text-[#f59e0b] shrink-0" />
-                  <span className="text-sm text-gray-700 font-medium">Review AI explanation for Article 32</span>
-                </div>
-                <div className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-100 hover:border-orange-200 hover:bg-orange-50/30 transition-colors cursor-pointer">
-                  <AlertCircle className="w-4 h-4 text-[#f59e0b] shrink-0" />
-                  <span className="text-sm text-gray-700 font-medium">Approve new 105th amendment entry</span>
-                </div>
-                <div className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-100 hover:border-orange-200 hover:bg-orange-50/30 transition-colors cursor-pointer">
-                  <AlertCircle className="w-4 h-4 text-[#f59e0b]  shrink-0" />
-                  <span className="text-sm text-gray-700 font-medium">5 user reports awaiting triage</span>
-                </div>
+                {[
+                  'Review AI explanation for Article 32',
+                  'Approve new 105th amendment entry',
+                  '5 user reports awaiting triage',
+                ].map((text) => (
+                  <div key={text} className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-100 hover:border-orange-200 hover:bg-orange-50/30 transition-colors cursor-pointer">
+                    <AlertCircle className="w-4 h-4 text-[#f59e0b] shrink-0" />
+                    <span className="text-sm text-gray-700 font-medium">{text}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Bottom Section: Lists */}
+          {/* Bottom: Lists */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
+
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80">
               <h3 className="text-lg font-serif font-bold text-gray-900 mb-5">Most read articles</h3>
               <div className="space-y-4">
-                <div className="flex justify-between items-center pb-3 border-b border-gray-50">
-                  <span className="text-sm text-gray-800 font-medium">Article 21 <span className="text-gray-400 font-normal ml-1">— Right to life</span></span>
-                  <span className="text-sm font-bold text-[#d97706]">8,420</span>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-50">
-                  <span className="text-sm text-gray-800 font-medium">Article 14 <span className="text-gray-400 font-normal ml-1">— Equality before law</span></span>
-                  <span className="text-sm font-bold text-[#d97706]">6,210</span>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-50">
-                  <span className="text-sm text-gray-800 font-medium">Article 19 <span className="text-gray-400 font-normal ml-1">— Six freedoms</span></span>
-                  <span className="text-sm font-bold text-[#d97706]">5,870</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-800 font-medium">Article 32 <span className="text-gray-400 font-normal ml-1">— Constitutional remedies</span></span>
-                  <span className="text-sm font-bold text-[#d97706]">4,310</span>
-                </div>
+                {[
+                  { label: 'Article 21', sub: 'Right to life',           count: '8,420' },
+                  { label: 'Article 14', sub: 'Equality before law',     count: '6,210' },
+                  { label: 'Article 19', sub: 'Six freedoms',            count: '5,870' },
+                  { label: 'Article 32', sub: 'Constitutional remedies', count: '4,310' },
+                ].map((row, i, arr) => (
+                  <div key={row.label} className={`flex justify-between items-center ${i < arr.length - 1 ? 'pb-3 border-b border-gray-50' : ''}`}>
+                    <span className="text-sm text-gray-800 font-medium">
+                      {row.label} <span className="text-gray-400 font-normal ml-1">— {row.sub}</span>
+                    </span>
+                    <span className="text-sm font-bold text-[#d97706]">{row.count}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80">
               <h3 className="text-lg font-serif font-bold text-gray-900 mb-5">Top quizzes</h3>
               <div className="space-y-4">
-                <div className="flex justify-between items-center pb-3 border-b border-gray-50">
-                  <span className="text-sm text-gray-800 font-medium">Fundamental Rights <span className="text-gray-400 font-normal ml-1">— Basic</span></span>
-                  <span className="text-sm font-bold text-[#10b981]">3,120</span>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-50">
-                  <span className="text-sm text-gray-800 font-medium">Amendments timeline <span className="text-gray-400 font-normal ml-1">— Moderate</span></span>
-                  <span className="text-sm font-bold text-[#10b981]">2,480</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-800 font-medium">Landmark cases <span className="text-gray-400 font-normal ml-1">— Advanced</span></span>
-                  <span className="text-sm font-bold text-[#10b981]">1,740</span>
-                </div>
+                {[
+                  { label: 'Fundamental Rights', sub: 'Basic',    count: '3,120' },
+                  { label: 'Amendments timeline', sub: 'Moderate', count: '2,480' },
+                  { label: 'Landmark cases',      sub: 'Advanced', count: '1,740' },
+                ].map((row, i, arr) => (
+                  <div key={row.label} className={`flex justify-between items-center ${i < arr.length - 1 ? 'pb-3 border-b border-gray-50' : ''}`}>
+                    <span className="text-sm text-gray-800 font-medium">
+                      {row.label} <span className="text-gray-400 font-normal ml-1">— {row.sub}</span>
+                    </span>
+                    <span className="text-sm font-bold text-[#10b981]">{row.count}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            
+
           </div>
 
         </div>

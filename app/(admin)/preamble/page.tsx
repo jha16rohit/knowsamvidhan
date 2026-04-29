@@ -1,48 +1,67 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   LayoutDashboard, List, FileText, AlignLeft, Book,
   CalendarDays, History, GraduationCap, Users, BarChart3,
-  Settings, ShieldAlert, BookOpen, Save, Plus, Trash2, Check, Loader2
+  Settings, ShieldAlert, BookOpen, Save, Plus, Trash2, Check, Loader2,
+  Bell, ShieldCheck,
 } from 'lucide-react';
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface NavItem {
+  name: string;
+  icon: React.ElementType;
+  active: boolean;
+  href: string;
+  badge?: number;
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function PreamblePage() {
-  const navItems = [
-    { name: 'Dashboard',  icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
-    { name: 'Parts',      icon: List,            active: false, href: '/parts'        },
-    { name: 'Articles',   icon: FileText,        active: false, href: '/articles'     },
-    { name: 'Clauses',    icon: AlignLeft,       active: false, href: '/clauses'      },
-    { name: 'Preamble',   icon: Book,            active: true,  href: '/preamble'     },
-    { name: 'Schedules',  icon: CalendarDays,    active: false, href: '/schedules'    },
-    { name: 'Amendments', icon: History,         active: false, href: '/amendments'   },
-    { name: 'Quizzes',    icon: GraduationCap,   active: false, href: '/quizzes'      },
-    { name: 'Users',      icon: Users,           active: false, href: '/users'        },
-    { name: 'Analytics',  icon: BarChart3,       active: false, href: '/analytics'    },
-    { name: 'Settings',   icon: Settings,        active: false, href: '/settings'     },
+  // Simulated open alerts count for the prototype
+  const openCount = 4;
+
+  const navItems: NavItem[] = [
+    { name: 'Dashboard',     icon: LayoutDashboard, active: false, href: '/ad-dashboard'  },
+    { name: 'Parts',         icon: List,            active: false, href: '/parts'         },
+    { name: 'Articles',      icon: FileText,        active: false, href: '/articles'      },
+    { name: 'Clauses',       icon: AlignLeft,       active: false, href: '/clauses'       },
+    { name: 'Preamble',      icon: Book,            active: true,  href: '/preamble'      },
+    { name: 'Schedules',     icon: CalendarDays,    active: false, href: '/schedules'     },
+    { name: 'Amendments',    icon: History,         active: false, href: '/amendments'    },
+    { name: 'Quizzes',       icon: GraduationCap,   active: false, href: '/quizzes'       },
+    { name: 'Users',         icon: Users,           active: false, href: '/users'         },
+    { name: 'Analytics',     icon: BarChart3,       active: false, href: '/analytics'     },
+    { name: 'Alerts',        icon: Bell,            active: false, href: '/alerts', badge: openCount },
+    { name: 'Activity Logs', icon: ShieldCheck,     active: false, href: '/activity-logs' },
+    { name: 'Settings',      icon: Settings,        active: false, href: '/settings'      },
   ];
 
-  // ─── State ───────────────────────────────────────────────────────────────
+  // ─── State ──────────────────────────────────────────────────────────────────
+
   const [officialText,      setOfficialText]      = useState('');
   const [simpleExplanation, setSimpleExplanation] = useState('');
   const [whyItMatters,      setWhyItMatters]      = useState('');
   const [keywords, setKeywords] = useState<{ word: string; definition: string }[]>([]);
 
-  const [isLoading, setIsLoading]   = useState(true);
-  const [isSaving,  setIsSaving]    = useState(false);
+  const [isLoading,    setIsLoading]    = useState(true);
+  const [isSaving,     setIsSaving]     = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType,    setToastType]    = useState<'success' | 'error'>('success');
 
-  // ─── Fetch on mount ───────────────────────────────────────────────────────
+  // ─── Fetch on mount ─────────────────────────────────────────────────────────
+
   useEffect(() => {
     fetch('/api/admin/preamble')
       .then((res) => res.json())
       .then((data) => {
-        setOfficialText(data.officialText      ?? '');
+        setOfficialText(data.officialText           ?? '');
         setSimpleExplanation(data.simpleExplanation ?? '');
-        setWhyItMatters(data.whyItMatters      ?? '');
-        // keywords stored as JSON string in DB: "[{word,definition},...]"
+        setWhyItMatters(data.whyItMatters           ?? '');
         try {
           const parsed = typeof data.keywords === 'string'
             ? JSON.parse(data.keywords)
@@ -56,14 +75,16 @@ export default function PreamblePage() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  // ─── Toast helper ─────────────────────────────────────────────────────────
+  // ─── Toast helper ───────────────────────────────────────────────────────────
+
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToastMessage(message);
     setToastType(type);
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // ─── Save ─────────────────────────────────────────────────────────────────
+  // ─── Save ───────────────────────────────────────────────────────────────────
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -86,7 +107,8 @@ export default function PreamblePage() {
     }
   };
 
-  // ─── Keyword helpers ─────────────────────────────────────────────────────
+  // ─── Keyword helpers ────────────────────────────────────────────────────────
+
   const updateKeyword = (index: number, field: 'word' | 'definition', value: string) => {
     setKeywords((prev) => prev.map((kw, i) => i === index ? { ...kw, [field]: value } : kw));
   };
@@ -99,14 +121,15 @@ export default function PreamblePage() {
     setKeywords((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ─── Render ───────────────────────────────────────────────────────────────
+  // ─── Render ─────────────────────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
 
       {/* Toast */}
       {toastMessage && (
-        <div className="fixed bottom-8 right-8 z-[60] bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${toastType === 'error' ? 'bg-red-500' : 'bg-[#1a1a1a]'}`}>
+        <div className="fixed bottom-8 right-8 z-60 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${toastType === 'error' ? 'bg-red-500' : 'bg-[#1a1a1a]'}`}>
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
           <span className="text-sm font-bold text-gray-900">{toastMessage}</span>
@@ -114,7 +137,7 @@ export default function PreamblePage() {
       )}
 
       {/* Sidebar */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col flex-shrink-0 min-h-screen">
+      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
             <BookOpen className="text-[#c19d60] w-4 h-4" />
@@ -130,14 +153,22 @@ export default function PreamblePage() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 item.active
                   ? 'bg-[#1e2638] text-[#f59e0b]'
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
-              <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-              {item.name}
+              <div className="flex items-center gap-3">
+                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
+                {item.name}
+              </div>
+
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -195,7 +226,7 @@ export default function PreamblePage() {
           ) : (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
 
-              {/* ── Left: Text fields ── */}
+              {/* Left: Text fields */}
               <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 flex flex-col gap-6">
 
                 <div>
@@ -229,14 +260,15 @@ export default function PreamblePage() {
                 </div>
               </div>
 
-              {/* ── Right: Keywords ── */}
+              {/* Right: Keywords */}
               <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 flex flex-col">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-serif font-bold text-gray-900">Keywords</h3>
-                  <span className="text-xs text-gray-400 font-medium">{keywords.length} word{keywords.length !== 1 ? 's' : ''}</span>
+                  <span className="text-xs text-gray-400 font-medium">
+                    {keywords.length} word{keywords.length !== 1 ? 's' : ''}
+                  </span>
                 </div>
 
-                {/* Header labels */}
                 {keywords.length > 0 && (
                   <div className="flex gap-3 mb-2 px-1">
                     <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase w-1/3">Word</span>
@@ -244,7 +276,7 @@ export default function PreamblePage() {
                   </div>
                 )}
 
-                <div className="flex-1 space-y-2.5 overflow-y-auto max-h-[420px] pr-1">
+                <div className="flex-1 space-y-2.5 overflow-y-auto max-h-105 pr-1">
                   {keywords.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mb-3">
@@ -271,7 +303,7 @@ export default function PreamblePage() {
                         />
                         <button
                           onClick={() => removeKeyword(index)}
-                          className="p-1.5 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
+                          className="p-1.5 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
                           aria-label="Remove keyword"
                         >
                           <Trash2 className="w-4 h-4" />

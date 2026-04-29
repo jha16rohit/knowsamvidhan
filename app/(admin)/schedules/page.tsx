@@ -2,17 +2,19 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { 
-  LayoutDashboard, List, FileText, AlignLeft, Book, 
-  CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check, Loader2
+import {
+  LayoutDashboard, List, FileText, AlignLeft, Book,
+  CalendarDays, History, GraduationCap, Users, BarChart3,
+  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2, X, Check, Loader2,
+  Bell, ShieldCheck,
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
 interface Schedule {
-  id: string;         // UUID from DB
-  shortId: string;    // e.g. "7th"
-  schedule: string;   // e.g. "Seventh Schedule"
+  id: string;
+  shortId: string;
+  schedule: string;
   title: string;
   description: string;
   topics: string[];
@@ -23,42 +25,60 @@ interface FormData {
   schedule: string;
   title: string;
   description: string;
-  topicsStr: string;  // comma-separated string for the input
+  topicsStr: string;
 }
 
-// ─── Nav ──────────────────────────────────────────────────────────────────────
-const navItems = [
-  { name: 'Dashboard',  icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
-  { name: 'Parts',      icon: List,            active: false, href: '/parts' },
-  { name: 'Articles',   icon: FileText,        active: false, href: '/articles' },
-  { name: 'Clauses',    icon: AlignLeft,       active: false, href: '/clauses' },
-  { name: 'Preamble',   icon: Book,            active: false, href: '/preamble' },
-  { name: 'Schedules',  icon: CalendarDays,    active: true,  href: '/schedules' },
-  { name: 'Amendments', icon: History,         active: false, href: '/amendments' },
-  { name: 'Quizzes',    icon: GraduationCap,   active: false, href: '/quizzes' },
-  { name: 'Users',      icon: Users,           active: false, href: '/users' },
-  { name: 'Analytics',  icon: BarChart3,       active: false, href: '/analytics' },
-  { name: 'Settings',   icon: Settings,        active: false, href: '/settings' },
-];
+interface NavItem {
+  name: string;
+  icon: React.ElementType;
+  active: boolean;
+  href: string;
+  badge?: number;
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const EMPTY_FORM: FormData = {
-  shortId: '', schedule: '', title: '', description: '', topicsStr: ''
+  shortId: '', schedule: '', title: '', description: '', topicsStr: '',
 };
 
 const API = '/api/admin/schedules';
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export default function SchedulesPage() {
-  const [schedules, setSchedules]     = useState<Schedule[]>([]);
-  const [loading, setLoading]         = useState(true);
-  const [saving, setSaving]           = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId]     = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Schedule | null>(null);
-  const [toast, setToast]             = useState<string | null>(null);
-  const [formData, setFormData]       = useState<FormData>(EMPTY_FORM);
 
-  // ── Fetch all schedules ──────────────────────────────────────────────────
+export default function SchedulesPage() {
+  // Simulated open alerts count for the prototype
+  const openCount = 4;
+
+  const navItems: NavItem[] = [
+    { name: 'Dashboard',     icon: LayoutDashboard, active: false, href: '/ad-dashboard'  },
+    { name: 'Parts',         icon: List,            active: false, href: '/parts'         },
+    { name: 'Articles',      icon: FileText,        active: false, href: '/articles'      },
+    { name: 'Clauses',       icon: AlignLeft,       active: false, href: '/clauses'       },
+    { name: 'Preamble',      icon: Book,            active: false, href: '/preamble'      },
+    { name: 'Schedules',     icon: CalendarDays,    active: true,  href: '/schedules'     },
+    { name: 'Amendments',    icon: History,         active: false, href: '/amendments'    },
+    { name: 'Quizzes',       icon: GraduationCap,   active: false, href: '/quizzes'       },
+    { name: 'Users',         icon: Users,           active: false, href: '/users'         },
+    { name: 'Analytics',     icon: BarChart3,       active: false, href: '/analytics'     },
+    { name: 'Alerts',        icon: Bell,            active: false, href: '/alerts', badge: openCount },
+    { name: 'Activity Logs', icon: ShieldCheck,     active: false, href: '/activity-logs' },
+    { name: 'Settings',      icon: Settings,        active: false, href: '/settings'      },
+  ];
+
+  // ─── State ──────────────────────────────────────────────────────────────────
+
+  const [schedules,    setSchedules]    = useState<Schedule[]>([]);
+  const [loading,      setLoading]      = useState(true);
+  const [saving,       setSaving]       = useState(false);
+  const [isModalOpen,  setIsModalOpen]  = useState(false);
+  const [editingId,    setEditingId]    = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Schedule | null>(null);
+  const [toast,        setToast]        = useState<string | null>(null);
+  const [formData,     setFormData]     = useState<FormData>(EMPTY_FORM);
+
+  // ─── Fetch all schedules ─────────────────────────────────────────────────────
+
   const fetchSchedules = useCallback(async () => {
     try {
       setLoading(true);
@@ -76,13 +96,15 @@ export default function SchedulesPage() {
 
   useEffect(() => { fetchSchedules(); }, [fetchSchedules]);
 
-  // ── Toast ────────────────────────────────────────────────────────────────
+  // ─── Toast ───────────────────────────────────────────────────────────────────
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   };
 
-  // ── Modal helpers ────────────────────────────────────────────────────────
+  // ─── Modal helpers ───────────────────────────────────────────────────────────
+
   const openCreateModal = () => {
     setFormData(EMPTY_FORM);
     setEditingId(null);
@@ -107,7 +129,8 @@ export default function SchedulesPage() {
     setFormData(EMPTY_FORM);
   };
 
-  // ── Save (Create or Update) ──────────────────────────────────────────────
+  // ─── Save (Create or Update) ─────────────────────────────────────────────────
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -127,7 +150,6 @@ export default function SchedulesPage() {
 
     try {
       if (editingId) {
-        // ── UPDATE
         const res = await fetch(`${API}/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -135,13 +157,9 @@ export default function SchedulesPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Update failed');
-
-        setSchedules((prev) =>
-          prev.map((s) => (s.id === editingId ? data.schedule : s))
-        );
+        setSchedules((prev) => prev.map((s) => (s.id === editingId ? data.schedule : s)));
         showToast(`Updated "${data.schedule.schedule}"`);
       } else {
-        // ── CREATE
         const res = await fetch(API, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -149,7 +167,6 @@ export default function SchedulesPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Create failed');
-
         setSchedules((prev) => [...prev, data.schedule]);
         showToast(`Created "${data.schedule.schedule}"`);
       }
@@ -161,14 +178,14 @@ export default function SchedulesPage() {
     }
   };
 
-  // ── Delete ───────────────────────────────────────────────────────────────
+  // ─── Delete ──────────────────────────────────────────────────────────────────
+
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     try {
       const res = await fetch(`${API}/${deleteTarget.id}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Delete failed');
-
       setSchedules((prev) => prev.filter((s) => s.id !== deleteTarget.id));
       showToast(`Deleted "${deleteTarget.schedule}"`);
     } catch (err: unknown) {
@@ -178,21 +195,22 @@ export default function SchedulesPage() {
     }
   };
 
-  // ─── Render ───────────────────────────────────────────────────────────────
+  // ─── Render ──────────────────────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
 
-      {/* ── Toast ── */}
+      {/* Toast */}
       {toast && (
-        <div className="fixed bottom-8 right-8 z-[60] bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="fixed bottom-8 right-8 z-60 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
           <span className="text-sm font-bold text-gray-900">{toast}</span>
         </div>
       )}
 
-      {/* ── Sidebar ── */}
+      {/* Sidebar */}
       <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
@@ -209,14 +227,22 @@ export default function SchedulesPage() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 item.active
                   ? 'bg-[#1e2638] text-[#f59e0b]'
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
-              <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-              {item.name}
+              <div className="flex items-center gap-3">
+                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
+                {item.name}
+              </div>
+
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -232,7 +258,7 @@ export default function SchedulesPage() {
         </div>
       </aside>
 
-      {/* ── Main ── */}
+      {/* Main */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <div className="flex-1 overflow-y-auto p-8 lg:p-10">
 
@@ -319,9 +345,9 @@ export default function SchedulesPage() {
         </div>
       </main>
 
-      {/* ── Create / Edit Modal ── */}
+      {/* Create / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 md:p-8 pb-0">
               <div className="flex justify-between items-start mb-6">
@@ -422,9 +448,9 @@ export default function SchedulesPage() {
         </div>
       )}
 
-      {/* ── Delete Confirmation Modal ── */}
+      {/* Delete Confirmation Modal */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-7 animate-in fade-in zoom-in-95 duration-200">
             <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">
               Delete this Schedule?

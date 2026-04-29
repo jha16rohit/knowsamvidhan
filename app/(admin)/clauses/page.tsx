@@ -2,16 +2,19 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import {
-  LayoutDashboard, List, FileText, AlignLeft, Book,
-  CalendarDays, History, GraduationCap, Users, BarChart3,
+import { 
+  LayoutDashboard, List, FileText, AlignLeft, Book, 
+  CalendarDays, History, GraduationCap, Users, BarChart3, 
   Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2,
-  Search, X, Check, Filter, ChevronLeft, ChevronRight
+  Search, X, Check, Filter, ChevronLeft, ChevronRight,
+  Bell, ShieldCheck
 } from 'lucide-react';
 
 const CLAUSES_PER_PAGE = 10;
 
 export default function ClausesPage() {
+  const openCount = 4;
+
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
     { name: 'Parts', icon: List, active: false, href: '/parts' },
@@ -23,6 +26,8 @@ export default function ClausesPage() {
     { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
     { name: 'Users', icon: Users, active: false, href: '/users' },
     { name: 'Analytics', icon: BarChart3, active: false, href: '/analytics' },
+    { name: 'Alerts', icon: Bell, active: false, href: '/alerts', badge: openCount },
+    { name: 'Activity Logs', icon: ShieldCheck, active: false, href: '/activity-logs' },
     { name: 'Settings', icon: Settings, active: false, href: '/settings' },
   ];
 
@@ -42,7 +47,6 @@ export default function ClausesPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Dropdown open states
   const [isArticleDropdownOpen, setIsArticleDropdownOpen] = useState(false);
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
@@ -52,7 +56,6 @@ export default function ClausesPage() {
     text: '',
   });
 
-  // Refs for click-outside
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const articleDropdownRef = useRef<HTMLDivElement>(null);
   const filterDropdownRef = useRef<HTMLDivElement>(null);
@@ -88,7 +91,6 @@ export default function ClausesPage() {
     fetch('/api/admin/articles?limit=200')
       .then((res) => res.json())
       .then((data) => {
-        // API returns { articles: [], total } or plain array
         const list = data.articles ?? data;
         const formatted = list.map((a: any) => ({
           id: a.id,
@@ -101,7 +103,6 @@ export default function ClausesPage() {
       .catch(console.error);
   }, []);
 
-  // Set default article in form once list loads
   useEffect(() => {
     if (availableArticles.length > 0 && !formData.articleId) {
       setFormData((prev) => ({ ...prev, articleId: availableArticles[0].id }));
@@ -150,7 +151,6 @@ export default function ClausesPage() {
     return found ? found.label : 'All Articles';
   };
 
-  // Group fetched clauses by article for display
   const groupedClauses = clauses.reduce((acc: Record<string, any[]>, clause: any) => {
     const key = clause.articleId;
     if (!acc[key]) acc[key] = [];
@@ -245,8 +245,8 @@ export default function ClausesPage() {
 
       {/* Toast */}
       {toastMessage && (
-        <div className="fixed bottom-8 right-8 z-[60] bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="fixed bottom-8 right-8 z-60 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
           <span className="text-sm font-bold text-gray-900">{toastMessage}</span>
@@ -254,7 +254,7 @@ export default function ClausesPage() {
       )}
 
       {/* Sidebar */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col flex-shrink-0 min-h-screen">
+      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
             <BookOpen className="text-[#c19d60] w-4 h-4" />
@@ -270,14 +270,21 @@ export default function ClausesPage() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                item.active
-                  ? 'bg-[#1e2638] text-[#f59e0b]'
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                item.active 
+                  ? 'bg-[#1e2638] text-[#f59e0b]' 
                   : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
               }`}
             >
-              <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-              {item.name}
+              <div className="flex items-center gap-3">
+                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
+                {item.name}
+              </div>
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -335,8 +342,8 @@ export default function ClausesPage() {
               )}
             </div>
 
-            {/* Filter — custom dropdown matching the modal */}
-            <div ref={filterDropdownRef} className="relative flex-shrink-0">
+            {/* Filter dropdown */}
+            <div ref={filterDropdownRef} className="relative shrink-0">
               <div
                 onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
                 className={`flex items-center gap-2 px-4 py-2.5 bg-white border rounded-xl cursor-pointer shadow-sm transition min-w-[200px] justify-between ${
@@ -344,11 +351,11 @@ export default function ClausesPage() {
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <Filter className="w-4 h-4 text-gray-400 shrink-0" />
                   <span className="text-sm text-gray-800 truncate max-w-[160px]">{getFilterLabel()}</span>
                 </div>
                 <svg
-                  className={`w-4 h-4 text-gray-500 flex-shrink-0 transition-transform ${isFilterDropdownOpen ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 text-gray-500 shrink-0 transition-transform ${isFilterDropdownOpen ? 'rotate-180' : ''}`}
                   fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
                 >
                   <path d="M6 9l6 6 6-6" />
@@ -379,7 +386,7 @@ export default function ClausesPage() {
                       }`}
                     >
                       <span className="truncate pr-2">{article.label}</span>
-                      {selectedArticleFilter === article.id && <Check className="w-4 h-4 text-[#f59e0b] flex-shrink-0" />}
+                      {selectedArticleFilter === article.id && <Check className="w-4 h-4 text-[#f59e0b] shrink-0" />}
                     </div>
                   ))}
                 </div>
@@ -533,7 +540,7 @@ export default function ClausesPage() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col animate-in fade-in zoom-in-95 duration-200">
 
             {/* Modal header */}
-            <div className="px-6 md:px-8 pt-6 md:pt-8 pb-4 border-b border-gray-100 flex justify-between items-start flex-shrink-0">
+            <div className="px-6 md:px-8 pt-6 md:pt-8 pb-4 border-b border-gray-100 flex justify-between items-start shrink-0">
               <div>
                 <h3 className="text-2xl font-serif font-bold text-gray-900">
                   {editingId !== null ? 'Edit clause' : 'New clause'}
@@ -553,11 +560,10 @@ export default function ClausesPage() {
             <div className="p-6 md:p-8 overflow-y-auto">
               <form id="clause-form" onSubmit={handleSave} className="space-y-5">
 
-                {/* Article selector — custom dropdown */}
+                {/* Article selector */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-800 mb-2">Article</label>
                   <div ref={articleDropdownRef} className="relative">
-                    {/* Trigger */}
                     <div
                       onClick={() => setIsArticleDropdownOpen(!isArticleDropdownOpen)}
                       className={`w-full px-4 py-2.5 bg-white border rounded-xl flex items-center justify-between cursor-pointer shadow-sm transition ${
@@ -568,14 +574,13 @@ export default function ClausesPage() {
                         {getArticleLabel(formData.articleId) || 'Select an article…'}
                       </span>
                       <svg
-                        className={`w-4 h-4 text-gray-500 flex-shrink-0 transition-transform ${isArticleDropdownOpen ? 'rotate-180' : ''}`}
+                        className={`w-4 h-4 text-gray-500 shrink-0 transition-transform ${isArticleDropdownOpen ? 'rotate-180' : ''}`}
                         fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
                       >
                         <path d="M6 9l6 6 6-6" />
                       </svg>
                     </div>
 
-                    {/* Options list */}
                     {isArticleDropdownOpen && (
                       <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                         {availableArticles.length === 0 ? (
@@ -596,7 +601,7 @@ export default function ClausesPage() {
                             >
                               <span className="truncate pr-2">{article.label}</span>
                               {formData.articleId === article.id && (
-                                <Check className="w-4 h-4 text-[#f59e0b] flex-shrink-0" />
+                                <Check className="w-4 h-4 text-[#f59e0b] shrink-0" />
                               )}
                             </div>
                           ))
@@ -636,7 +641,7 @@ export default function ClausesPage() {
             </div>
 
             {/* Modal footer */}
-            <div className="p-6 md:px-8 md:py-5 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0 bg-gray-50 rounded-b-2xl">
+            <div className="p-6 md:px-8 md:py-5 border-t border-gray-100 flex justify-end gap-3 shrink-0 bg-gray-50 rounded-b-2xl">
               <button
                 type="button"
                 onClick={handleCloseModal}
@@ -659,7 +664,7 @@ export default function ClausesPage() {
 
       {/* ═══ MODAL: Delete confirm ═══ */}
       {deleteId !== null && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-7 animate-in fade-in zoom-in-95 duration-200">
             <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">Delete this clause?</h3>
             <p className="text-[15px] text-gray-500 leading-relaxed mb-8">
