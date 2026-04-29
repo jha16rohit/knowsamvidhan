@@ -1,9 +1,15 @@
-export default function Home() {
+ 
+import ConstitutionHero from "@/components/ConstitutionHero";
+import FooterSection from "@/components/Footer";
+
+export default function Page() {
+  
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold">
-        KnowSamvidhan 🚀
-      </h1>
-    </div>
+  <>
+  <ConstitutionHero />
+  <FooterSection />
+  
+  </>
   );
-}
+  
+} 
