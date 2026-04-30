@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* Debug style to confirm Tailwind */
+body {
+  background-color: #f1f5f9;
+}
+
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-popIn {
+  animation: popIn 0.15s ease-out;
+}
