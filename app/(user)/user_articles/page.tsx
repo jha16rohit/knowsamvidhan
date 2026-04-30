@@ -1,503 +1,9 @@
-// // "use client";
-
-// // import FooterSection from "@/components/Footer";
-// // import Navbar from "@/components/Navbar";
-// // import { useState } from "react";
-
-// // // ─── Types ────────────────────────────────────────────────────────────────────
-
-// // interface Article {
-// //   part: string;
-// //   tag: string;
-// //   number: string;
-// //   title: string;
-// //   description: string;
-// // }
-
-// // // ─── Data ─────────────────────────────────────────────────────────────────────
-
-// // const allArticles: Article[] = [
-// //   { part: "Part III", tag: "Fundamental Rights", number: "Article 14", title: "Equality before law", description: "The State shall not deny to any person equality before the law or the equal protection of the laws." },
-// //   { part: "Part III", tag: "Fundamental Rights", number: "Article 15", title: "Prohibition of discrimination", description: "Prohibits discrimination on grounds of religion, race, caste, sex or place of birth." },
-// //   { part: "Part III", tag: "Fundamental Rights", number: "Article 19", title: "Six freedoms", description: "Guarantees six fundamental freedoms including speech, assembly, and movement." },
-// //   { part: "Part III", tag: "Fundamental Rights", number: "Article 21", title: "Right to life and personal liberty", description: "No person shall be deprived of life or personal liberty except according to procedure established by law." },
-// //   { part: "Part III", tag: "Fundamental Rights", number: "Article 32", title: "Right to constitutional remedies", description: "The right to move the Supreme Court for enforcement of fundamental rights." },
-// //   { part: "Part IV", tag: "Directive Principles of State Policy", number: "Article 44", title: "Uniform Civil Code", description: "The State shall endeavour to secure for citizens a uniform civil code throughout India." },
-// //   { part: "Part I", tag: "The Union and its Territory", number: "Article 1", title: "Name and territory of the Union", description: "India, that is Bharat, shall be a Union of States." },
-// //   { part: "Part II", tag: "Citizenship", number: "Article 5", title: "Citizenship at the commencement of the Constitution", description: "Defines who automatically became a citizen of India on 26 January 1950." },
-// //   { part: "Part IV-A", tag: "Fundamental Duties", number: "Article 51A", title: "Fundamental Duties", description: "Eleven duties every citizen of India must observe." },
-// //   { part: "Part III", tag: "Fundamental Rights", number: "Article 16", title: "Equality of opportunity in public employment", description: "Equal opportunity for all citizens in matters relating to employment under the State." },
-// //   { part: "Part III", tag: "Fundamental Rights", number: "Article 17", title: "Abolition of Untouchability", description: "Untouchability is abolished and its practice in any form is forbidden." },
-// //   { part: "Part III", tag: "Fundamental Rights", number: "Article 25", title: "Freedom of religion", description: "All persons are equally entitled to freedom of conscience and the right to profess, practise and propagate religion." },
-// //   { part: "Part V", tag: "The Union", number: "Article 72", title: "Power of President to grant pardons", description: "The President shall have the power to grant pardons, reprieves, respites or remissions of punishment." },
-// //   { part: "Part V", tag: "The Union", number: "Article 124", title: "Establishment of Supreme Court", description: "There shall be a Supreme Court of India constituted as provided in this article." },
-// //   { part: "Part VI", tag: "The States", number: "Article 214", title: "High Courts for States", description: "There shall be a High Court for each State." },
-// // ];
-
-// // const filterTabs = ["All", "Part I", "Part II", "Part III", "Part IV", "Part IV-A", "Part V", "Part VI"];
-
-// // // ─── Article Card ─────────────────────────────────────────────────────────────
-
-// // function ArticleCard({ article, onBookmark, bookmarked }: { article: Article; onBookmark: () => void; bookmarked: boolean }) {
-// //   const [hovered, setHovered] = useState(false);
-// //   return (
-// //     <div
-// //       onMouseEnter={() => setHovered(true)}
-// //       onMouseLeave={() => setHovered(false)}
-// //       style={{
-// //         background: "#fff",
-// //         border: "1px solid #ede8df",
-// //         borderRadius: 16,
-// //         padding: "22px 20px",
-// //         cursor: "pointer",
-// //         transition: "all 0.2s ease",
-// //         boxShadow: hovered ? "0 8px 28px rgba(196,130,50,0.10)" : "0 1px 4px rgba(0,0,0,0.05)",
-// //         display: "flex",
-// //         flexDirection: "column" as const,
-// //         gap: 6,
-// //         position: "relative" as const,
-// //       }}
-// //     >
-// //       {/* Top row: tag + bookmark */}
-// //       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
-// //         <span style={{ background: "#fdf3e3", border: "1px solid #e8d4a0", borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#c48232", fontFamily: "system-ui, sans-serif" }}>
-// //           {article.tag}
-// //         </span>
-// //         <button
-// //           onClick={(e) => { e.stopPropagation(); onBookmark(); }}
-// //           style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, color: bookmarked ? "#c48232" : "#c9b99a", padding: 0 }}
-// //         >
-// //           🔖
-// //         </button>
-// //       </div>
-
-// //       <div style={{ fontWeight: 800, fontSize: 20, color: "#1a1208", fontFamily: "'Georgia', serif", lineHeight: 1.1 }}>{article.number}</div>
-// //       <div style={{ fontWeight: 600, fontSize: 14, color: "#4a3c28", fontFamily: "system-ui, sans-serif" }}>{article.title}</div>
-// //       <div style={{ fontSize: 13, color: "#7a6a50", lineHeight: 1.6, fontFamily: "system-ui, sans-serif", flex: 1 }}>{article.description}</div>
-
-// //       <div style={{ marginTop: 8, fontSize: 13, color: "#c48232", fontWeight: 600, display: "flex", alignItems: "center", gap: 4, fontFamily: "system-ui, sans-serif" }}>
-// //         Read article →
-// //       </div>
-// //     </div>
-// //   );
-// // }
-
-// // // ─── Main Page ─────────────────────────────────────────────────────────────────
-
-// // export default function ArticlesPage() {
-  
-  
-  
-// //   const [activeFilter, setActiveFilter] = useState("All");
-// //   const [search, setSearch] = useState("");
-// //   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
-
-// //   const toggleBookmark = (num: string) => {
-// //     setBookmarks((prev) => {
-// //       const next = new Set(prev);
-// //       next.has(num) ? next.delete(num) : next.add(num);
-// //       return next;
-// //     });
-// //   };
-
-// //   const filtered = allArticles.filter((a) => {
-// //     const matchesPart = activeFilter === "All" || a.part === activeFilter;
-// //     const q = search.toLowerCase();
-// //     const matchesSearch = !q || a.number.toLowerCase().includes(q) || a.title.toLowerCase().includes(q) || a.tag.toLowerCase().includes(q);
-// //     return matchesPart && matchesSearch;
-// //   });
-
-// //   return (
-// //     <>
-// //     <Navbar />
-// //     <div style={{ fontFamily: "system-ui, sans-serif", background: "#faf7f2", minHeight: "100vh", color: "#1a1208", paddingTop: 64 }}>
-
-// //       {/* ── Hero Header ── */}
-// //       <section style={{ background: "linear-gradient(135deg, #f5f3ef 60%, #ede8df 100%)", borderBottom: "1px solid #ede8df", padding: "52px 48px 40px" }}>
-// //         <div style={{ maxWidth: 900, margin: "0 auto" }}>
-// //           <div style={{ fontSize: 11, fontWeight: 700, color: "#c48232", letterSpacing: 1.5, textTransform: "uppercase" as const, marginBottom: 12 }}>Library</div>
-// //           <h1 style={{ fontSize: 42, fontWeight: 800, color: "#1a1208", margin: "0 0 12px", lineHeight: 1.1, fontFamily: "'Georgia', serif" }}>
-// //             Every Article. Clearly explained.
-// //           </h1>
-// //           <p style={{ fontSize: 15, color: "#7a6a50", margin: "0 0 28px", lineHeight: 1.6, maxWidth: 500 }}>
-// //             Filter by part of the Constitution or search by Article number, name or topic.
-// //           </p>
-
-// //           {/* Search */}
-// //           <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "1px solid #ede8df", borderRadius: 12, padding: "10px 16px", maxWidth: 480, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-// //             <span style={{ fontSize: 16, color: "#9e8c73" }}>🔍</span>
-// //             <input
-// //               type="text"
-// //               value={search}
-// //               onChange={(e) => setSearch(e.target.value)}
-// //               placeholder="Search Article 21, Right to Education..."
-// //               style={{ flex: 1, border: "none", outline: "none", fontSize: 14, background: "transparent", color: "#1a1208", fontFamily: "system-ui, sans-serif" }}
-// //             />
-// //           </div>
-
-// //           {/* Filter tabs */}
-// //           <div style={{ display: "flex", gap: 8, marginTop: 20, flexWrap: "wrap" as const, alignItems: "center" }}>
-// //             <span style={{ fontSize: 13, color: "#9e8c73", marginRight: 4 }}>⚙</span>
-// //             {filterTabs.map((tab) => (
-// //               <button
-// //                 key={tab}
-// //                 onClick={() => setActiveFilter(tab)}
-// //                 style={{
-// //                   padding: "6px 16px",
-// //                   borderRadius: 20,
-// //                   border: activeFilter === tab ? "1.5px solid #c48232" : "1px solid #ede8df",
-// //                   background: activeFilter === tab ? "#fdf3e3" : "#fff",
-// //                   color: activeFilter === tab ? "#c48232" : "#7a6a50",
-// //                   fontSize: 13,
-// //                   fontWeight: activeFilter === tab ? 700 : 500,
-// //                   cursor: "pointer",
-// //                   transition: "all 0.15s",
-// //                   fontFamily: "system-ui, sans-serif",
-// //                 }}
-// //               >
-// //                 {tab}
-// //               </button>
-// //             ))}
-// //           </div>
-// //         </div>
-// //       </section>
-
-// //       {/* ── Articles Grid ── */}
-// //       <main style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px 80px" }}>
-// //         {filtered.length === 0 ? (
-// //           <div style={{ textAlign: "center" as const, padding: "60px 0", color: "#9e8c73", fontSize: 15 }}>
-// //             No articles found. Try a different search or filter.
-// //           </div>
-// //         ) : (
-// //           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
-// //             {filtered.map((article) => (
-// //               <ArticleCard
-// //                 key={article.number}
-// //                 article={article}
-// //                 bookmarked={bookmarks.has(article.number)}
-// //                 onBookmark={() => toggleBookmark(article.number)}
-// //               />
-// //             ))}
-// //           </div>
-// //         )}
-
-// //         {/* Bottom CTA */}
-// //         <div style={{ textAlign: "center" as const, marginTop: 52 }}> 
-// //           { <button style={{ background: "transparent", border: "1px solid #ede8df", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 600, color: "#4a3c28", cursor: "pointer", fontFamily: "system-ui, sans-serif" }}>
-// //             Test your knowledge in a quiz
-// //           </button> }
-// //          </div>
-// //       </main>
-// //       <FooterSection />
-// //     </div>
-// //     </>
-// //   );
-
-// // }
-// "use client";
-
-// import FooterSection from "@/components/Footer";
-// import Navbar from "@/components/Navbar";
-// import { useState } from "react";
-
-// // ─── Types ─────────────────────────────────────────────────────────────────────
-
-// interface Article {
-//   part: string;
-//   tag: string;
-//   number: string;
-//   title: string;
-//   description: string;
-// }
-
-// // ─── Data ──────────────────────────────────────────────────────────────────────
-
-// const allArticles: Article[] = [
-//   { part: "Part I",    tag: "The Union and its Territory",         number: "Article 1",   title: "Name and territory of the Union",                description: "India, that is Bharat, shall be a Union of States." },
-//   { part: "Part II",   tag: "Citizenship",                         number: "Article 5",   title: "Citizenship at the commencement of the Constitution", description: "Defines who automatically became a citizen of India on 26 January 1950." },
-//   { part: "Part III",  tag: "Fundamental Rights",                  number: "Article 14",  title: "Equality before law",                            description: "The State shall not deny to any person equality before the law or the equal protection of the laws." },
-//   { part: "Part III",  tag: "Fundamental Rights",                  number: "Article 15",  title: "Prohibition of discrimination",                  description: "Prohibits discrimination on grounds of religion, race, caste, sex or place of birth." },
-//   { part: "Part III",  tag: "Fundamental Rights",                  number: "Article 16",  title: "Equality of opportunity in public employment",   description: "Equal opportunity for all citizens in matters relating to employment under the State." },
-//   { part: "Part III",  tag: "Fundamental Rights",                  number: "Article 17",  title: "Abolition of Untouchability",                    description: "Untouchability is abolished and its practice in any form is forbidden." },
-//   { part: "Part III",  tag: "Fundamental Rights",                  number: "Article 19",  title: "Six freedoms",                                   description: "Guarantees six fundamental freedoms including speech, assembly, and movement." },
-//   { part: "Part III",  tag: "Fundamental Rights",                  number: "Article 21",  title: "Right to life and personal liberty",             description: "No person shall be deprived of life or personal liberty except according to procedure established by law." },
-//   { part: "Part III",  tag: "Fundamental Rights",                  number: "Article 25",  title: "Freedom of religion",                            description: "All persons are equally entitled to freedom of conscience and the right to profess, practise and propagate religion." },
-//   { part: "Part III",  tag: "Fundamental Rights",                  number: "Article 32",  title: "Right to constitutional remedies",               description: "The right to move the Supreme Court for enforcement of fundamental rights." },
-//   { part: "Part IV",   tag: "Directive Principles of State Policy",number: "Article 44",  title: "Uniform Civil Code",                             description: "The State shall endeavour to secure for citizens a uniform civil code throughout India." },
-//   { part: "Part IV-A", tag: "Fundamental Duties",                  number: "Article 51A", title: "Fundamental Duties",                             description: "Eleven duties every citizen of India must observe." },
-//   { part: "Part V",    tag: "The Union",                           number: "Article 72",  title: "Power of President to grant pardons",            description: "The President shall have the power to grant pardons, reprieves, respites or remissions of punishment." },
-//   { part: "Part V",    tag: "The Union",                           number: "Article 124", title: "Establishment of Supreme Court",                 description: "There shall be a Supreme Court of India constituted as provided in this article." },
-//   { part: "Part VI",   tag: "The States",                          number: "Article 214", title: "High Courts for States",                         description: "There shall be a High Court for each State." },
-// ];
-
-// const filterTabs = ["All", "Part I", "Part II", "Part III", "Part IV", "Part IV-A", "Part V", "Part VI"];
-
-// // ─── Search Icon SVG ───────────────────────────────────────────────────────────
-
-// function SearchIcon({ className }: { className?: string }) {
-//   return (
-//     <svg
-//       xmlns="http://www.w3.org/2000/svg"
-//       viewBox="0 0 24 24"
-//       fill="none"
-//       stroke="currentColor"
-//       strokeWidth={2}
-//       strokeLinecap="round"
-//       strokeLinejoin="round"
-//       className={className}
-//     >
-//       <circle cx="11" cy="11" r="8" />
-//       <line x1="21" y1="21" x2="16.65" y2="16.65" />
-//     </svg>
-//   );
-// }
-
-// // ─── Article Card ──────────────────────────────────────────────────────────────
-
-// interface ArticleCardProps {
-//   article: Article;
-//   bookmarked: boolean;
-//   onBookmark: () => void;
-// }
-
-// function ArticleCard({ article, bookmarked, onBookmark }: ArticleCardProps) {
-//   return (
-//     <div className="
-//       group relative bg-white border border-[#ede8df] rounded-2xl
-//       p-5 flex flex-col gap-1.5 cursor-pointer
-//       transition-all duration-200
-//       hover:-translate-y-1 hover:shadow-[0_8px_28px_rgba(196,130,50,0.10)]
-//       shadow-[0_1px_4px_rgba(0,0,0,0.05)]
-//     ">
-//       {/* Top row: tag + bookmark */}
-//       <div className="flex items-start justify-between gap-2 mb-1">
-//         <span className="
-//           bg-[#fdf3e3] border border-[#e8d4a0] rounded-full
-//           px-2.5 py-0.5 text-[11px] font-semibold text-[#c48232]
-//           leading-5 shrink-0
-//         ">
-//           {article.tag}
-//         </span>
-
-//         {/* Bookmark button — no emoji, clean SVG */}
-//         <button
-//           onClick={(e) => { e.stopPropagation(); onBookmark(); }}
-//           aria-label={bookmarked ? "Remove bookmark" : "Bookmark article"}
-//           className={`
-//             shrink-0 w-7 h-7 flex items-center justify-center rounded-full
-//             transition-colors duration-150
-//             ${bookmarked
-//               ? "text-[#c48232] bg-[#fdf3e3]"
-//               : "text-[#c9b99a] hover:text-[#c48232] hover:bg-[#fdf3e3]"}
-//           `}
-//         >
-//           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-//             fill={bookmarked ? "currentColor" : "none"}
-//             stroke="currentColor" strokeWidth={2}
-//             strokeLinecap="round" strokeLinejoin="round"
-//             className="w-4 h-4"
-//           >
-//             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-//           </svg>
-//         </button>
-//       </div>
-
-//       {/* Article number */}
-//       <p className="font-extrabold text-xl text-[#1a1208] font-serif leading-tight">
-//         {article.number}
-//       </p>
-
-//       {/* Title */}
-//       <p className="font-semibold text-sm text-[#4a3c28]">{article.title}</p>
-
-//       {/* Description */}
-//       <p className="text-xs text-[#7a6a50] leading-relaxed flex-1">
-//         {article.description}
-//       </p>
-
-//       {/* Read link */}
-//       <div className="
-//         mt-2 text-xs font-semibold text-[#c48232]
-//         flex items-center gap-1
-//         group-hover:gap-2 transition-all duration-200
-//       ">
-//         Read article
-//         <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
-//       </div>
-//     </div>
-//   );
-// }
-
-// // ─── Main Page ─────────────────────────────────────────────────────────────────
-
-// export default function ArticlesPage() {
-//   const [activeFilter, setActiveFilter] = useState("All");
-//   const [search, setSearch]             = useState("");
-//   const [bookmarks, setBookmarks]       = useState<Set<string>>(new Set());
-
-//   const toggleBookmark = (num: string) => {
-//     setBookmarks((prev) => {
-//       const next = new Set(prev);
-//       next.has(num) ? next.delete(num) : next.add(num);
-//       return next;
-//     });
-//   };
-
-//   const filtered = allArticles.filter((a) => {
-//     const matchesPart   = activeFilter === "All" || a.part === activeFilter;
-//     const q             = search.toLowerCase();
-//     const matchesSearch =
-//       !q ||
-//       a.number.toLowerCase().includes(q) ||
-//       a.title.toLowerCase().includes(q) ||
-//       a.tag.toLowerCase().includes(q);
-//     return matchesPart && matchesSearch;
-//   });
-
-//   return (
-//     <>
-//       <Navbar />
-
-//       <div className="font-sans bg-[#faf7f2] min-h-screen text-[#1a1208] pt-16">
-
-//         {/* ── Hero Header ── */}
-//         <section className="
-//           bg-gradient-to-br from-[#f5f3ef] via-[#f0ece4] to-[#ede8df]
-//           border-b border-[#ede8df]
-//           px-5 sm:px-8 md:px-12 lg:px-16
-//           py-10 sm:py-12 md:py-16
-//         ">
-//           <div className="max-w-4xl mx-auto">
-
-//             {/* Label */}
-//             <p className="text-[11px] font-bold text-[#c48232] tracking-[1.5px] uppercase mb-3">
-//               Library
-//             </p>
-
-//             {/* Heading */}
-//             <h1 className="
-//               font-extrabold text-[#1a1208] font-serif leading-tight mb-4
-//               text-3xl sm:text-4xl md:text-5xl
-//             ">
-//               Every Article. Clearly explained.
-//             </h1>
-
-//             {/* Subtext */}
-//             <p className="text-sm sm:text-base text-[#7a6a50] leading-relaxed max-w-lg mb-7">
-//               Filter by part of the Constitution or search by Article number, name or topic.
-//             </p>
-
-//             {/* ── Search bar — icon on RIGHT ── */}
-//             <div className="
-//               flex items-center gap-3 bg-white
-//               border border-[#ede8df] rounded-xl
-//               px-4 py-2.5
-//               max-w-sm sm:max-w-md
-//               shadow-[0_2px_8px_rgba(0,0,0,0.05)]
-//               focus-within:border-[#c48232] focus-within:shadow-[0_0_0_3px_rgba(196,130,50,0.12)]
-//               transition-all duration-200
-//             ">
-//               <input
-//                 type="text"
-//                 value={search}
-//                 onChange={(e) => setSearch(e.target.value)}
-//                 placeholder="Search Article 21, Right to Education..."
-//                 className="
-//                   flex-1 border-none outline-none bg-transparent
-//                   text-sm text-[#1a1208] placeholder:text-[#b0a08a]
-//                   font-sans
-//                 "
-//               />
-
-//               {/* Search icon — right side with hover effect */}
-//               <button
-//                 aria-label="Search"
-//                 className="
-//                   group/search shrink-0
-//                   w-8 h-8 flex items-center justify-center
-//                   rounded-lg text-[#9e8c73]
-//                   hover:bg-[#fdf3e3] hover:text-[#c48232]
-//                   active:scale-95
-//                   transition-all duration-150
-//                 "
-//               >
-//                 <SearchIcon className="w-4 h-4" />
-//               </button>
-//             </div>
-
-//             {/* ── Filter tabs — no prefix icon ── */}
-//             <div className="flex flex-wrap gap-2 mt-5">
-//               {filterTabs.map((tab) => (
-//                 <button
-//                   key={tab}
-//                   onClick={() => setActiveFilter(tab)}
-//                   className={`
-//                     px-4 py-1.5 rounded-full text-[13px] font-medium
-//                     border transition-all duration-150
-//                     ${activeFilter === tab
-//                       ? "border-[#c48232] bg-[#fdf3e3] text-[#c48232] font-bold"
-//                       : "border-[#ede8df] bg-white text-[#7a6a50] hover:border-[#c48232]/50 hover:text-[#c48232]"
-//                     }
-//                   `}
-//                 >
-//                   {tab}
-//                 </button>
-//               ))}
-//             </div>
-//           </div>
-//         </section>
-
-//         {/* ── Articles Grid ── */}
-//         <main className="
-//           max-w-6xl mx-auto
-//           px-4 sm:px-6 md:px-10 lg:px-12
-//           py-10 sm:py-12
-//         ">
-//           {filtered.length === 0 ? (
-//             <div className="text-center py-20 text-[#9e8c73] text-base">
-//               No articles found. Try a different search or filter.
-//             </div>
-//           ) : (
-//             <div className="
-//               grid gap-4 sm:gap-5
-//               grid-cols-1
-//               sm:grid-cols-2
-//               lg:grid-cols-3
-//             ">
-//               {filtered.map((article) => (
-//                 <ArticleCard
-//                   key={article.number}
-//                   article={article}
-//                   bookmarked={bookmarks.has(article.number)}
-//                   onBookmark={() => toggleBookmark(article.number)}
-//                 />
-//               ))}
-//             </div>
-//           )}
-
-//           {/* ── Bottom CTA ── */}
-//           <div className="flex justify-center mt-14">
-//             <button className="
-//               bg-transparent border border-[#ede8df] rounded-xl
-//               px-7 py-3 text-sm font-semibold text-[#4a3c28]
-//               hover:border-[#c48232] hover:text-[#c48232] hover:bg-[#fdf3e3]
-//               transition-all duration-200
-//             ">
-//               Test your knowledge in a quiz
-//             </button>
-//           </div>
-//         </main>
-
-//         <FooterSection />
-//       </div>
-//     </>
-//   );
-// }
 "use client";
 
 import FooterSection from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -527,7 +33,7 @@ interface Article {
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 
-const allArticles: Article[] = [
+export const allArticles: Article[] = [
   {
     part: "Part I", tag: "The Union and its Territory",
     number: "Article 1", title: "Name and territory of the Union",
@@ -764,7 +270,7 @@ const allArticles: Article[] = [
       keyPoints: [
         "Pardon: completely absolves the offender — wipes out conviction and sentence.",
         "Reprieve: temporary stay of execution, usually pending appeal or mercy petition.",
-        "Respite: reduced sentence for special reasons (e.g., pregnancy).",
+        "Respite: reduces sentence for special reasons (e.g., pregnancy).",
         "Remission: reduces quantum of sentence without changing its nature.",
         "Commutation: substitutes a heavier sentence with a lighter one.",
         "The President acts on the advice of the Council of Ministers (Article 74).",
@@ -818,6 +324,13 @@ const allArticles: Article[] = [
   },
 ];
 
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Convert "Article 14" → "article-14", "Article 51A" → "article-51a" */
+export function articleToSlug(number: string): string {
+  return number.toLowerCase().replace(/\s+/g, "-");
+}
+
 const filterTabs = ["All", "Part I", "Part II", "Part III", "Part IV", "Part IV-A", "Part V", "Part VI"];
 
 // ─── SVG Icons ─────────────────────────────────────────────────────────────────
@@ -843,201 +356,33 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
   );
 }
 
-function CloseIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-      className="w-4 h-4">
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-function ScaleIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"
-      className="w-4 h-4 shrink-0 mt-0.5">
-      <path d="M12 3v18M3 9l9-6 9 6M5 21h14" />
-      <path d="M5 12l-2 6h4l-2-6zM19 12l-2 6h4l-2-6z" />
-    </svg>
-  );
-}
-
-// ─── Detail Panel ──────────────────────────────────────────────────────────────
-
-interface DetailPanelProps {
-  article: Article | null;
-  onClose: () => void;
-}
-
-function DetailPanel({ article, onClose }: DetailPanelProps) {
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  useEffect(() => {
-    document.body.style.overflow = article ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [article]);
-
-  const isOpen = !!article;
-
-  return (
-    <>
-      {/* Backdrop overlay */}
-      <div
-        onClick={onClose}
-        className={`
-          fixed inset-0 z-40 bg-[#1a1208]/40 backdrop-blur-sm
-          transition-opacity duration-300
-          ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
-        `}
-      />
-
-      {/* Slide-in panel */}
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={article?.title ?? "Article Detail"}
-        className={`
-          fixed top-0 right-0 z-50 h-full flex flex-col bg-white
-          w-full sm:w-[440px] md:w-[500px] lg:w-[540px]
-          shadow-[-4px_0_40px_rgba(26,18,8,0.12)]
-          transition-transform duration-[340ms] ease-[cubic-bezier(0.4,0,0.2,1)]
-          ${isOpen ? "translate-x-0" : "translate-x-full"}
-        `}
-      >
-        {article && (
-          <>
-            {/* Sticky header */}
-            <div className="shrink-0 sticky top-0 z-10
-              bg-gradient-to-br from-[#fdf3e3] to-[#f5edd5]
-              border-b border-[#e8d4a0] px-5 pt-6 pb-5">
-              <button
-                onClick={onClose}
-                aria-label="Close panel"
-                className="absolute top-4 right-4 w-8 h-8 rounded-full
-                  bg-[#c48232]/10 border border-[#e8d4a0]
-                  flex items-center justify-center text-[#c48232]
-                  hover:bg-[#c48232]/20 transition-colors duration-150"
-              >
-                <CloseIcon />
-              </button>
-
-              <p className="text-[10px] font-bold text-[#c48232] tracking-widest uppercase mb-1">
-                {article.tag}
-              </p>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-[#1a1208] font-serif leading-tight mb-1 pr-10">
-                {article.number}
-              </h2>
-              <p className="text-sm font-semibold text-[#4a3c28] pr-10">{article.title}</p>
-            </div>
-
-            {/* Scrollable body */}
-            <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
-
-              {/* Overview */}
-              <section>
-                <p className="text-[10px] font-bold text-[#c48232] tracking-widest uppercase mb-2 pb-2 border-b border-[#ede8df]">
-                  Overview
-                </p>
-                <p className="text-sm text-[#4a3c28] leading-7">{article.detail.overview}</p>
-              </section>
-
-              {/* Key Points */}
-              <section>
-                <p className="text-[10px] font-bold text-[#c48232] tracking-widest uppercase mb-3 pb-2 border-b border-[#ede8df]">
-                  Key Points
-                </p>
-                <ul className="space-y-2">
-                  {article.detail.keyPoints.map((pt, i) => (
-                    <li key={i} className="flex gap-2.5 text-sm text-[#4a3c28] leading-relaxed">
-                      <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#c48232] shrink-0" />
-                      {pt}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-
-              {/* Amendment History */}
-              {article.detail.amendment && (
-                <section>
-                  <p className="text-[10px] font-bold text-[#c48232] tracking-widest uppercase mb-2 pb-2 border-b border-[#ede8df]">
-                    Amendment History
-                  </p>
-                  <div className="bg-[#fdf3e3] border border-[#e8d4a0] rounded-xl px-4 py-3">
-                    <p className="text-sm text-[#6b4c1e] leading-relaxed">{article.detail.amendment}</p>
-                  </div>
-                </section>
-              )}
-
-              {/* Landmark Cases */}
-              {article.detail.caselaw && article.detail.caselaw.length > 0 && (
-                <section>
-                  <p className="text-[10px] font-bold text-[#c48232] tracking-widest uppercase mb-3 pb-2 border-b border-[#ede8df]">
-                    Landmark Cases
-                  </p>
-                  <div className="space-y-3">
-                    {article.detail.caselaw.map((c, i) => (
-                      <div key={i} className="bg-[#faf7f2] border border-[#ede8df] rounded-xl px-4 py-3.5">
-                        <div className="flex gap-2 items-start mb-1.5">
-                          <ScaleIcon />
-                          <p className="text-sm font-bold text-[#1a1208] font-serif leading-tight">
-                            {c.name}
-                            <span className="ml-1.5 text-xs font-normal text-[#9e8c73]">({c.year})</span>
-                          </p>
-                        </div>
-                        <p className="text-xs text-[#7a6a50] leading-relaxed pl-6">{c.significance}</p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Key Insight */}
-              <section>
-                <p className="text-[10px] font-bold text-[#c48232] tracking-widest uppercase mb-2 pb-2 border-b border-[#ede8df]">
-                  Key Insight
-                </p>
-                <div className="bg-[#fdf3e3] border border-[#e8d4a0] rounded-xl px-4 py-4">
-                  <p className="text-sm text-[#6b4c1e] leading-7">{article.detail.insight}</p>
-                </div>
-              </section>
-
-            </div>
-          </>
-        )}
-      </aside>
-    </>
-  );
-}
-
 // ─── Article Card ──────────────────────────────────────────────────────────────
 
 interface ArticleCardProps {
   article: Article;
   bookmarked: boolean;
   onBookmark: () => void;
-  onReadArticle: () => void;
 }
 
-function ArticleCard({ article, bookmarked, onBookmark, onReadArticle }: ArticleCardProps) {
+function ArticleCard({ article, bookmarked, onBookmark }: ArticleCardProps) {
+  const router = useRouter();
+
   return (
     <div className="
-      group relative bg-white border border-[#ede8df] rounded-2xl
-      p-5 flex flex-col gap-1.5
-      transition-all duration-200
-      hover:-translate-y-1 hover:shadow-[0_8px_28px_rgba(196,130,50,0.10)]
-      shadow-[0_1px_4px_rgba(0,0,0,0.05)]
-    ">
+  group relative bg-white 
+  border border-[#d6c7a8] rounded-2xl
+  p-4 sm:p-5 flex flex-col justify-between
+  min-h-[170px]
+  transition-all duration-200
+  hover:-translate-y-1 
+  hover:shadow-[0_8px_24px_rgba(0,0,0,0.2)]
+  hover:border-[#c48232]
+">
       {/* Tag + Bookmark */}
       <div className="flex items-start justify-between gap-2 mb-1">
         <span className="bg-[#fdf3e3] border border-[#e8d4a0] rounded-full
-          px-2.5 py-0.5 text-[11px] font-semibold text-[#c48232] leading-5 shrink-0 max-w-[75%]">
+          px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold text-[#c48232]
+          leading-5 shrink-0 max-w-[75%] truncate">
           {article.tag}
         </span>
         <button
@@ -1054,7 +399,7 @@ function ArticleCard({ article, bookmarked, onBookmark, onReadArticle }: Article
       </div>
 
       {/* Number */}
-      <p className="font-extrabold text-xl text-[#1a1208] font-serif leading-tight">
+      <p className="font-extrabold text-lg sm:text-xl text-[#1a1208] font-serif leading-tight">
         {article.number}
       </p>
 
@@ -1064,9 +409,9 @@ function ArticleCard({ article, bookmarked, onBookmark, onReadArticle }: Article
       {/* Description */}
       <p className="text-xs text-[#7a6a50] leading-relaxed flex-1">{article.description}</p>
 
-      {/* Read Article — triggers panel */}
+      {/* Read Article — navigates to detail page */}
       <button
-        onClick={onReadArticle}
+        onClick={() => router.push(`/user_articles/${articleToSlug(article.number)}`)}
         className="
           mt-2 self-start flex items-center gap-1
           text-xs font-semibold text-[#c48232] bg-transparent border-none p-0 cursor-pointer
@@ -1083,10 +428,10 @@ function ArticleCard({ article, bookmarked, onBookmark, onReadArticle }: Article
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function ArticlesPage() {
-  const [activeFilter, setActiveFilter]       = useState("All");
-  const [search, setSearch]                   = useState("");
-  const [bookmarks, setBookmarks]             = useState<Set<string>>(new Set());
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [search, setSearch]             = useState("");
+  const [bookmarks, setBookmarks]       = useState<Set<string>>(new Set());
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
 
   const toggleBookmark = (num: string) => {
     setBookmarks((prev) => {
@@ -1117,28 +462,29 @@ export default function ArticlesPage() {
         <section className="
           bg-gradient-to-br from-[#f5f3ef] via-[#f0ece4] to-[#ede8df]
           border-b border-[#ede8df]
-          px-5 sm:px-8 md:px-12 lg:px-16
-          py-10 sm:py-12 md:py-16
+          px-4 sm:px-6 md:px-10 lg:px-16
+          py-8 sm:py-10 md:py-14 lg:py-16
         ">
           <div className="max-w-4xl mx-auto">
 
-            <p className="text-[11px] font-bold text-[#c48232] tracking-[1.5px] uppercase mb-3">
+            <p className="text-[10px] sm:text-[11px] font-bold text-[#c48232] tracking-[1.5px] uppercase mb-2 sm:mb-3">
               Library
             </p>
 
-            <h1 className="font-extrabold text-[#1a1208] font-serif leading-tight mb-4
-              text-3xl sm:text-4xl md:text-5xl">
+            <h1 className="font-extrabold text-[#1a1208] font-serif leading-tight mb-3 sm:mb-4
+              text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
               Every Article. Clearly explained.
             </h1>
 
-            <p className="text-sm sm:text-base text-[#7a6a50] leading-relaxed max-w-lg mb-7">
+            <p className="text-xs sm:text-sm md:text-base text-[#7a6a50] leading-relaxed max-w-lg mb-5 sm:mb-7">
               Filter by part of the Constitution or search by Article number, name or topic.
             </p>
 
-            {/* Search — icon on right */}
+            {/* Search */}
             <div className="
-              flex items-center gap-3 bg-white border border-[#ede8df] rounded-xl
-              px-4 py-2.5 max-w-sm sm:max-w-md
+              flex items-center gap-3 bg-white border border-[#cbb896] rounded-xl
+              px-3 sm:px-4 py-2 sm:py-2.5
+              w-full max-w-xs sm:max-w-sm md:max-w-md
               shadow-[0_2px_8px_rgba(0,0,0,0.05)]
               focus-within:border-[#c48232] focus-within:shadow-[0_0_0_3px_rgba(196,130,50,0.12)]
               transition-all duration-200
@@ -1148,64 +494,78 @@ export default function ArticlesPage() {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search Article 21, Right to Education..."
                 className="flex-1 border-none outline-none bg-transparent
-                  text-sm text-[#1a1208] placeholder:text-[#b0a08a] font-sans"
+                  text-xs sm:text-sm text-[#1a1208] placeholder:text-[#b0a08a] font-sans min-w-0"
               />
               <button aria-label="Search"
-                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg
+                className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg
                   text-[#9e8c73] hover:bg-[#fdf3e3] hover:text-[#c48232]
                   active:scale-95 transition-all duration-150">
-                <SearchIcon className="w-4 h-4" />
+                <SearchIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
 
-            {/* Filter tabs */}
-            <div className="flex flex-wrap gap-2 mt-5">
-              {filterTabs.map((tab) => (
-                <button key={tab} onClick={() => setActiveFilter(tab)}
-                  className={`px-4 py-1.5 rounded-full text-[13px] font-medium border
-                    transition-all duration-150
-                    ${activeFilter === tab
-                      ? "border-[#c48232] bg-[#fdf3e3] text-[#c48232] font-bold"
-                      : "border-[#ede8df] bg-white text-[#7a6a50] hover:border-[#c48232]/50 hover:text-[#c48232]"}`}
-                >
-                  {tab}
-                </button>
-              ))}
+            {/* Filter tabs — scrollable on mobile */}
+            <div className="mt-4 sm:mt-5 -mx-4 sm:mx-0 px-4 sm:px-0">
+              <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible
+                scrollbar-hide">
+                {filterTabs.map((tab) => (
+                  <button key={tab} onClick={() => setActiveFilter(tab)}
+                    className={`flex-shrink-0 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full
+                      text-[11px] sm:text-[13px] font-medium border
+                      transition-all duration-150 whitespace-nowrap
+                      ${activeFilter === tab
+                        ? "border-[#c48232] bg-[#fdf3e3] text-[#c48232] font-bold"
+                        : "border-[#ede8df] bg-white text-[#7a6a50] hover:border-[#c48232]/50 hover:text-[#c48232]"}`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
             </div>
+
           </div>
         </section>
 
         {/* ── Articles Grid ── */}
-        <main className="
-          max-w-6xl mx-auto
-          px-4 sm:px-6 md:px-10 lg:px-12
-          py-10 sm:py-12
-        ">
+        <main className="w-full px-2 sm:px-4 md:px-6 lg:px-8 pt-10 sm:pt-12 md:pt-14 pb-8">
+          {/* Results count */}
+          {search || activeFilter !== "All" ? (
+            <p className="text-xs text-[#9e8c73] mb-5 sm:mb-6">
+              {filtered.length} article{filtered.length !== 1 ? "s" : ""} found
+            </p>
+          ) : null}
+
           {filtered.length === 0 ? (
-            <div className="text-center py-20 text-[#9e8c73] text-base">
+            <div className="text-center py-16 sm:py-20 text-[#9e8c73] text-sm sm:text-base">
               No articles found. Try a different search or filter.
             </div>
           ) : (
-            <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            /* Responsive grid:
+               mobile (< 640px): 1 col
+               mini-tablet (640–767px): 2 col
+               tablet (768–1023px): 2 col
+               desktop (1024px+): 3 col */
+            <div className="grid gap-4 md:gap-5
+  grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
               {filtered.map((article) => (
                 <ArticleCard
                   key={article.number}
                   article={article}
                   bookmarked={bookmarks.has(article.number)}
                   onBookmark={() => toggleBookmark(article.number)}
-                  onReadArticle={() => setSelectedArticle(article)}
                 />
               ))}
             </div>
           )}
 
-          {/* ── Quiz CTA — linked to /quiz ── */}
-          <div className="flex justify-center mt-14 mb-4">
+          {/* ── Quiz CTA ── */}
+          <div className="flex justify-center mt-10 sm:mt-12 md:mt-14 mb-4">
             <Link
-              href="/quiz"
+              href="/user_quiz"
               className="inline-flex items-center gap-2
-                bg-transparent border border-[#ede8df] rounded-xl
-                px-7 py-3 text-sm font-semibold text-[#4a3c28]
+                bg-transparent border border-[#cbb896] rounded-xl
+                px-5 sm:px-7 py-2.5 sm:py-3
+                text-xs sm:text-sm font-semibold text-[#4a3c28]
                 hover:border-[#c48232] hover:text-[#c48232] hover:bg-[#fdf3e3]
                 transition-all duration-200 group"
             >
@@ -1217,12 +577,6 @@ export default function ArticlesPage() {
 
         <FooterSection />
       </div>
-
-      {/* ── Sliding Detail Panel ── */}
-      <DetailPanel
-        article={selectedArticle}
-        onClose={() => setSelectedArticle(null)}
-      />
     </>
   );
 }

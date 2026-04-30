@@ -41,7 +41,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔴 PASSWORD CHECK
     const isValid = await bcrypt.compare(password, user.password);
 
     if (!isValid) {
@@ -66,3 +65,4 @@ export async function POST(req: Request) {
     );
   }
 }
+

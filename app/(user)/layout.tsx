@@ -1,6 +1,8 @@
+"use client";
 
 import Navbar from "@/components/Navbar";
-// import FooterSection from "@/components/Footersection";
+import AIVideo from "@/components/AIVideo";
+
 export default function UserLayout({
   children,
 }: {
@@ -9,10 +11,12 @@ export default function UserLayout({
   return (
     <>
       <Navbar />
+
+      {/* Page Content */}
       {children}
-      
+
+      {/* 🔥 Floating AI Video (global on user side) */}
+      <AIVideo />
     </>
-    
-    
   );
 }
