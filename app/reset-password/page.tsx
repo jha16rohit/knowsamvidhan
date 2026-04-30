@@ -29,7 +29,7 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="p-8 bg-white shadow rounded w-[350px]">
+      <div className="p-8 bg-white shadow rounded `w-[350px]`">
         <h1 className="text-xl font-semibold mb-4">Reset Password</h1>
 
         <input

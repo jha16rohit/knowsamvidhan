@@ -77,6 +77,15 @@ export default function SchedulesPage() {
   const [toast,        setToast]        = useState<string | null>(null);
   const [formData,     setFormData]     = useState<FormData>(EMPTY_FORM);
 
+
+  // ─── Toast ───────────────────────────────────────────────────────────────────
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+
   // ─── Fetch all schedules ─────────────────────────────────────────────────────
 
   const fetchSchedules = useCallback(async () => {
@@ -95,13 +104,7 @@ export default function SchedulesPage() {
   }, []);
 
   useEffect(() => { fetchSchedules(); }, [fetchSchedules]);
-
-  // ─── Toast ───────────────────────────────────────────────────────────────────
-
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  };
+  
 
   // ─── Modal helpers ───────────────────────────────────────────────────────────
 
@@ -291,7 +294,7 @@ export default function SchedulesPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[1000px]">
+                <table className="w-full text-left border-collapse `min-w-[1000px]`">
                   <thead>
                     <tr className="border-b border-gray-200 bg-white">
                       <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase w-16">#</th>

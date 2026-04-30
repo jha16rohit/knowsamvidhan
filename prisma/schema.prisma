@@ -4,18 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")   
-}
-
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  role      String   @default("user")
-  createdAt DateTime @default(now())
-
-  posts     Post[]
-  passwordResetTokens PasswordResetToken[]
+  url      = env("DATABASE_URL")
 }
 
 model Post {
@@ -25,8 +14,8 @@ model Post {
   category  String
   createdAt DateTime @default(now())
 
-  authorId  String
-  author    User     @relation(fields: [authorId], references: [id])
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
 }
 
 model PasswordResetToken {
@@ -35,7 +24,7 @@ model PasswordResetToken {
   userId    String
   expiresAt DateTime
 
-  user      User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model PasswordResetOTP {
@@ -46,26 +35,26 @@ model PasswordResetOTP {
 }
 
 model Part {
-  id          String  @id @default(uuid())
-  partNumber  String
-  title       String
-  range       String
-  articles    Int
-  description String?
-  createdAt   DateTime @default(now())
+  id           String    @id @default(uuid())
+  partNumber   String
+  title        String
+  range        String
+  articles     Int
+  description  String?
+  createdAt    DateTime  @default(now())
   articlesList Article[]
 }
 
 model Article {
-  id               String   @id @default(uuid())
-  articleNumber    String
-  title            String
-  shortSummary     String?
-  officialText     String?
+  id                String  @id @default(uuid())
+  articleNumber     String
+  title             String
+  shortSummary      String?
+  officialText      String?
   simpleExplanation String?
-  example          String?
-  tags             String?
-  featured         Boolean  @default(false)
+  example           String?
+  tags              String?
+  featured          Boolean @default(false)
 
   // 🔗 relation
   partId String
@@ -78,13 +67,13 @@ model Article {
 
 model Clause {
   id           String   @id @default(uuid())
-  clauseNumber String                        
+  clauseNumber String
   text         String
   createdAt    DateTime @default(now())
 
   // 🔗 Relation to Article
-  articleId    String
-  article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
 }
 
 model Preamble {
@@ -94,14 +83,14 @@ model Preamble {
   whyItMatters      String   @db.Text
   // Keywords stored as a JSON string: "[{\"word\":\"...\",\"definition\":\"...\"}]"
   // Using String keeps the schema simple — no extra join table needed for a small list.
-  keywords          String   @db.Text @default("[]")
+  keywords          String   @default("[]") @db.Text
   updatedAt         DateTime @updatedAt
 }
 
 model Schedule {
   id          String   @id @default(uuid())
-  shortId     String   // e.g. "7th"
-  schedule    String   // e.g. "Seventh Schedule"
+  shortId     String // e.g. "7th"
+  schedule    String // e.g. "Seventh Schedule"
   title       String
   description String?  @db.Text
   // Topics stored as comma-separated string for simplicity (consistent with tags pattern above)
@@ -112,25 +101,25 @@ model Schedule {
 
 model Amendment {
   id              String   @id @default(uuid())
-  number          String            // e.g. "42nd"
-  year            String            // e.g. "1976"
+  number          String // e.g. "42nd"
+  year            String // e.g. "1976"
   title           String
   summary         String   @db.Text
   whyItMatters    String?  @db.Text
-  relatedArticles String?           // comma-separated e.g. "article-21, article-19"
+  relatedArticles String? // comma-separated e.g. "article-21, article-19"
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
 model Quiz {
-  id          String       @id @default(uuid())
-  title       String
-  level       String       // "basic" | "intermediate" | "advanced"
-  status      String       @default("draft") // "draft" | "published"
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id        String   @id @default(uuid())
+  title     String
+  level     String // "basic" | "intermediate" | "advanced"
+  status    String   @default("draft") // "draft" | "published"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  questions   Question[]
+  questions Question[]
 }
 
 model Question {
@@ -140,11 +129,50 @@ model Question {
   optionB       String
   optionC       String
   optionD       String
-  correctAnswer String   // "A" | "B" | "C" | "D"
+  correctAnswer String // "A" | "B" | "C" | "D"
   explanation   String?  @db.Text
   order         Int      @default(0)
   createdAt     DateTime @default(now())
 
-  quizId        String
-  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+// ==================
+// USER MODEL
+// ==================
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Status {
+  ACTIVE
+  BLOCKED
+  SUSPENDED
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String?
+  email    String  @unique
+  password String
+
+  role     Role    @default(USER)  
+  status   Status  @default(ACTIVE)  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  avatar    String?
+  lastLogin DateTime?
+
+  isDeleted Boolean @default(false)
+
+  posts               Post[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
 }
