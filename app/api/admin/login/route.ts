@@ -1,56 +1,68 @@
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "Email and password required" },
+        { status: 400 }
+      );
+    }
+
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
+    // 🔴 USER NOT FOUND
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 }
+      );
     }
 
-    // 🔐 bcrypt compare
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return NextResponse.json({ error: "Wrong password" }, { status: 401 });
+    // 🔴 NOT ADMIN
+    if (user.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Not Authorized (Admin only)" },
+        { status: 403 }
+      );
     }
 
-    if (user.role !== "admin") {
-      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+    // 🔴 STATUS CHECK
+    if (user.status !== "ACTIVE") {
+      return NextResponse.json(
+        { error: "Account inactive" },
+        { status: 403 }
+      );
     }
 
-    // 🔥 CREATE JWT TOKEN
-    const token = jwt.sign(
-      {
-        id: user.id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET!,
-      { expiresIn: "1d" }
-    );
+    // 🔴 PASSWORD CHECK
+    const isValid = await bcrypt.compare(password, user.password);
 
-    // ✅ RESPONSE + COOKIE
-    const response = NextResponse.json({ message: "Login success" });
+    if (!isValid) {
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
 
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: false, // true in production
-      sameSite: "strict",
-      path: "/",
-      maxAge: 60 * 60 * 24,
+    const { password: _, ...safeUser } = user;
+
+    return NextResponse.json({
+      message: "Admin login successful",
+      user: safeUser,
     });
 
-    return response;
-
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("ADMIN LOGIN ERROR:", error);
+    return NextResponse.json(
+      { error: "Server error" },
+      { status: 500 }
+    );
   }
 }
