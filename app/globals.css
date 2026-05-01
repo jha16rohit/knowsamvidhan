@@ -20,3 +20,7 @@ body {
 .animate-popIn {
   animation: popIn 0.15s ease-out;
 }
+
+.overflow-wrap-anywhere {
+  overflow-wrap: anywhere;
+}

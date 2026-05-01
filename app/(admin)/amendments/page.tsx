@@ -287,14 +287,15 @@ export default function AmendmentsPage() {
               {amendments.map((amendment) => (
                 <div
                   key={amendment.id}
-                  className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col gap-4 hover:border-gray-300 transition-colors"
+                  /* ↓ overflow-hidden + min-w-0 prevent any child from blowing out the card */
+                  className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col gap-4 hover:border-gray-300 transition-colors overflow-hidden min-w-0"
                 >
                   {/* Top row — year badge + actions */}
-                  <div className="flex justify-between items-start">
-                    <span className="px-3 py-1 bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20 rounded-full text-[10px] font-bold tracking-wider">
+                  <div className="flex justify-between items-start gap-2">
+                    <span className="px-3 py-1 bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20 rounded-full text-[10px] font-bold tracking-wider shrink-0">
                       {amendment.year}
                     </span>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 shrink-0">
                       <button
                         onClick={() => openEditModal(amendment)}
                         className="text-gray-400 hover:text-gray-900 transition-colors"
@@ -313,33 +314,33 @@ export default function AmendmentsPage() {
                   </div>
 
                   {/* Title + summary */}
-                  <div>
-                    <h3 className="text-xl font-serif font-bold text-gray-900 mb-2">
+                  <div className="min-w-0">
+                    <h3 className="text-xl font-serif font-bold text-gray-900 mb-2 break-words">
                       {amendment.number} — {amendment.title}
                     </h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">{amendment.summary}</p>
+                    <p className="text-sm text-gray-500 leading-relaxed break-words">{amendment.summary}</p>
                   </div>
 
                   {/* Why it matters */}
                   {amendment.whyItMatters && (
-                    <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
+                    <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3 min-w-0">
                       <Lightbulb className="w-4 h-4 text-[#f59e0b] shrink-0 mt-0.5" />
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-[10px] font-bold tracking-widest text-[#f59e0b] uppercase mb-1">Why it matters</p>
-                        <p className="text-sm text-amber-900 leading-relaxed">{amendment.whyItMatters}</p>
+                        <p className="text-sm text-amber-900 leading-relaxed break-words">{amendment.whyItMatters}</p>
                       </div>
                     </div>
                   )}
 
                   {/* Related articles */}
                   {amendment.relatedArticles && (
-                    <div className="flex gap-3 items-start">
+                    <div className="flex gap-3 items-start min-w-0">
                       <BookMarked className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">Related Articles</p>
                         <div className="flex flex-wrap gap-1.5">
                           {amendment.relatedArticles.split(',').map((a, i) => (
-                            <span key={i} className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold tracking-wide">
+                            <span key={i} className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold tracking-wide break-all">
                               {a.trim()}
                             </span>
                           ))}
@@ -483,7 +484,7 @@ export default function AmendmentsPage() {
             </h3>
             <p className="text-[15px] text-gray-500 leading-relaxed mb-2">
               You&apos;re about to delete{' '}
-              <span className="font-semibold text-gray-800">
+              <span className="font-semibold text-gray-800 break-words">
                 {deleteTarget.number} — {deleteTarget.title}
               </span>.
             </p>

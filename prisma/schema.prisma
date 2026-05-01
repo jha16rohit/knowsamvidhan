@@ -56,7 +56,6 @@ model Article {
   tags              String?
   featured          Boolean @default(false)
 
-  // 🔗 relation
   partId String
   part   Part   @relation(fields: [partId], references: [id])
 
@@ -71,65 +70,60 @@ model Clause {
   text         String
   createdAt    DateTime @default(now())
 
-  // 🔗 Relation to Article
   articleId String
   article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
 }
 
 model Preamble {
   id                String   @id @default("singleton")
-
   officialText      String   @db.Text
   simpleExplanation String   @db.Text
   whyItMatters      String   @db.Text
-
   keywords          String   @default("[]") @db.Text
   timeline          String   @default("[]") @db.Text
   quickFacts        String   @default("[]") @db.Text
-
-  // ✅ FIXED (array instead of single object)
   landmarkCases     String   @default("[]") @db.Text
-
-  // ✅ FIXED (merged both into notes array)
   notes             String   @default("[]") @db.Text
-
   updatedAt         DateTime @updatedAt
 }
 
-
 model Schedule {
   id          String   @id @default(uuid())
-  shortId     String // e.g. "7th"
-  schedule    String // e.g. "Seventh Schedule"
+  shortId     String
+  schedule    String
+  slug        String   @unique
   title       String
   description String?  @db.Text
-  // Topics stored as comma-separated string for simplicity (consistent with tags pattern above)
   topics      String   @default("")
+  tagDetails  String   @default("[]") @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 model Amendment {
   id              String   @id @default(uuid())
-  number          String // e.g. "42nd"
-  year            String // e.g. "1976"
+  number          String
+  year            String
   title           String
   summary         String   @db.Text
   whyItMatters    String?  @db.Text
-  relatedArticles String? // comma-separated e.g. "article-21, article-19"
+  relatedArticles String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
 model Quiz {
-  id        String   @id @default(uuid())
-  title     String
-  level     String // "basic" | "intermediate" | "advanced"
-  status    String   @default("draft") // "draft" | "published"
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text   // ← NEW: quiz description shown to users
+  level       String              // "basic" | "intermediate" | "advanced"
+  status      String   @default("draft") // "draft" | "published"
+  timeMinutes Int      @default(10)      // ← NEW: time limit in minutes, set by admin
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   questions Question[]
+  attempts  UserQuizAttempt[]
 }
 
 model Question {
@@ -139,13 +133,31 @@ model Question {
   optionB       String
   optionC       String
   optionD       String
-  correctAnswer String // "A" | "B" | "C" | "D"
+  correctAnswer String   // "A" | "B" | "C" | "D"
   explanation   String?  @db.Text
   order         Int      @default(0)
   createdAt     DateTime @default(now())
 
   quizId String
   quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+// ← NEW: tracks each user's quiz submission (prevents retakes)
+model UserQuizAttempt {
+  id          String   @id @default(uuid())
+  userId      String
+  quizId      String
+  score       Int      // number of correct answers
+  totalQ      Int      // total questions at time of attempt
+  answers     String   @db.Text  // JSON: Record<number, number> — questionIndex → chosenOptionIndex
+  submittedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, quizId])  // one attempt per user per quiz
+  @@index([userId])
+  @@index([quizId])
 }
 
 // ==================
@@ -168,8 +180,8 @@ model User {
   email    String  @unique
   password String
 
-  role     Role    @default(USER)  
-  status   Status  @default(ACTIVE)  
+  role     Role    @default(USER)
+  status   Status  @default(ACTIVE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -181,6 +193,7 @@ model User {
 
   posts               Post[]
   passwordResetTokens PasswordResetToken[]
+  quizAttempts        UserQuizAttempt[]
 
   @@index([email])
   @@index([role])
