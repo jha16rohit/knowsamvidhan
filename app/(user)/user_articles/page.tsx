@@ -465,7 +465,7 @@ export default function ArticlesPage() {
           px-4 sm:px-6 md:px-10 lg:px-16
           py-8 sm:py-10 md:py-14 lg:py-16
         ">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-[92rem] mx-auto">
 
             <p className="text-[10px] sm:text-[11px] font-bold text-[#c48232] tracking-[1.5px] uppercase mb-2 sm:mb-3">
               Library

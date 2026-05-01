@@ -355,7 +355,7 @@ export default function PartsPage() {
 
         {/* ── Hero Header ── */}
         <section className="bg-gradient-to-br from-[#f5f3ef] via-[#f0ece4] to-[#ede8df] border-b border-[#d6c7a8] px-5 sm:px-8 md:px-12 lg:px-16 py-10 sm:py-14 md:py-16">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-[92rem] mx-auto">
             <p className="text-[11px] font-bold text-[#c48232] tracking-[1.5px] uppercase mb-3">
               Chapters
             </p>

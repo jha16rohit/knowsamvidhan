@@ -96,7 +96,7 @@ export default function SettingsPage() {
             <p className="text-sm text-gray-500">Branding, homepage copy and theme.</p>
           </div>
 
-          <div className="flex flex-col gap-6 max-w-6xl">
+          <div className="flex flex-col gap-6 max-w-full">
             
             {/* Top Row: Branding & Homepage Copy */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

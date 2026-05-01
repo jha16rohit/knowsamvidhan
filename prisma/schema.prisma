@@ -78,14 +78,24 @@ model Clause {
 
 model Preamble {
   id                String   @id @default("singleton")
+
   officialText      String   @db.Text
   simpleExplanation String   @db.Text
   whyItMatters      String   @db.Text
-  // Keywords stored as a JSON string: "[{\"word\":\"...\",\"definition\":\"...\"}]"
-  // Using String keeps the schema simple — no extra join table needed for a small list.
+
   keywords          String   @default("[]") @db.Text
+  timeline          String   @default("[]") @db.Text
+  quickFacts        String   @default("[]") @db.Text
+
+  // ✅ FIXED (array instead of single object)
+  landmarkCases     String   @default("[]") @db.Text
+
+  // ✅ FIXED (merged both into notes array)
+  notes             String   @default("[]") @db.Text
+
   updatedAt         DateTime @updatedAt
 }
+
 
 model Schedule {
   id          String   @id @default(uuid())

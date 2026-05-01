@@ -1,243 +1,194 @@
-// "use client";
-
-// import FooterSection from "@/components/Footer";
-// import Navbar from "@/components/Navbar";
-// import { useState } from "react";
-
-// // ─── Types ────────────────────────────────────────────────────────────────────
-
-// interface QuizLevel {
-//   tag: string;
-//   tagColor: string;
-//   tagBg: string;
-//   title: string;
-//   description: string;
-//   questions: number;
-//   minutes: string;
-// }
-
-// interface Feature {
-//   icon: string;
-//   title: string;
-//   description: string;
-// }
-
-// // ─── Data ─────────────────────────────────────────────────────────────────────
-
-// const quizLevels: QuizLevel[] = [
-//   {
-//     tag: "Basic",
-//     tagColor: "#166534",
-//     tagBg: "#dcfce7",
-//     title: "Basic level",
-//     description: "Foundations: Preamble, structure and key articles every citizen should know.",
-//     questions: 10,
-//     minutes: "~8 min",
-//   },
-//   {
-//     tag: "Moderate",
-//     tagColor: "#92400e",
-//     tagBg: "#fef3c7",
-//     title: "Moderate level",
-//     description: "Fundamental Rights, Directive Principles and core amendments in depth.",
-//     questions: 15,
-//     minutes: "~15 min",
-//   },
-//   {
-//     tag: "Advanced",
-//     tagColor: "#1e3a5f",
-//     tagBg: "#dbeafe",
-//     title: "Advanced level",
-//     description: "Landmark cases, constitutional interpretation and complex inter-article links.",
-//     questions: 20,
-//     minutes: "~25 min",
-//   },
-// ];
-
-// const features: Feature[] = [
-//   {
-//     icon: "🔄",
-//     title: "Adaptive",
-//     description: "Questions adjust to your weak topics.",
-//   },
-//   {
-//     icon: "⏱",
-//     title: "Timed practice",
-//     description: "Mock real exam pacing if you wish.",
-//   },
-//   {
-//     icon: "📄",
-//     title: "Explained answers",
-//     description: "Every answer cites the article.",
-//   },
-// ];
-
-// // ─── Quiz Card ────────────────────────────────────────────────────────────────
-
-// function QuizCard({ level, index }: { level: QuizLevel; index: number }) {
-//   const [hovered, setHovered] = useState(false);
-
-//   return (
-//     <div
-//       onMouseEnter={() => setHovered(true)}
-//       onMouseLeave={() => setHovered(false)}
-//       style={{
-//         background: "#fff",
-//         border: hovered ? "1.5px solid #c48232" : "1px solid #ede8df",
-//         borderRadius: 16,
-//         padding: "28px 24px",
-//         transition: "all 0.2s ease",
-//         boxShadow: hovered ? "0 8px 28px rgba(196,130,50,0.12)" : "0 1px 4px rgba(0,0,0,0.05)",
-//         display: "flex",
-//         flexDirection: "column" as const,
-//         gap: 12,
-//       }}
-//     >
-//       {/* Tag */}
-//       <span
-//         style={{
-//           display: "inline-block",
-//           alignSelf: "flex-start",
-//           background: level.tagBg,
-//           color: level.tagColor,
-//           borderRadius: 20,
-//           padding: "3px 12px",
-//           fontSize: 12,
-//           fontWeight: 700,
-//           fontFamily: "system-ui, sans-serif",
-//           border: `1px solid ${level.tagColor}22`,
-//         }}
-//       >
-//         {level.tag}
-//       </span>
-
-//       {/* Title */}
-//       <div style={{ fontWeight: 800, fontSize: 22, color: "#1a1208", fontFamily: "'Georgia', serif", lineHeight: 1.1 }}>
-//         {level.title}
-//       </div>
-
-//       {/* Description */}
-//       <div style={{ fontSize: 13, color: "#7a6a50", lineHeight: 1.6, fontFamily: "system-ui, sans-serif", flex: 1 }}>
-//         {level.description}
-//       </div>
-
-//       {/* Meta: questions + time */}
-//       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-//         <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#9e8c73", fontFamily: "system-ui, sans-serif" }}>
-//           <span>📋</span>
-//           <span>{level.questions} questions</span>
-//         </div>
-//         <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#9e8c73", fontFamily: "system-ui, sans-serif" }}>
-//           <span>⏱</span>
-//           <span>{level.minutes}</span>
-//         </div>
-//       </div>
-
-//       {/* CTA */}
-//       <button
-//         style={{
-//           background: "#c48232",
-//           color: "#fff",
-//           border: "none",
-//           borderRadius: 10,
-//           padding: "12px 20px",
-//           fontSize: 14,
-//           fontWeight: 700,
-//           cursor: "pointer",
-//           fontFamily: "system-ui, sans-serif",
-//           display: "flex",
-//           alignItems: "center",
-//           justifyContent: "center",
-//           gap: 6,
-//           transition: "background 0.15s",
-//           marginTop: 4,
-//         }}
-//         onMouseEnter={(e) => (e.currentTarget.style.background = "#a86a28")}
-//         onMouseLeave={(e) => (e.currentTarget.style.background = "#c48232")}
-//       >
-//         Start quiz →
-//       </button>
-//     </div>
-//   );
-// }
-
-// // ─── Main Page ─────────────────────────────────────────────────────────────────
-
-// export default function QuizPage() {
-//   return (
-//     <>
-//     < Navbar />
-//     <div style={{ fontFamily: "system-ui, sans-serif", background: "#faf7f2", minHeight: "100vh", color: "#1a1208", paddingTop: 64 }}>
-
-//       {/* ── Hero Header ── */}
-//       <section style={{ background: "linear-gradient(135deg, #f5f3ef 60%, #ede8df 100%)", borderBottom: "1px solid #ede8df", padding: "52px 48px 48px" }}>
-//         <div style={{ maxWidth: 860, margin: "0 auto" }}>
-//           <div style={{ fontSize: 11, fontWeight: 700, color: "#c48232", letterSpacing: 1.5, textTransform: "uppercase" as const, marginBottom: 12 }}>Practice</div>
-//           <h1 style={{ fontSize: 38, fontWeight: 800, color: "#1a1208", margin: "0 0 12px", lineHeight: 1.15, fontFamily: "'Georgia', serif" }}>
-//             Quiz yourself. Master the Constitution.
-//           </h1>
-//           <p style={{ fontSize: 15, color: "#7a6a50", margin: 0, lineHeight: 1.6 }}>
-//             Three levels with instant feedback, explanations and progress tracking.
-//           </p>
-//         </div>
-//       </section>
-
-//       {/* ── Quiz Cards ── */}
-//       <main style={{ maxWidth: 860, margin: "0 auto", padding: "44px 24px 80px" }}>
-//         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginBottom: 28 }}>
-//           {quizLevels.map((level, i) => (
-//             <QuizCard key={level.tag} level={level} index={i} />
-//           ))}
-//         </div>
-
-//         {/* Features strip */}
-//         <div
-//           style={{
-//             background: "#fff",
-//             border: "1px solid #ede8df",
-//             borderRadius: 16,
-//             padding: "24px 32px",
-//             display: "grid",
-//             gridTemplateColumns: "repeat(3, 1fr)",
-//             gap: 24,
-//             boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-//           }}
-//         >
-//           {features.map((f) => (
-//             <div key={f.title} style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-//               <div
-//                 style={{
-//                   width: 36,
-//                   height: 36,
-//                   borderRadius: 10,
-//                   background: "#fdf3e3",
-//                   border: "1px solid #e8d4a0",
-//                   display: "flex",
-//                   alignItems: "center",
-//                   justifyContent: "center",
-//                   fontSize: 18,
-//                   flexShrink: 0,
-//                 }}
-//               >
-//                 {f.icon}
-//               </div>
-//               <div>
-//                 <div style={{ fontWeight: 700, fontSize: 14, color: "#1a1208", marginBottom: 3 }}>{f.title}</div>
-//                 <div style={{ fontSize: 12, color: "#7a6a50", lineHeight: 1.5 }}>{f.description}</div>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       </main>
-//       < FooterSection/>
-//     </div>
-//     </>
-//   );
-// }
 "use client";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import FooterSection from "@/components/Footer";
+
+// ── Icons ──────────────────────────────────────────────────────────────────────
+
+function BookOpenIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  );
+}
+
+function ScaleIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+      <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+      <path d="M7 21h10" />
+      <path d="M12 3v18" />
+      <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
+    </svg>
+  );
+}
+
+function BuildingIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+      <path d="M9 22v-4h6v4" />
+      <path d="M8 6h.01" />
+      <path d="M16 6h.01" />
+      <path d="M12 6h.01" />
+      <path d="M12 10h.01" />
+      <path d="M12 14h.01" />
+      <path d="M16 10h.01" />
+      <path d="M16 14h.01" />
+      <path d="M8 10h.01" />
+      <path d="M8 14h.01" />
+    </svg>
+  );
+}
+
+function SearchIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.35-4.35" />
+    </svg>
+  );
+}
+
+function FilterIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+    </svg>
+  );
+}
+
+function ClockIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
+function ClipboardIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+    </svg>
+  );
+}
+
+function BarChartIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" x2="12" y1="20" y2="10" />
+      <line x1="18" x2="18" y1="20" y2="4" />
+      <line x1="6" x2="6" y1="20" y2="16" />
+    </svg>
+  );
+}
+
+function LogOutIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" x2="9" y1="12" y2="12" />
+    </svg>
+  );
+}
+
+function AlertTriangleIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+function XIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  );
+}
+
+function CircleIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+    </svg>
+  );
+}
+
+function DownloadIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" x2="12" y1="15" y2="3" />
+    </svg>
+  );
+}
+
+function LightbulbIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+      <path d="M9 18h6" />
+      <path d="M10 22h4" />
+    </svg>
+  );
+}
+
+function ArrowLeftIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="m12 19-7-7 7-7" />
+      <path d="M19 12H5" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14" />
+      <path d="m12 5 7 7-7 7" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+function FlagIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+      <line x1="4" x2="4" y1="22" y2="15" />
+    </svg>
+  );
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 interface Question {
@@ -268,7 +219,7 @@ interface Level {
   twBorder: string;
   twText: string;
   twHoverBg: string;
-  icon: string;
+  icon: "book" | "scale" | "building";
   quizzes: Quiz[];
 }
 
@@ -281,6 +232,14 @@ interface QuizResult {
 }
 
 type Screen = "list" | "quiz" | "results";
+
+// ── Level Icon ─────────────────────────────────────────────────────────────────
+
+function LevelIcon({ icon, className = "" }: { icon: Level["icon"]; className?: string }) {
+  if (icon === "book") return <BookOpenIcon className={className} />;
+  if (icon === "scale") return <ScaleIcon className={className} />;
+  return <BuildingIcon className={className} />;
+}
 
 // ── Data ───────────────────────────────────────────────────────────────────────
 
@@ -298,7 +257,7 @@ const quizData: { levels: Level[] } = {
       twBorder: "border-green-200",
       twText: "text-green-700",
       twHoverBg: "hover:bg-green-50",
-      icon: "📗",
+      icon: "book",
       quizzes: [
         {
           id: "fundamental-rights",
@@ -352,7 +311,7 @@ const quizData: { levels: Level[] } = {
       twBorder: "border-amber-200",
       twText: "text-amber-700",
       twHoverBg: "hover:bg-amber-50",
-      icon: "⚖️",
+      icon: "scale",
       quizzes: [
         {
           id: "directive-principles",
@@ -416,7 +375,7 @@ const quizData: { levels: Level[] } = {
       twBorder: "border-red-200",
       twText: "text-red-700",
       twHoverBg: "hover:bg-red-50",
-      icon: "🏛️",
+      icon: "building",
       quizzes: [
         {
           id: "constitutional-amendments",
@@ -483,56 +442,34 @@ const quizData: { levels: Level[] } = {
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-
-// ── CircleProgress ─────────────────────────────────────────────────────────────
-
-
-// ── QuizListScreen ─────────────────────────────────────────────────────────────
-
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, "0");
   const s = (seconds % 60).toString().padStart(2, "0");
   return `${m}:${s}`;
 }
 
-function CircleProgress({
-  score,
-  total,
-  color,
-}: {
-  score: number;
-  total: number;
-  color: string;
-}) {
+// ── CircleProgress ─────────────────────────────────────────────────────────────
+
+function CircleProgress({ score, total, color }: { score: number; total: number; color: string }) {
   const pct = Math.round((score / total) * 100);
   const r = 28;
   const circ = 2 * Math.PI * r;
   const dash = (pct / 100) * circ;
-
   return (
     <div className="relative shrink-0" style={{ width: 72, height: 72 }}>
       <svg width="72" height="72" style={{ transform: "rotate(-90deg)" }}>
         <circle cx="36" cy="36" r={r} fill="none" stroke="#e5e7eb" strokeWidth="5" />
-        <circle
-          cx="36"
-          cy="36"
-          r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth="5"
-          strokeDasharray={`${dash} ${circ}`}
-          strokeLinecap="round"
-        />
+        <circle cx="36" cy="36" r={r} fill="none" stroke={color} strokeWidth="5" strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-sm font-bold leading-none text-gray-800">
-          {score}/{total}
-        </span>
+        <span className="text-sm font-bold leading-none text-gray-800">{score}/{total}</span>
         <span className="text-xs text-gray-500">{pct}%</span>
       </div>
     </div>
   );
 }
+
+// ── QuizListScreen ─────────────────────────────────────────────────────────────
 
 function QuizListScreen({
   results,
@@ -559,18 +496,17 @@ function QuizListScreen({
     .filter((level) => level.quizzes.length > 0);
 
   return (
-    <div className="min-h-screen bg-white px-4 pt-24 pb-10 font-sans sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
+    <div className="min-h-screen bg-white px-4 pt-20 pb-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+
+        {/* Header */}
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <h1 className="m-0 text-3xl font-extrabold text-gray-900 sm:text-4xl">
-              Quizzes
-            </h1>
+            <h1 className="m-0 text-3xl font-extrabold text-gray-900 sm:text-4xl">Quizzes</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
               Practice and test your knowledge of the Constitution with our curated quizzes.
             </p>
           </div>
-
           <img
             src="https://cdn-icons-png.flaticon.com/512/2436/2436874.png"
             alt=""
@@ -578,11 +514,10 @@ function QuizListScreen({
           />
         </div>
 
-        <div className="mb-9 grid gap-3 md:grid-cols-[1fr_auto]">
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              🔍
-            </span>
+        {/* Search + Filter */}
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -590,68 +525,64 @@ function QuizListScreen({
               className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-gray-300"
             />
           </div>
-
-          <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2">
-            <span className="shrink-0 text-xs text-gray-500">⚙️ Filter</span>
+          <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 sm:w-auto">
+            <FilterIcon className="h-4 w-4 shrink-0 text-gray-500" />
+            <span className="shrink-0 text-xs text-gray-500">Filter by Level</span>
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="w-full cursor-pointer border-none bg-transparent text-sm font-semibold text-gray-700 outline-none md:w-auto"
+              className="cursor-pointer border-none bg-transparent text-sm font-semibold text-gray-700 outline-none"
             >
               <option value="all">All Levels</option>
               <option value="basic">Basic</option>
               <option value="intermediate">Intermediate</option>
               <option value="advanced">Advanced</option>
             </select>
+            <ChevronDownIcon className="h-4 w-4 text-gray-400" />
           </div>
         </div>
 
+        {/* Levels */}
         {filteredLevels.map((level) => (
           <div key={level.id} className="mb-10">
+            {/* Level Header */}
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl border ${level.twBg} ${level.twBorder} text-lg`}
-                >
-                  {level.icon}
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${level.twBg} ${level.twBorder} ${level.twColor}`}>
+                  <LevelIcon icon={level.icon} className="h-5 w-5" />
                 </div>
                 <div>
                   <h2 className="m-0 text-lg font-bold text-gray-900">{level.name}</h2>
                   <p className="m-0 text-xs text-gray-500">{level.subtitle}</p>
                 </div>
               </div>
-
-              <span
-                className={`rounded-full border px-3.5 py-1 text-xs font-semibold ${level.twBg} ${level.twColor} ${level.twBorder}`}
-              >
+              <span className={`rounded-full border px-3.5 py-1 text-xs font-semibold ${level.twBg} ${level.twColor} ${level.twBorder}`}>
                 {level.quizzes.length} Quizzes
               </span>
             </div>
 
+            {/* Quiz Cards */}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {level.quizzes.map((quiz) => {
                 const res = results[quiz.id];
-
                 return (
-                  <div
-                    key={quiz.id}
-                    className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-lg"
-                  >
+                  <div key={quiz.id} className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-lg">
                     <div className="flex gap-4">
-                      <div
-                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${level.twBg} ${level.twBorder} text-2xl`}
-                      >
-                        {level.icon}
+                      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${level.twBg} ${level.twBorder} ${level.twColor}`}>
+                        <LevelIcon icon={level.icon} className="h-6 w-6" />
                       </div>
-
                       <div className="min-w-0 flex-1">
                         <h3 className="mb-1 text-sm font-bold text-gray-900">{quiz.title}</h3>
-                        <p className="mb-2.5 text-xs leading-snug text-gray-500">
-                          {quiz.description}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400">
-                          <span>📋 {quiz.questions} Questions</span>
-                          <span>⏱ ~{quiz.time} min</span>
+                        <p className="mb-2.5 text-xs leading-snug text-gray-500">{quiz.description}</p>
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <ClipboardIcon className="h-3.5 w-3.5" />
+                            {quiz.questions} Questions
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <ClockIcon className="h-3.5 w-3.5" />
+                            ~{quiz.time} min
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -660,20 +591,24 @@ function QuizListScreen({
                       {res ? (
                         <>
                           <CircleProgress score={res.correct} total={quiz.questions} color={level.color} />
-                          <button
-                            onClick={() => onPreview(quiz, level, res)}
-                            className={`rounded-lg border px-3.5 py-2 text-xs font-semibold ${level.twBorder} ${level.twBg} ${level.twColor}`}
-                          >
-                            See Preview
-                          </button>
+                          <div className="flex flex-col items-end gap-1">
+                            <button
+                              onClick={() => onPreview(quiz, level, res)}
+                              className={`rounded-lg border px-3.5 py-2 text-xs font-semibold ${level.twBorder} ${level.twBg} ${level.twColor}`}
+                            >
+                              See Results
+                            </button>
+                            <span className="text-[10px] text-gray-400">Already submitted</span>
+                          </div>
                         </>
                       ) : (
                         <button
                           onClick={() => onStart(quiz, level)}
-                          className="w-full rounded-xl px-4 py-2.5 text-sm font-bold text-white"
+                          className="flex w-full items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold text-white"
                           style={{ backgroundColor: level.color }}
                         >
-                          Start Quiz →
+                          Start Quiz
+                          <ArrowRightIcon className="h-4 w-4" />
                         </button>
                       )}
                     </div>
@@ -701,26 +636,27 @@ function QuizScreen({
   onFinish: (result: QuizResult) => void;
   onLeave: () => void;
 }) {
-  const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [timeLeft, setTimeLeft] = useState(quiz.time * 60);
+  const [current, setCurrent]       = useState(0);
+  const [answers, setAnswers]       = useState<Record<number, number>>({});
+  const [marked, setMarked]         = useState<Set<number>>(new Set());
+  const [timeLeft, setTimeLeft]     = useState(quiz.time * 60);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
   useEffect(() => {
-    if (timeLeft <= 0) {
-      handleSubmit();
-      return;
-    }
+    if (timeLeft <= 0) { submitQuiz(); return; }
     const t = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(t);
   }, [timeLeft]);
 
   const q = quiz.questions_data[current];
-  const answered = Object.keys(answers).length;
+  const answered   = Object.keys(answers).length;
+  const skipped    = quiz.questions - answered;
+  const markedCount = marked.size;
+  const isLowTime  = timeLeft < 60;
 
-  function handleSubmit() {
-    let correct = 0;
-    let incorrect = 0;
+  function submitQuiz() {
+    let correct = 0, incorrect = 0;
     quiz.questions_data.forEach((q, i) => {
       if (answers[i] === undefined) return;
       if (answers[i] === q.correct) correct++;
@@ -735,232 +671,288 @@ function QuizScreen({
     });
   }
 
-  const isLowTime = timeLeft < 60;
+  function toggleMark() {
+    setMarked((prev) => {
+      const next = new Set(prev);
+      if (next.has(current)) next.delete(current);
+      else next.add(current);
+      return next;
+    });
+  }
 
   return (
-    <div className="font-sans max-w-5xl mx-auto px-4 bg-slate-50 min-h-screen">
-      {/* Top Bar */}
-      <div className="flex items-center justify-between py-4 border-b border-gray-200 mb-6 flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div
-            className={`w-11 h-11 rounded-xl ${level.twBg} border ${level.twBorder} flex items-center justify-center text-xl`}
-          >
-            {level.icon}
-          </div>
-          <div>
-            <div className="font-bold text-base text-gray-900">{quiz.title}</div>
-            <div className="text-xs text-gray-500">{quiz.questions} Questions</div>
-          </div>
+    <div className="min-h-screen bg-slate-50 px-4 pb-10 pt-20 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+
+        {/* Breadcrumb */}
+        <div className="mb-4 flex items-center gap-2 text-sm text-gray-500">
+          <button onClick={() => setShowConfirm(true)} className="hover:text-gray-700">Quiz</button>
+          <span>/</span>
+          <span className="font-medium text-gray-800">{quiz.title}</span>
         </div>
-        <div className="flex items-center gap-4">
-          <div
-            className={`rounded-xl px-4 py-2.5 text-center border ${
-              isLowTime ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"
-            }`}
-          >
-            <div
-              className={`font-extrabold text-xl font-mono ${
-                isLowTime ? "text-red-600" : "text-green-600"
-              }`}
-            >
-              {formatTime(timeLeft)}
+
+        {/* Top Bar */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className={`flex h-11 w-11 items-center justify-center rounded-xl border ${level.twBg} ${level.twBorder} ${level.twColor}`}>
+              <LevelIcon icon={level.icon} className="h-5 w-5" />
             </div>
-            <div className="text-xs text-gray-500">Time Left</div>
+            <div>
+              <div className="font-bold text-base text-gray-900">{quiz.title}</div>
+              <div className="text-xs text-gray-500">{quiz.questions} Questions</div>
+            </div>
           </div>
-          <button
-            onClick={() => setShowConfirm(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 border border-red-200 rounded-xl bg-white text-red-600 font-semibold text-sm cursor-pointer"
-          >
-            ↩ Leave Quiz
-          </button>
-        </div>
-      </div>
-
-      <div className="grid gap-5" style={{ gridTemplateColumns: "1fr 280px", alignItems: "start" }}>
-        {/* Question Area */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-7">
-          <div className="font-bold text-xs mb-2" style={{ color: level.color }}>
-            Question {current + 1} of {quiz.questions}
-          </div>
-          <div className="bg-gray-200 rounded-full h-1.5 mb-6">
-            <div
-              className="h-1.5 rounded-full transition-all duration-300"
-              style={{ backgroundColor: level.color, width: `${((current + 1) / quiz.questions) * 100}%` }}
-            />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-6 leading-snug">{q.q}</h2>
-
-          <div className="flex flex-col gap-3">
-            {q.options.map((opt, i) => {
-              const sel = answers[current] === i;
-              return (
-                <div
-                  key={i}
-                  onClick={() => setAnswers((a) => ({ ...a, [current]: i }))}
-                  className="px-4 py-3.5 rounded-xl cursor-pointer flex items-center gap-3 transition-all duration-150"
-                  style={{
-                    border: `2px solid ${sel ? level.color : "#e5e7eb"}`,
-                    backgroundColor: sel ? level.bgColor : "#fff",
-                  }}
-                >
-                  <div
-                    className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center"
-                    style={{
-                      border: `2px solid ${sel ? level.color : "#d1d5db"}`,
-                      backgroundColor: sel ? level.color : "#fff",
-                    }}
-                  >
-                    {sel && <div className="w-2 h-2 rounded-full bg-white" />}
-                  </div>
-                  <span className={`text-sm text-gray-700 ${sel ? "font-semibold" : "font-normal"}`}>
-                    {String.fromCharCode(65 + i)}. {opt}
-                  </span>
+          <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 ${isLowTime ? "border-red-200 bg-red-50" : "border-green-200 bg-green-50"}`}>
+              <ClockIcon className={`h-4 w-4 ${isLowTime ? "text-red-500" : "text-green-600"}`} />
+              <div className="text-center">
+                <div className={`font-extrabold text-lg font-mono leading-none ${isLowTime ? "text-red-600" : "text-green-600"}`}>
+                  {formatTime(timeLeft)}
                 </div>
-              );
-            })}
-          </div>
-
-          <div className="flex justify-between mt-7">
+                <div className="text-xs text-gray-500">Time Left</div>
+              </div>
+            </div>
             <button
-              onClick={() => setCurrent((c) => Math.max(0, c - 1))}
-              disabled={current === 0}
-              className={`px-5 py-2.5 border border-gray-200 rounded-xl bg-white font-semibold text-sm ${
-                current === 0 ? "text-gray-300 cursor-not-allowed" : "text-gray-700 cursor-pointer"
-              }`}
+              onClick={() => setShowConfirm(true)}
+              className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-red-600 font-semibold text-sm"
             >
-              ← Previous
+              <LogOutIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">Leave Quiz</span>
             </button>
-            {current < quiz.questions - 1 ? (
-              <button
-                onClick={() => setCurrent((c) => c + 1)}
-                className="px-6 py-2.5 border-none rounded-xl text-white font-bold text-sm cursor-pointer"
-                style={{ backgroundColor: level.color }}
-              >
-                Next →
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmit}
-                className="px-6 py-2.5 border-none rounded-xl bg-green-600 text-white font-bold text-sm cursor-pointer"
-              >
-                Submit Quiz ✓
-              </button>
-            )}
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="flex flex-col gap-4">
-          {/* Progress */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="font-bold text-sm text-gray-900 mb-3.5 flex items-center gap-1.5">
-              📊 Quiz Progress
+        {/* Main Grid */}
+        <div className="grid gap-5 lg:grid-cols-[1fr_280px] lg:items-start">
+
+          {/* Question Area */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+            <div className="mb-2 font-bold text-xs" style={{ color: level.color }}>
+              Question {current + 1} of {quiz.questions}
             </div>
-            <div className="flex justify-between text-xs text-gray-500 mb-2">
-              <span>{answered} of {quiz.questions} answered</span>
-              <span>{Math.round((answered / quiz.questions) * 100)}%</span>
-            </div>
-            <div className="bg-gray-200 rounded-full h-1.5 mb-4">
+            <div className="mb-6 h-1.5 rounded-full bg-gray-200">
               <div
                 className="h-1.5 rounded-full transition-all duration-300"
-                style={{ backgroundColor: level.color, width: `${(answered / quiz.questions) * 100}%` }}
+                style={{ backgroundColor: level.color, width: `${((current + 1) / quiz.questions) * 100}%` }}
               />
             </div>
-            <div className="flex gap-3">
-              {[
-                {
-                  label: "Correct",
-                  val: Object.entries(answers).filter(([i, a]) => quiz.questions_data[Number(i)].correct === a).length,
-                  color: "text-green-600",
-                },
-                {
-                  label: "Incorrect",
-                  val: Object.entries(answers).filter(([i, a]) => quiz.questions_data[Number(i)].correct !== a).length,
-                  color: "text-red-600",
-                },
-                { label: "Skipped", val: quiz.questions - answered, color: "text-gray-400" },
-              ].map((s) => (
-                <div key={s.label} className="flex-1 text-center">
-                  <div className={`text-xl font-extrabold ${s.color}`}>{s.val}</div>
-                  <div className="text-xs text-gray-500">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+            <h2 className="mb-6 text-lg font-bold text-gray-900 leading-snug sm:text-xl">{q.q}</h2>
 
-          {/* Navigator */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="font-bold text-sm text-gray-900 mb-3.5">Question Navigator</div>
-            <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
-              {quiz.questions_data.map((_, i) => {
-                const isCurrent = i === current;
-                const isAnswered = answers[i] !== undefined;
-                let bg = "#f3f4f6",
-                  color = "#6b7280",
-                  border = "#e5e7eb";
-                if (isCurrent) {
-                  bg = level.color;
-                  color = "#fff";
-                  border = level.color;
-                } else if (isAnswered) {
-                  bg = "#dcfce7";
-                  color = "#16a34a";
-                  border = "#bbf7d0";
-                }
+            <div className="flex flex-col gap-3">
+              {q.options.map((opt, i) => {
+                const sel = answers[current] === i;
                 return (
-                  <button
+                  <div
                     key={i}
-                    onClick={() => setCurrent(i)}
-                    className="py-2 rounded-lg font-semibold text-xs cursor-pointer border"
-                    style={{ backgroundColor: bg, color, borderColor: border }}
+                    onClick={() => setAnswers((a) => ({ ...a, [current]: i }))}
+                    className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3.5 transition-all duration-150"
+                    style={{
+                      border: `2px solid ${sel ? level.color : "#e5e7eb"}`,
+                      backgroundColor: sel ? level.bgColor : "#fff",
+                    }}
                   >
-                    {i + 1}
-                  </button>
+                    <div
+                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                      style={{
+                        border: `2px solid ${sel ? level.color : "#d1d5db"}`,
+                        backgroundColor: sel ? level.color : "#fff",
+                      }}
+                    >
+                      {sel && <div className="h-2 w-2 rounded-full bg-white" />}
+                    </div>
+                    <span className={`text-sm text-gray-700 ${sel ? "font-semibold" : "font-normal"}`}>
+                      {String.fromCharCode(65 + i)}. {opt}
+                    </span>
+                  </div>
                 );
               })}
             </div>
-            <div className="flex flex-wrap gap-2 mt-3.5 text-xs text-gray-500">
-              {[
-                ["#dcfce7", "#16a34a", "Answered"],
-                ["#f3f4f6", "#9ca3af", "Not Answered"],
-              ].map(([bg, c, lbl]) => (
-                <div key={lbl} className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-sm border" style={{ backgroundColor: bg, borderColor: c }} />
-                  <span>{lbl}</span>
-                </div>
-              ))}
+
+            {/* Mark for Review + Nav */}
+            <div className="mt-7 flex items-center justify-between gap-3 flex-wrap">
+              <button
+                onClick={() => setCurrent((c) => Math.max(0, c - 1))}
+                disabled={current === 0}
+                className={`flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-5 py-2.5 font-semibold text-sm ${current === 0 ? "cursor-not-allowed text-gray-300" : "cursor-pointer text-gray-700"}`}
+              >
+                <ArrowLeftIcon className="h-4 w-4" />
+                Previous
+              </button>
+
+              {/* Mark for review */}
+              <button
+                onClick={toggleMark}
+                className={`flex items-center gap-1.5 rounded-xl border px-4 py-2.5 font-semibold text-sm transition-colors ${
+                  marked.has(current)
+                    ? "border-amber-300 bg-amber-50 text-amber-700"
+                    : "border-gray-200 bg-white text-gray-500 hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600"
+                }`}
+              >
+                <FlagIcon className="h-4 w-4" />
+                {marked.has(current) ? "Marked" : "Mark for Review"}
+              </button>
+
+              {current < quiz.questions - 1 ? (
+                <button
+                  onClick={() => setCurrent((c) => c + 1)}
+                  className="flex items-center gap-1.5 rounded-xl border-none px-6 py-2.5 text-white font-bold text-sm cursor-pointer"
+                  style={{ backgroundColor: level.color }}
+                >
+                  Next
+                  <ArrowRightIcon className="h-4 w-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowSubmitConfirm(true)}
+                  className="flex items-center gap-1.5 rounded-xl border-none bg-green-600 px-6 py-2.5 text-white font-bold text-sm cursor-pointer"
+                >
+                  <CheckIcon className="h-4 w-4" />
+                  Submit Quiz
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Tip */}
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-            <div className="font-bold text-xs text-amber-600 mb-1">💡 Tip</div>
-            <p className="m-0 text-xs text-amber-800 leading-relaxed">
-              You can review your answers before submitting the quiz.
-            </p>
+          {/* Sidebar */}
+          <div className="flex flex-col gap-4">
+            {/* Progress — Attempted / Skipped / Marked for Review */}
+            <div className="rounded-2xl border border-gray-200 bg-white p-5">
+              <div className="mb-3.5 flex items-center gap-1.5 font-bold text-sm text-gray-900">
+                <BarChartIcon className="h-4 w-4" />
+                Quiz Progress
+              </div>
+              <div className="mb-2 flex justify-between text-xs text-gray-500">
+                <span>{answered} of {quiz.questions} answered</span>
+                <span>{Math.round((answered / quiz.questions) * 100)}%</span>
+              </div>
+              <div className="mb-4 h-1.5 rounded-full bg-gray-200">
+                <div
+                  className="h-1.5 rounded-full transition-all duration-300"
+                  style={{ backgroundColor: level.color, width: `${(answered / quiz.questions) * 100}%` }}
+                />
+              </div>
+              {/* Three stats: Attempted / Skipped / Marked */}
+              <div className="flex gap-2">
+                <div className="flex-1 rounded-xl bg-green-50 border border-green-100 py-2.5 text-center">
+                  <div className="text-xl font-extrabold text-green-600">{answered}</div>
+                  <div className="text-[10px] font-semibold text-green-700 mt-0.5">Attempted</div>
+                </div>
+                <div className="flex-1 rounded-xl bg-gray-50 border border-gray-200 py-2.5 text-center">
+                  <div className="text-xl font-extrabold text-gray-400">{skipped}</div>
+                  <div className="text-[10px] font-semibold text-gray-500 mt-0.5">Skipped</div>
+                </div>
+                <div className="flex-1 rounded-xl bg-amber-50 border border-amber-100 py-2.5 text-center">
+                  <div className="text-xl font-extrabold text-amber-500">{markedCount}</div>
+                  <div className="text-[10px] font-semibold text-amber-600 mt-0.5">Marked</div>
+                </div>
+              </div>
+
+              {/* Submit button in sidebar too */}
+              <button
+                onClick={() => setShowSubmitConfirm(true)}
+                className="mt-4 w-full flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 text-white font-bold text-sm cursor-pointer border-none"
+              >
+                <CheckIcon className="h-4 w-4" />
+                Submit Quiz
+              </button>
+            </div>
+
+            {/* Navigator */}
+            <div className="rounded-2xl border border-gray-200 bg-white p-5">
+              <div className="mb-3.5 font-bold text-sm text-gray-900">Question Navigator</div>
+              <div className="grid grid-cols-5 gap-2">
+                {quiz.questions_data.map((_, i) => {
+                  const isCurrent  = i === current;
+                  const isAnswered = answers[i] !== undefined;
+                  const isMarked   = marked.has(i);
+
+                  let bg = "#f3f4f6", color = "#6b7280", border = "#e5e7eb";
+                  if (isCurrent)       { bg = level.color;  color = "#fff";     border = level.color; }
+                  else if (isMarked)   { bg = "#fffbeb";    color = "#d97706";  border = "#fde68a"; }
+                  else if (isAnswered) { bg = "#f0fdf4";    color = "#16a34a";  border = "#bbf7d0"; }
+
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setCurrent(i)}
+                      className="rounded-lg border py-2 font-semibold text-xs cursor-pointer relative"
+                      style={{ backgroundColor: bg, color, borderColor: border }}
+                    >
+                      {i + 1}
+                      {isMarked && !isCurrent && (
+                        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-amber-400" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-3.5 flex flex-wrap gap-3 text-xs text-gray-500">
+                {[
+                  ["#f0fdf4", "#16a34a", "Answered"],
+                  ["#f3f4f6", "#9ca3af", "Not Answered"],
+                  ["#fffbeb", "#d97706", "Marked for Review"],
+                ].map(([bg, c, lbl]) => (
+                  <div key={lbl} className="flex items-center gap-1">
+                    <div className="h-3 w-3 rounded-sm border" style={{ backgroundColor: bg, borderColor: c }} />
+                    <span>{lbl}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Leave Confirm Modal */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-11/12 text-center">
-            <div className="text-5xl mb-4">⚠️</div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-8 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+              <AlertTriangleIcon className="h-7 w-7 text-amber-600" />
+            </div>
             <h3 className="m-0 mb-3 text-lg font-bold">Leave Quiz?</h3>
-            <p className="text-gray-500 text-sm mb-6">Your progress will be lost if you leave now.</p>
+            <p className="mb-6 text-gray-500 text-sm">Your progress will be lost if you leave now.</p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="flex-1 py-3 border border-gray-200 rounded-xl bg-white font-semibold cursor-pointer"
-              >
+              <button onClick={() => setShowConfirm(false)} className="flex-1 rounded-xl border border-gray-200 bg-white py-3 font-semibold cursor-pointer">
                 Stay
               </button>
-              <button
-                onClick={onLeave}
-                className="flex-1 py-3 border-none rounded-xl bg-red-600 text-white font-bold cursor-pointer"
-              >
+              <button onClick={onLeave} className="flex-1 rounded-xl border-none bg-red-600 py-3 text-white font-bold cursor-pointer">
                 Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submit Confirm Modal */}
+      {showSubmitConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-8 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+              <CheckIcon className="h-7 w-7 text-green-600" />
+            </div>
+            <h3 className="m-0 mb-2 text-lg font-bold">Submit Quiz?</h3>
+            <div className="mb-5 flex justify-center gap-6 text-sm">
+              <div className="text-center">
+                <div className="text-xl font-extrabold text-green-600">{answered}</div>
+                <div className="text-xs text-gray-500">Attempted</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-extrabold text-gray-400">{skipped}</div>
+                <div className="text-xs text-gray-500">Skipped</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-extrabold text-amber-500">{markedCount}</div>
+                <div className="text-xs text-gray-500">Marked</div>
+              </div>
+            </div>
+            <p className="mb-6 text-gray-500 text-sm">Once submitted, you cannot retake this quiz.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowSubmitConfirm(false)} className="flex-1 rounded-xl border border-gray-200 bg-white py-3 font-semibold cursor-pointer text-sm">
+                Go Back
+              </button>
+              <button onClick={submitQuiz} className="flex-1 rounded-xl border-none bg-green-600 py-3 text-white font-bold cursor-pointer text-sm">
+                Submit
               </button>
             </div>
           </div>
@@ -977,13 +969,11 @@ function ResultsScreen({
   level,
   result,
   onBack,
-  onRetake,
 }: {
   quiz: Quiz;
   level: Level;
   result: QuizResult;
   onBack: () => void;
-  onRetake: () => void;
 }) {
   const [selected, setSelected] = useState(0);
   const q = quiz.questions_data[selected];
@@ -991,215 +981,211 @@ function ResultsScreen({
   const isCorrect = userAns === q.correct;
   const isUnanswered = userAns === undefined;
 
-  const statusColor = isUnanswered ? "#6b7280" : isCorrect ? "#16a34a" : "#dc2626";
   const statusLabel = isUnanswered ? "Unanswered" : isCorrect ? "Correct" : "Incorrect";
   const statusBg = isUnanswered ? "bg-gray-100 text-gray-500" : isCorrect ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600";
 
   return (
-    <div className="font-sans max-w-6xl mx-auto px-4 py-6 bg-slate-50 min-h-screen">
-      {/* Header Summary */}
-      <div className="bg-white border border-gray-200 rounded-2xl px-7 py-5 mb-5 flex items-center gap-6 flex-wrap">
-        <div
-          className={`w-14 h-14 rounded-xl ${level.twBg} border ${level.twBorder} flex items-center justify-center text-3xl`}
-        >
-          {level.icon}
-        </div>
-        <div className="flex-1">
-          <h1 className="m-0 mb-1 text-2xl font-extrabold text-gray-900">{quiz.title}</h1>
-          <div className="flex gap-3 flex-wrap">
-            <span className={`${level.twBg} ${level.twColor} px-2.5 py-1 rounded-full text-xs font-semibold`}>
-              {level.name}
-            </span>
-            <span className="text-gray-500 text-xs">• {quiz.questions} Questions • ~{quiz.time} min</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-8 flex-wrap">
-          <CircleProgress score={result.correct} total={quiz.questions} color={level.color} />
-          {[
-            ["Correct", result.correct, "text-green-600"],
-            ["Incorrect", result.incorrect, "text-red-600"],
-            ["Unanswered", result.unanswered, "text-gray-500"],
-          ].map(([l, v, c]) => (
-            <div key={l as string} className="text-center">
-              <div className={`text-3xl font-extrabold ${c}`}>{v}</div>
-              <div className="text-xs text-gray-500">{l}</div>
-            </div>
-          ))}
-          <div className="text-right text-xs text-gray-400">
-            <div>Attempted on</div>
-            <div className="font-semibold text-gray-600">
-              {result.date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-            </div>
-            <div>{result.date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-50 px-4 pb-10 pt-20 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
 
-      <div className="grid gap-5" style={{ gridTemplateColumns: "300px 1fr", alignItems: "start" }}>
-        {/* Question List */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-5">
-          <div className="font-bold text-sm mb-3.5 text-gray-900">Questions Overview</div>
-          <div className="flex gap-3 mb-4 text-xs">
-            {[
-              ["✓", "text-green-600", "bg-green-50", "Correct"],
-              ["✗", "text-red-600", "bg-red-50", "Incorrect"],
-              ["○", "text-gray-400", "bg-gray-100", "Unanswered"],
-            ].map(([ic, c, bg, lbl]) => (
-              <div key={lbl} className={`flex items-center gap-1 ${c}`}>
-                <span className={`${bg} rounded-full w-4 h-4 inline-flex items-center justify-center text-xs font-bold`}>
-                  {ic}
+        {/* Back */}
+        <button
+          onClick={onBack}
+          className="mb-4 flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeftIcon className="h-4 w-4" />
+          Back to Quizzes
+        </button>
+
+        {/* Header Summary */}
+        <div className="mb-5 rounded-2xl border border-gray-200 bg-white px-5 py-5 sm:px-7">
+          <div className="flex flex-wrap items-start gap-4 sm:items-center">
+            <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border ${level.twBg} ${level.twBorder} ${level.twColor}`}>
+              <LevelIcon icon={level.icon} className="h-7 w-7" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="m-0 mb-1 text-xl font-extrabold text-gray-900 sm:text-2xl">{quiz.title}</h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${level.twBg} ${level.twColor}`}>
+                  {level.name}
                 </span>
-                <span className="text-gray-700">{lbl}</span>
+                <span className="text-gray-400 text-xs">• {quiz.questions} Questions • ~{quiz.time} min</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-6 border-t border-gray-100 pt-5">
+            <CircleProgress score={result.correct} total={quiz.questions} color={level.color} />
+            {[
+              ["Correct",   result.correct,   "text-green-600"],
+              ["Incorrect", result.incorrect, "text-red-600"],
+              ["Unanswered",result.unanswered,"text-gray-500"],
+            ].map(([l, v, c]) => (
+              <div key={l as string} className="text-center">
+                <div className={`text-2xl font-extrabold sm:text-3xl ${c}`}>{v}</div>
+                <div className="text-xs text-gray-500">{l}</div>
               </div>
             ))}
+            <div className="ml-auto text-right text-xs text-gray-400">
+              <div>Submitted on</div>
+              <div className="font-semibold text-gray-600">
+                {result.date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+              </div>
+              <div>{result.date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</div>
+            </div>
           </div>
-          <div className="flex flex-col gap-2 max-h-96 overflow-y-auto">
-            {quiz.questions_data.map((q, i) => {
-              const ans = result.answers[i];
-              const correct = ans === q.correct;
-              const unanswered = ans === undefined;
-              const isSel = selected === i;
-              const ringColor = unanswered ? "#9ca3af" : correct ? "#16a34a" : "#dc2626";
-              const ringBg = unanswered ? "#f3f4f6" : correct ? "#f0fdf4" : "#fef2f2";
-              const selBg = unanswered ? "#f3f4f6" : correct ? "#dcfce7" : "#fee2e2";
-              return (
-                <div
-                  key={i}
-                  onClick={() => setSelected(i)}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer border"
-                  style={{
-                    backgroundColor: isSel ? selBg : "#fff",
-                    borderColor: isSel ? ringColor : "#e5e7eb",
-                  }}
-                >
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border"
-                    style={{ backgroundColor: ringBg, borderColor: ringColor, color: ringColor }}
-                  >
-                    {i + 1}
-                  </div>
-                  <span className="text-xs text-gray-700 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                    {q.q.slice(0, 45)}...
-                  </span>
-                  <span className="text-xs font-bold" style={{ color: ringColor }}>
-                    {unanswered ? "" : correct ? "+1" : "0"}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          <button className="w-full mt-4 py-2.5 border border-gray-200 rounded-xl bg-white text-gray-700 font-semibold text-xs cursor-pointer">
-            ⬇ Download Report
-          </button>
         </div>
 
-        {/* Question Detail */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-7">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-xs text-gray-500">
-              Question {selected + 1} of {quiz.questions}
-            </span>
-            <span className={`${statusBg} px-3 py-1 rounded-full text-xs font-bold`}>{statusLabel}</span>
-          </div>
-          <h2 className="text-lg font-bold text-gray-900 mb-5">{q.q}</h2>
+        {/* Main Grid */}
+        <div className="grid gap-5 lg:grid-cols-[300px_1fr] lg:items-start">
 
-          <div className="flex flex-col gap-2.5 mb-6">
-            {q.options.map((opt, i) => {
-              const isCorrectOpt = i === q.correct;
-              const isUserOpt = i === userAns;
-              let borderColor = "#e5e7eb",
-                bgColor = "#fff",
-                txtColor = "#374151";
-              if (isCorrectOpt) {
-                borderColor = "#16a34a";
-                bgColor = "#f0fdf4";
-                txtColor = "#166534";
-              }
-              if (isUserOpt && !isCorrectOpt) {
-                borderColor = "#dc2626";
-                bgColor = "#fef2f2";
-                txtColor = "#991b1b";
-              }
-              return (
-                <div
-                  key={i}
-                  className="px-4 py-3.5 rounded-xl flex items-center justify-between border-2"
-                  style={{ borderColor, backgroundColor: bgColor }}
-                >
-                  <div className="flex items-center gap-2.5">
+          {/* Question List */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-5">
+            <div className="mb-3.5 flex items-center gap-1.5 font-bold text-sm text-gray-900">
+              <ClipboardIcon className="h-4 w-4 text-green-600" />
+              Questions Overview
+            </div>
+            <div className="mb-4 flex flex-wrap gap-3 text-xs">
+              {[
+                [<CheckIcon className="h-3 w-3" />, "text-green-600", "bg-green-50", "Correct"],
+                [<XIcon className="h-3 w-3" />, "text-red-600", "bg-red-50", "Incorrect"],
+                [<CircleIcon className="h-3 w-3" />, "text-gray-400", "bg-gray-100", "Unanswered"],
+              ].map(([ic, c, bg, lbl]) => (
+                <div key={lbl as string} className={`flex items-center gap-1 ${c as string}`}>
+                  <span className={`${bg as string} rounded-full inline-flex h-4 w-4 items-center justify-center`}>
+                    {ic}
+                  </span>
+                  <span className="text-gray-700">{lbl}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex max-h-96 flex-col gap-2 overflow-y-auto">
+              {quiz.questions_data.map((q, i) => {
+                const ans = result.answers[i];
+                const correct = ans === q.correct;
+                const unanswered = ans === undefined;
+                const isSel = selected === i;
+                const ringColor = unanswered ? "#9ca3af" : correct ? "#16a34a" : "#dc2626";
+                const ringBg = unanswered ? "#f3f4f6" : correct ? "#f0fdf4" : "#fef2f2";
+                const selBg = unanswered ? "#f3f4f6" : correct ? "#dcfce7" : "#fee2e2";
+                return (
+                  <div
+                    key={i}
+                    onClick={() => setSelected(i)}
+                    className="flex cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-2.5"
+                    style={{ backgroundColor: isSel ? selBg : "#fff", borderColor: isSel ? ringColor : "#e5e7eb" }}
+                  >
                     <div
-                      className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center border-2"
-                      style={{
-                        borderColor,
-                        backgroundColor: isCorrectOpt || isUserOpt ? borderColor : "#fff",
-                      }}
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold"
+                      style={{ backgroundColor: ringBg, borderColor: ringColor, color: ringColor }}
                     >
-                      {(isCorrectOpt || isUserOpt) && <div className="w-2 h-2 rounded-full bg-white" />}
+                      {i + 1}
                     </div>
-                    <span
-                      className="text-sm"
-                      style={{ color: txtColor, fontWeight: isCorrectOpt || isUserOpt ? 600 : 400 }}
-                    >
-                      {String.fromCharCode(65 + i)}. {opt}
+                    <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-700">
+                      {q.q.slice(0, 45)}...
+                    </span>
+                    <span className="text-xs font-bold" style={{ color: ringColor }}>
+                      {unanswered ? "—" : correct ? "+1" : "0"}
                     </span>
                   </div>
-                  {isCorrectOpt && <span className="text-green-600 text-lg">✓</span>}
-                  {isUserOpt && !isCorrectOpt && <span className="text-red-600 text-lg">✗</span>}
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            <button className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white py-2.5 text-gray-700 font-semibold text-xs cursor-pointer">
+              <DownloadIcon className="h-4 w-4" />
+              Download Report
+            </button>
           </div>
 
-          {!isUnanswered && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-              <div className="flex gap-4 mb-3 flex-wrap">
-                <div>
-                  <span className="text-xs text-gray-500">Your Answer: </span>
-                  <span className={`font-bold text-sm ${isCorrect ? "text-green-600" : "text-red-600"}`}>
-                    {String.fromCharCode(65 + userAns)}. {q.options[userAns]}
-                  </span>
+          {/* Question Detail */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-xs text-gray-500">Question {selected + 1} of {quiz.questions}</span>
+              <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusBg}`}>{statusLabel}</span>
+            </div>
+            <h2 className="mb-5 text-base font-bold text-gray-900 sm:text-lg">{q.q}</h2>
+
+            <div className="mb-6 flex flex-col gap-2.5">
+              {q.options.map((opt, i) => {
+                const isCorrectOpt = i === q.correct;
+                const isUserOpt    = i === userAns;
+                let borderColor = "#e5e7eb", bgColor = "#fff", txtColor = "#374151";
+                if (isCorrectOpt)              { borderColor = "#16a34a"; bgColor = "#f0fdf4"; txtColor = "#166534"; }
+                if (isUserOpt && !isCorrectOpt){ borderColor = "#dc2626"; bgColor = "#fef2f2"; txtColor = "#991b1b"; }
+                return (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between rounded-xl border-2 px-4 py-3.5"
+                    style={{ borderColor, backgroundColor: bgColor }}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2"
+                        style={{ borderColor, backgroundColor: isCorrectOpt || isUserOpt ? borderColor : "#fff" }}
+                      >
+                        {(isCorrectOpt || isUserOpt) && <div className="h-2 w-2 rounded-full bg-white" />}
+                      </div>
+                      <span className="text-sm" style={{ color: txtColor, fontWeight: isCorrectOpt || isUserOpt ? 600 : 400 }}>
+                        {String.fromCharCode(65 + i)}. {opt}
+                      </span>
+                    </div>
+                    {isCorrectOpt && <CheckIcon className="h-5 w-5 text-green-600" />}
+                    {isUserOpt && !isCorrectOpt && <XIcon className="h-5 w-5 text-red-600" />}
+                  </div>
+                );
+              })}
+            </div>
+
+            {!isUnanswered && (
+              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <div className="mb-3 flex flex-wrap gap-4">
+                  <div>
+                    <span className="text-xs text-gray-500">Your Answer: </span>
+                    <span className={`font-bold text-sm ${isCorrect ? "text-green-600" : "text-red-600"}`}>
+                      {String.fromCharCode(65 + userAns)}. {q.options[userAns]}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500">Correct Answer: </span>
+                    <span className="font-bold text-sm text-green-600">
+                      {String.fromCharCode(65 + q.correct)}. {q.options[q.correct]}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-xs text-gray-500">Correct Answer: </span>
-                  <span className="font-bold text-sm text-green-600">
-                    {String.fromCharCode(65 + q.correct)}. {q.options[q.correct]}
+                <div className="mb-1.5 text-xs font-bold text-amber-800">Explanation:</div>
+                <p className="m-0 text-xs text-amber-900 leading-relaxed">{q.explanation}</p>
+                <div className="mt-3 flex items-center gap-2 rounded-lg border border-amber-200 bg-white px-3 py-2">
+                  <BookOpenIcon className="h-4 w-4 shrink-0 text-green-600" />
+                  <span className="text-xs text-gray-600">
+                    <span className="font-semibold">Reference:</span> Constitution of India
                   </span>
+                  <button className="ml-auto text-xs font-semibold text-blue-600 hover:underline">Read More</button>
                 </div>
               </div>
-              <div className="text-xs font-bold text-amber-800 mb-1.5">Explanation:</div>
-              <p className="m-0 text-xs text-amber-900 leading-relaxed">{q.explanation}</p>
-            </div>
-          )}
+            )}
 
-          <div className="flex gap-3 justify-between items-center flex-wrap">
-            <button
-              onClick={() => setSelected((s) => Math.max(0, s - 1))}
-              disabled={selected === 0}
-              className={`px-4 py-2.5 border border-gray-200 rounded-xl bg-white font-semibold text-sm ${
-                selected === 0 ? "text-gray-300 cursor-not-allowed" : "text-gray-700 cursor-pointer"
-              }`}
-            >
-              ← Previous Question
-            </button>
-            <div className="flex gap-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <button
-                onClick={onRetake}
-                className={`px-4 py-2.5 border ${level.twBorder} rounded-xl ${level.twBg} ${level.twColor} font-semibold text-sm cursor-pointer`}
+                onClick={() => setSelected((s) => Math.max(0, s - 1))}
+                disabled={selected === 0}
+                className={`flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2.5 font-semibold text-sm ${selected === 0 ? "cursor-not-allowed text-gray-300" : "cursor-pointer text-gray-700"}`}
               >
-                Retake Quiz
+                <ArrowLeftIcon className="h-4 w-4" />
+                Previous Question
               </button>
               {selected < quiz.questions - 1 ? (
                 <button
                   onClick={() => setSelected((s) => s + 1)}
-                  className="px-5 py-2.5 border-none rounded-xl text-white font-bold text-sm cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-xl border-none px-5 py-2.5 text-white font-bold text-sm cursor-pointer"
                   style={{ backgroundColor: level.color }}
                 >
-                  Next Question →
+                  Next Question
+                  <ArrowRightIcon className="h-4 w-4" />
                 </button>
               ) : (
                 <button
                   onClick={onBack}
-                  className="px-5 py-2.5 border-none rounded-xl bg-gray-700 text-white font-bold text-sm cursor-pointer"
+                  className="rounded-xl border-none bg-gray-700 px-5 py-2.5 text-white font-bold text-sm cursor-pointer"
                 >
                   Back to Quizzes
                 </button>
@@ -1207,16 +1193,38 @@ function ResultsScreen({
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="text-center py-5 text-xs text-gray-400">
-        💡 Keep practicing and improve your knowledge every day!
-        <button
-          onClick={onBack}
-          className="ml-4 px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 font-semibold text-xs cursor-pointer"
-        >
-          Back to All Quizzes
-        </button>
+       {/* Footer */}
+<div className="mt-5 rounded-2xl border border-gray-200 bg-white overflow-hidden">
+  <div className="px-6 py-5 flex items-center gap-5 flex-wrap">
+    <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0">
+      <LightbulbIcon className="h-5 w-5 text-gray-400" />
+    </div>
+    <div className="flex-1 min-w-[180px]">
+      <p className="text-sm font-semibold text-gray-900 mb-0.5">Keep practising</p>
+      <p className="text-xs text-gray-500 leading-relaxed">Every question you review brings you closer to mastering the Constitution. Consistency is everything.</p>
+    </div>
+    <button
+      onClick={onBack}
+      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-semibold cursor-pointer shrink-0 border-none"
+    >
+      <ArrowLeftIcon className="h-4 w-4" />
+      Back to all quizzes
+    </button>
+  </div>
+  <div className="border-t border-gray-100 px-6 py-3 flex items-center gap-6 flex-wrap">
+    <div className="flex items-center gap-2">
+      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+      <span className="text-xs text-gray-400">Quiz submitted — no retakes available</span>
+    </div>
+    <div className="flex items-center gap-1.5 ml-auto">
+      <svg className="h-3 w-3 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+      </svg>
+      <span className="text-xs text-gray-400">Review your answers above to understand each concept</span>
+    </div>
+  </div>
+</div>
       </div>
     </div>
   );
@@ -1225,10 +1233,10 @@ function ResultsScreen({
 // ── App ────────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("list");
-  const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
+  const [screen,      setScreen]      = useState<Screen>("list");
+  const [activeQuiz,  setActiveQuiz]  = useState<Quiz | null>(null);
   const [activeLevel, setActiveLevel] = useState<Level | null>(null);
-  const [results, setResults] = useState<Record<string, QuizResult>>({});
+  const [results,     setResults]     = useState<Record<string, QuizResult>>({});
 
   function handleStart(quiz: Quiz, level: Level) {
     setActiveQuiz(quiz);
@@ -1238,12 +1246,7 @@ export default function App() {
 
   function handleFinish(result: QuizResult) {
     if (!activeQuiz) return;
-
-    setResults((previousResults) => ({
-      ...previousResults,
-      [activeQuiz.id]: result,
-    }));
-
+    setResults((prev) => ({ ...prev, [activeQuiz.id]: result }));
     setScreen("results");
   }
 
@@ -1257,18 +1260,6 @@ export default function App() {
     setScreen("list");
   }
 
-  function handleRetake() {
-    if (!activeQuiz) return;
-
-    setResults((previousResults) => {
-      const nextResults = { ...previousResults };
-      delete nextResults[activeQuiz.id];
-      return nextResults;
-    });
-
-    setScreen("quiz");
-  }
-
   let content: React.ReactNode;
 
   if (screen === "quiz" && activeQuiz && activeLevel) {
@@ -1280,19 +1271,13 @@ export default function App() {
         onLeave={handleBackToList}
       />
     );
-  } else if (
-    screen === "results" &&
-    activeQuiz &&
-    activeLevel &&
-    results[activeQuiz.id]
-  ) {
+  } else if (screen === "results" && activeQuiz && activeLevel && results[activeQuiz.id]) {
     content = (
       <ResultsScreen
         quiz={activeQuiz}
         level={activeLevel}
         result={results[activeQuiz.id]}
         onBack={handleBackToList}
-        onRetake={handleRetake}
       />
     );
   } else {
