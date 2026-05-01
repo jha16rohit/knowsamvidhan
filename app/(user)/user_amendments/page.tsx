@@ -1,146 +1,162 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import FooterSection from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import { useState } from "react";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { useRouter } from "next/navigation";
 
 interface Amendment {
-  year: string;
+  id: string;
   number: string;
+  year: string;
   title: string;
-  description: string;
-  whyMatters: string;
-  relatedArticles: string[];
-  side: "right" | "left";
+  summary: string;
+  whyItMatters: string;
+  relatedArticles: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+const ERA_MAP: Record<string, string> = {
+  "1st":   "Post-Independence",
+  "42nd":  "Emergency Era",
+  "44th":  "Post-Emergency",
+  "73rd":  "Liberalisation",
+  "86th":  "Modern Era",
+  "101st": "Digital Era",
+  "103rd": "Digital Era",
+};
 
-const amendments: Amendment[] = [
-  {
-    year: "1951",
-    number: "1st Amendment",
-    title: "First Amendment",
-    description: "Added the Ninth Schedule to protect land reform laws and modified Articles 15 and 19.",
-    whyMatters: "Set early limits on free speech and enabled state-led social reform.",
-    relatedArticles: ["article-15", "article-19"],
-    side: "right",
-  },
-  {
-    year: "1976",
-    number: "42nd Amendment",
-    title: "The 'Mini-Constitution'",
-    description: "Added the words Socialist, Secular and Integrity to the Preamble; introduced Fundamental Duties.",
-    whyMatters: "The most extensive amendment in Indian history, expanding state power during the Emergency.",
-    relatedArticles: ["article-21", "article-51a"],
-    side: "left",
-  },
-  {
-    year: "1978",
-    number: "44th Amendment",
-    title: "Restoration of Rights",
-    description: "Reversed many of the 42nd Amendment's changes; right to property removed from Fundamental Rights.",
-    whyMatters: "Strengthened safeguards for civil liberties after the Emergency.",
-    relatedArticles: ["article-19", "article-21"],
-    side: "right",
-  },
-  {
-    year: "1992",
-    number: "73rd Amendment",
-    title: "Panchayati Raj",
-    description: "Constitutional status to Panchayats; created a three-tier system of local self-government.",
-    whyMatters: "Decentralised democracy and empowered rural governance.",
-    relatedArticles: [],
-    side: "left",
-  },
-  {
-    year: "2002",
-    number: "86th Amendment",
-    title: "Right to Education",
-    description: "Made elementary education a fundamental right under Article 21A.",
-    whyMatters: "Cornerstone of universal schooling for children aged 6 to 14.",
-    relatedArticles: ["article-21"],
-    side: "right",
-  },
-  {
-    year: "2016",
-    number: "101st Amendment",
-    title: "Goods and Services Tax",
-    description: "Introduced GST, replacing a web of indirect taxes with a unified national tax.",
-    whyMatters: "Reshaped India's economic and federal tax architecture.",
-    relatedArticles: [],
-    side: "left",
-  },
-  {
-    year: "2019",
-    number: "103rd Amendment",
-    title: "EWS Reservation",
-    description: "10% reservation in education and employment for Economically Weaker Sections among general category.",
-    whyMatters: "Extended affirmative action beyond traditional caste-based criteria.",
-    relatedArticles: ["article-15"],
-    side: "right",
-  },
+// 8 alternating accent colors — cycles by card index
+const CYCLE_COLORS = [
+  "#b85c38", // terracotta
+  "#6b4c9a", // purple
+  "#2d7d6f", // teal
+  "#4a7c3f", // forest green
+  "#c48232", // amber
+  "#1a6b99", // steel blue
+  "#8b4a6b", // mauve
+  "#7a3b1e", // dark rust
 ];
 
-// ─── Amendment Card ───────────────────────────────────────────────────────────
+function getColor(index: number): string {
+  return CYCLE_COLORS[index % CYCLE_COLORS.length];
+}
 
-function AmendmentCard({ amendment }: { amendment: Amendment }) {
-  const [saved, setSaved] = useState(false);
-  const [hovered, setHovered] = useState(false);
+function getEra(number: string) {
+  const n = (number ?? "").trim();
+  return ERA_MAP[n] ?? "Modern Era";
+}
+
+function slugify(number: string) {
+  return (number ?? "").trim().toLowerCase().replace(/\s+/g, "-");
+}
+
+function AmendmentCard({
+  amendment,
+  index,
+  onClick,
+}: {
+  amendment: Amendment;
+  index: number;
+  onClick: () => void;
+}) {
+  const color = getColor(index);
+  const era = getEra(amendment.number);
+  const related = amendment.relatedArticles
+    ? amendment.relatedArticles.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
 
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: "#fff",
-        border: "1px solid #ede8df",
-        borderRadius: 16,
-        padding: "24px",
-        transition: "all 0.2s ease",
-        boxShadow: hovered ? "0 8px 28px rgba(196,130,50,0.10)" : "0 1px 4px rgba(0,0,0,0.05)",
-        width: 280,
-      }}
+      onClick={onClick}
+      className="group relative w-full bg-white rounded-[20px] p-6 cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      style={{ border: `1.5px solid ${color}40` }}
     >
-      {/* Year dot */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-        <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#c48232", display: "inline-block" }} />
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#c48232", fontFamily: "system-ui, sans-serif" }}>{amendment.year}</span>
+      {/* Top colour bar */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[3px] rounded-t-[20px] opacity-50 group-hover:opacity-100 transition-opacity duration-300"
+        style={{ background: color }}
+      />
+
+      {/* Year + Era row */}
+      <div className="flex items-center justify-between mb-4">
+        <span
+          className="inline-block rounded-full px-3 py-1 text-[11px] font-extrabold tracking-wide flex-shrink-0"
+          style={{ background: `${color}1a`, color }}
+        >
+          {amendment.year}
+        </span>
       </div>
 
-      {/* Title */}
-      <div style={{ fontWeight: 800, fontSize: 18, color: "#1a1208", fontFamily: "'Georgia', serif", lineHeight: 1.2, marginBottom: 8 }}>
-        {amendment.number} — {amendment.title}
+      {/* Amendment number label */}
+      <div
+        className="text-[11px] font-bold tracking-[0.08em] uppercase mb-1.5 break-words"
+        style={{ color }}
+      >
+        {amendment.number} Amendment
       </div>
 
-      {/* Description */}
-      <div style={{ fontSize: 13, color: "#7a6a50", lineHeight: 1.6, marginBottom: 12, fontFamily: "system-ui, sans-serif" }}>
-        {amendment.description}
-      </div>
+      {/* Title — full text, wraps naturally */}
+      <h3
+        className="text-[18px] font-extrabold text-[#1a1208] leading-snug tracking-tight mb-3 font-serif break-words"
+      >
+        {amendment.title}
+      </h3>
 
-      {/* Why it matters */}
-      <div style={{ background: "#fffbf5", border: "1px solid #f5e6c8", borderRadius: 8, padding: "10px 12px", marginBottom: 14 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: "#c48232", fontFamily: "system-ui, sans-serif" }}>Why it matters: </span>
-        <span style={{ fontSize: 12, color: "#7a6a50", fontFamily: "system-ui, sans-serif" }}>{amendment.whyMatters}</span>
-      </div>
+      {/* Summary — clamped to 3 lines */}
+      <p
+        className="text-[13px] text-[#7a6a50] leading-relaxed mb-4"
+        style={{
+          display: "-webkit-box",
+          WebkitLineClamp: 3,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+          wordBreak: "break-word",
+        }}
+      >
+        {amendment.summary}
+      </p>
+
+      {/* Why it matters — clamped to 2 lines */}
+      {amendment.whyItMatters && (
+        <div
+          className="rounded-xl p-3 mb-4"
+          style={{ background: `${color}0d`, border: `1px solid ${color}30` }}
+        >
+          <span
+            className="block text-[10px] font-bold tracking-[0.10em] uppercase mb-1"
+            style={{ color }}
+          >
+            Why it matters
+          </span>
+          <span
+            className="text-[12px] text-[#6b5a3e] leading-relaxed"
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              wordBreak: "break-word",
+            }}
+          >
+            {amendment.whyItMatters}
+          </span>
+        </div>
+      )}
 
       {/* Related article tags */}
-      {amendment.relatedArticles.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginBottom: 14 }}>
-          {amendment.relatedArticles.map((a) => (
+      {related.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {related.map((a) => (
             <span
               key={a}
+              className="rounded-md px-2.5 py-0.5 text-[10px] font-semibold tracking-wide"
               style={{
-                background: "#f5f3ef",
-                border: "1px solid #ede8df",
-                borderRadius: 6,
-                padding: "3px 10px",
-                fontSize: 11,
-                fontWeight: 500,
-                color: "#7a6a50",
-                fontFamily: "system-ui, sans-serif",
+                background: `${color}12`,
+                border: `1px solid ${color}30`,
+                color,
+                wordBreak: "break-all",
               }}
             >
               {a}
@@ -149,121 +165,166 @@ function AmendmentCard({ amendment }: { amendment: Amendment }) {
         </div>
       )}
 
-      {/* Action buttons */}
-      <div style={{ display: "flex", gap: 8 }}>
-        <button
-          onClick={() => setSaved((s) => !s)}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 5,
-            padding: "6px 14px",
-            background: saved ? "#fdf3e3" : "#fff",
-            border: "1px solid #ede8df",
-            borderRadius: 8,
-            fontSize: 12,
-            fontWeight: 600,
-            color: saved ? "#c48232" : "#4a3c28",
-            cursor: "pointer",
-            fontFamily: "system-ui, sans-serif",
-            transition: "all 0.15s",
-          }}
-        >
-          🔖 {saved ? "Saved" : "Save"}
-        </button>
-        <button
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 5,
-            padding: "6px 14px",
-            background: "#fff",
-            border: "1px solid #ede8df",
-            borderRadius: 8,
-            fontSize: 12,
-            fontWeight: 600,
-            color: "#4a3c28",
-            cursor: "pointer",
-            fontFamily: "system-ui, sans-serif",
-          }}
-        >
-          🧩 Add to quiz
-        </button>
+      {/* Read more */}
+      <div
+        className="flex items-center gap-1.5 text-[12px] font-bold opacity-60 group-hover:opacity-100 transition-opacity duration-200"
+        style={{ color }}
+      >
+        Read more
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
       </div>
     </div>
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
-
 export default function AmendmentsPage() {
+  const router = useRouter();
+  const [amendments, setAmendments] = useState<Amendment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/amendments")
+      .then((r) => r.json())
+      .then((data) => {
+        setAmendments(Array.isArray(data) ? data : data.amendments ?? []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
   return (
     <>
-    <Navbar />
-    <div style={{ fontFamily: "system-ui, sans-serif", background: "#faf7f2", minHeight: "100vh", color: "#1a1208", paddingTop: 64 }}>
+      <Navbar />
 
-      {/* ── Hero Header ── */}
-      <section style={{ background: "linear-gradient(135deg, #f5f3ef 60%, #ede8df 100%)", borderBottom: "1px solid #ede8df", padding: "52px 48px 48px" }}>
-        <div style={{ maxWidth: 680, margin: "0 auto" }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#c48232", letterSpacing: 1.5, textTransform: "uppercase" as const, marginBottom: 12 }}>Timeline</div>
-          <h1 style={{ fontSize: 42, fontWeight: 800, color: "#1a1208", margin: "0 0 14px", lineHeight: 1.1, fontFamily: "'Georgia', serif" }}>
-            How the Constitution has evolved
-          </h1>
-          <p style={{ fontSize: 15, color: "#7a6a50", margin: 0, lineHeight: 1.65, maxWidth: 440 }}>
-            A chronological journey through the most important amendments — what changed and why it matters.
-          </p>
+      <style>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideRight {
+          0%, 100% { transform: translateX(0); }
+          50%       { transform: translateX(6px); }
+        }
+        .anim-fade-up     { animation: fadeUp     0.5s ease both; }
+        .anim-slide-right { animation: slideRight 1.4s ease-in-out infinite; }
+
+        .amendment-card-wrap * {
+          min-width: 0;
+          max-width: 100%;
+        }
+      `}</style>
+
+      <div className="bg-[#faf7f2] min-h-screen text-[#1a1208] pt-16 font-sans">
+
+        {/* Hero */}
+        <section
+          className="relative overflow-hidden border-b border-[#ddd5c0] px-6 py-14 md:px-12 lg:px-16"
+          style={{ background: "linear-gradient(150deg,#f5f0e8 0%,#ede4d0 60%,#e4d8c0 100%)" }}
+        >
+          <div
+            className="pointer-events-none absolute -top-20 -right-20 h-96 w-96 rounded-full"
+            style={{ background: "radial-gradient(circle,rgba(196,130,50,.10) 0%,transparent 70%)" }}
+          />
+          <div
+            className="pointer-events-none absolute -bottom-10 left-1/3 h-52 w-52 rounded-full"
+            style={{ background: "radial-gradient(circle,rgba(196,130,50,.06) 0%,transparent 70%)" }}
+          />
+
+          <div className="relative max-w-2xl">
+            <p className="text-[10px] font-extrabold tracking-[0.18em] uppercase text-[#c48232] mb-3">
+              Constitutional Timeline
+            </p>
+            <h1 className="text-[clamp(32px,5vw,52px)] font-black text-[#1a1208] leading-[1.08] tracking-tight mb-4 font-serif">
+              How the Constitution has
+              <br />
+              <span className="text-orange-900">evolved?</span>
+            </h1>
+            <p className="text-base text-[#6b5a3e] leading-relaxed max-w-md">
+              A chronological journey through the most important amendments — what changed and why it
+              matters for every Indian.
+            </p>
+          </div>
+        </section>
+
+        {/* Scroll hint */}
+        <div className="flex items-center gap-2 px-6 md:px-12 lg:px-16 pt-7 text-[12px] font-semibold text-[#b0a090]">
+          Scroll horizontally to explore
+          <span className="anim-slide-right">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </span>
         </div>
-      </section>
 
-      {/* ── Timeline ── */}
-      <main style={{ maxWidth: 680, margin: "0 auto", padding: "60px 24px 80px", position: "relative" as const }}>
-
-        {/* Centre line */}
+        {/* Timeline */}
         <div
+          className="overflow-x-auto overflow-y-hidden py-12 cursor-grab active:cursor-grabbing"
           style={{
-            position: "absolute" as const,
-            top: 60,
-            bottom: 80,
-            left: "50%",
-            width: 2,
-            background: "#ede8df",
-            transform: "translateX(-50%)",
+            scrollbarWidth: "thin",
+            scrollbarColor: "#ddd5c0 transparent",
           }}
-        />
+        >
+          <div className="flex items-start px-6 md:px-12 lg:px-16 w-max">
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-start">
+                    <div className="w-[280px] flex-shrink-0 px-3">
+                      <div className="bg-white border border-[#ede8df] rounded-[20px] h-64 animate-pulse" />
+                    </div>
+                    {i < 4 && (
+                      <div className="flex items-center w-10 flex-shrink-0 mt-[42px]">
+                        <div className="flex-1 h-[2px] bg-[#ede8df]" />
+                      </div>
+                    )}
+                  </div>
+                ))
+              : amendments.map((amendment, i) => (
+                  <div key={amendment.id} className="flex items-start">
+                    <div
+                      className="anim-fade-up amendment-card-wrap flex flex-col items-center w-[260px] sm:w-[280px] md:w-[300px] flex-shrink-0"
+                      style={{ animationDelay: `${i * 0.07}s` }}
+                    >
+                      {/* Timeline dot — uses cycling color */}
+                      <div className="mb-4 flex items-center justify-center">
+                        <div
+                          className="w-3.5 h-3.5 rounded-full border-[3px] border-white z-10"
+                          style={{
+                            background: getColor(i),
+                            boxShadow: `0 0 0 2px ${getColor(i)}`,
+                          }}
+                        />
+                      </div>
 
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 48 }}>
-          {amendments.map((amendment, i) => (
-            <div
-              key={amendment.number}
-              style={{
-                display: "flex",
-                justifyContent: amendment.side === "right" ? "flex-end" : "flex-start",
-                position: "relative" as const,
-              }}
-            >
-              {/* Centre dot */}
-              <div
-                style={{
-                  position: "absolute" as const,
-                  left: "50%",
-                  top: 18,
-                  transform: "translateX(-50%)",
-                  width: 14,
-                  height: 14,
-                  borderRadius: "50%",
-                  background: "#c48232",
-                  border: "3px solid #fff",
-                  boxShadow: "0 0 0 2px #c48232",
-                  zIndex: 2,
-                }}
-              />
-              <AmendmentCard amendment={amendment} />
-            </div>
-          ))}
+                      {/* Card */}
+                      <div className="w-full px-3 overflow-hidden">
+                        <AmendmentCard
+                          amendment={amendment}
+                          index={i}
+                          onClick={() =>
+                            router.push(`/user_amendments/${slugify(amendment.number)}`)
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    {/* Connector line */}
+                    {i < amendments.length - 1 && (
+                      <div className="flex items-center w-10 flex-shrink-0 mt-[42px]">
+                        <div
+                          className="flex-1 h-[2px]"
+                          style={{ background: "linear-gradient(90deg,#ede8df,#ddd5c0)" }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+          </div>
         </div>
-      </main>
-      <FooterSection />
-    </div>
+
+        <FooterSection />
+      </div>
     </>
   );
 }

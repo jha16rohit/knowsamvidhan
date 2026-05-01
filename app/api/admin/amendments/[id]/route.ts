@@ -1,31 +1,46 @@
-// app/api/admin/amendments/route.ts
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// ✅ GET all amendments
-export async function GET() {
-  const amendments = await prisma.amendment.findMany({
-    orderBy: { createdAt: "asc" },
-  });
+// ✅ PUT — update amendment
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await req.json();
 
-  return NextResponse.json({ amendments });
+    const updated = await prisma.amendment.update({
+      where: { id: params.id },
+      data: {
+        number:          body.number,
+        year:            body.year,
+        title:           body.title,
+        summary:         body.summary,
+        whyItMatters:    body.whyItMatters    ?? "",
+        relatedArticles: body.relatedArticles ?? "",
+      },
+    });
+
+    return NextResponse.json({ amendment: updated });
+  } catch (error) {
+    console.error("PUT /api/admin/amendments/[id] error:", error);
+    return NextResponse.json({ error: "Failed to update amendment" }, { status: 500 });
+  }
 }
 
-// ✅ POST create amendment
-export async function POST(req: Request) {
-  const body = await req.json();
+// ✅ DELETE — remove amendment
+export async function DELETE(
+  _req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await prisma.amendment.delete({
+      where: { id: params.id },
+    });
 
-  const created = await prisma.amendment.create({
-    data: {
-      number:          body.number,
-      year:            body.year,
-      title:           body.title,
-      summary:         body.summary,
-      whyItMatters:    body.whyItMatters    ?? "",
-      relatedArticles: body.relatedArticles ?? "",
-    },
-  });
-
-  return NextResponse.json({ amendment: created }, { status: 201 });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("DELETE /api/admin/amendments/[id] error:", error);
+    return NextResponse.json({ error: "Failed to delete amendment" }, { status: 500 });
+  }
 }

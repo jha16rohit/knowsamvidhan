@@ -84,6 +84,11 @@ CREATE TABLE "Preamble" (
     "simpleExplanation" TEXT NOT NULL,
     "whyItMatters" TEXT NOT NULL,
     "keywords" TEXT NOT NULL DEFAULT '[]',
+    "timeline" TEXT NOT NULL DEFAULT '[]',
+    "quickFacts" TEXT NOT NULL DEFAULT '[]',
+    "landmarkCase" TEXT NOT NULL DEFAULT '{}',
+    "amendmentNote" TEXT NOT NULL DEFAULT '',
+    "didYouKnow" TEXT NOT NULL DEFAULT '',
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Preamble_pkey" PRIMARY KEY ("id")

@@ -1,14 +1,14 @@
-// app/api/admin/schedules/route.ts
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// Helper
 function formatTopics(topics: string): string[] {
   return topics.split(",").map((t: string) => t.trim()).filter(Boolean);
 }
 
-// ✅ GET all schedules
+function parseTagDetails(raw: string): { tag: string; detail: string }[] {
+  try { return JSON.parse(raw); } catch { return []; }
+}
+
 export async function GET() {
   const schedules = await prisma.schedule.findMany({
     orderBy: { createdAt: "asc" },
@@ -18,15 +18,16 @@ export async function GET() {
     id:          s.id,
     shortId:     s.shortId,
     schedule:    s.schedule,
+    slug:        s.slug,
     title:       s.title,
     description: s.description ?? "",
     topics:      formatTopics(s.topics),
+    tagDetails:  parseTagDetails(s.tagDetails),
   }));
 
   return NextResponse.json({ schedules: formatted });
 }
 
-// ✅ POST create schedule
 export async function POST(req: Request) {
   const body = await req.json();
 
@@ -34,13 +35,19 @@ export async function POST(req: Request) {
     ? body.topics.join(", ")
     : body.topics ?? "";
 
+  const tagDetails = JSON.stringify(
+    Array.isArray(body.tagDetails) ? body.tagDetails : []
+  );
+
   const created = await prisma.schedule.create({
     data: {
       shortId:     body.shortId,
       schedule:    body.schedule,
+      slug:        body.slug,
       title:       body.title,
       description: body.description ?? "",
       topics,
+      tagDetails,
     },
   });
 
@@ -49,9 +56,11 @@ export async function POST(req: Request) {
       id:          created.id,
       shortId:     created.shortId,
       schedule:    created.schedule,
+      slug:        created.slug,
       title:       created.title,
       description: created.description ?? "",
       topics:      formatTopics(created.topics),
+      tagDetails:  parseTagDetails(created.tagDetails),
     }
   }, { status: 201 });
 }

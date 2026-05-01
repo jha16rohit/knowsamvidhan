@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -17,7 +18,6 @@ export async function POST(req: Request) {
       where: { email },
     });
 
-    // 🔴 USER NOT FOUND
     if (!user) {
       return NextResponse.json(
         { error: "Invalid credentials" },
@@ -25,7 +25,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔴 NOT ADMIN
     if (user.role !== "ADMIN") {
       return NextResponse.json(
         { error: "Not Authorized (Admin only)" },
@@ -33,7 +32,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔴 STATUS CHECK
     if (user.status !== "ACTIVE") {
       return NextResponse.json(
         { error: "Account inactive" },
@@ -54,10 +52,28 @@ export async function POST(req: Request) {
       Object.entries(user).filter(([key]) => key !== "password")
     );
 
-    return NextResponse.json({
+    // ✅ CREATE JWT TOKEN
+const token = jwt.sign(
+  { id: user.id, email: user.email, role: user.role }, // ← user.role = "ADMIN"
+  process.env.JWT_SECRET!,
+  { expiresIn: "7d" }
+);
+
+    // ✅ SET TOKEN AS COOKIE
+    const response = NextResponse.json({
       message: "Admin login successful",
       user: safeUser,
     });
+
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
+    });
+
+    return response;
 
   } catch (error) {
     console.error("ADMIN LOGIN ERROR:", error);

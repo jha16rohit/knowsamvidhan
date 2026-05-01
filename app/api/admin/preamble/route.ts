@@ -1,50 +1,83 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// The Preamble is a singleton — there's only ever ONE row.
-// We use a fixed id so upsert always targets the same record.
 const PREAMBLE_ID = "singleton";
 
-// GET — fetch the preamble
+// ── DEFAULT DATA (MATCHES UI) ──
+const DEFAULTS = {
+  officialText: "We, the people of India...",
+  simpleExplanation: "This explains the Constitution...",
+  whyItMatters: "Defines core values of India",
+
+  keywords: JSON.stringify([]),
+  timeline: JSON.stringify([]),
+  quickFacts: JSON.stringify([]),
+
+  // ✅ ARRAY
+  landmarkCases: JSON.stringify([]),
+
+  // ✅ ARRAY WITH TYPES
+  notes: JSON.stringify([
+    { type: "amendment", text: "" },
+    { type: "did-you-know", text: "" }
+  ]),
+};
+
+// ── GET ──
 export async function GET() {
-  const preamble = await prisma.preamble.findUnique({
-    where: { id: PREAMBLE_ID },
-  });
-
-  if (!preamble) {
-    // Return empty defaults so the frontend form still renders cleanly
-    return NextResponse.json({
-      id:                PREAMBLE_ID,
-      officialText:      "",
-      simpleExplanation: "",
-      whyItMatters:      "",
-      keywords:          "[]",
+  try {
+    const preamble = await prisma.preamble.findUnique({
+      where: { id: PREAMBLE_ID },
     });
-  }
 
-  return NextResponse.json(preamble);
+    if (!preamble) {
+      return NextResponse.json({ id: PREAMBLE_ID, ...DEFAULTS });
+    }
+
+    return NextResponse.json(preamble);
+  } catch (error) {
+    console.error("GET ERROR:", error);
+    return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
+  }
 }
 
-// PUT — upsert the preamble (create if first save, update on every subsequent save)
+// ── PUT ──
 export async function PUT(req: Request) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
 
-  const preamble = await prisma.preamble.upsert({
-    where: { id: PREAMBLE_ID },
-    create: {
-      id:                PREAMBLE_ID,
-      officialText:      body.officialText      ?? "",
-      simpleExplanation: body.simpleExplanation ?? "",
-      whyItMatters:      body.whyItMatters      ?? "",
-      keywords:          body.keywords          ?? "[]",
-    },
-    update: {
-      ...(body.officialText      !== undefined && { officialText:      body.officialText      }),
-      ...(body.simpleExplanation !== undefined && { simpleExplanation: body.simpleExplanation }),
-      ...(body.whyItMatters      !== undefined && { whyItMatters:      body.whyItMatters      }),
-      ...(body.keywords          !== undefined && { keywords:          body.keywords          }),
-    },
-  });
+    const preamble = await prisma.preamble.upsert({
+      where: { id: PREAMBLE_ID },
 
-  return NextResponse.json(preamble);
+      create: {
+        id: PREAMBLE_ID,
+        officialText:      body.officialText      ?? DEFAULTS.officialText,
+        simpleExplanation: body.simpleExplanation ?? DEFAULTS.simpleExplanation,
+        whyItMatters:      body.whyItMatters      ?? DEFAULTS.whyItMatters,
+
+        keywords:      body.keywords      ?? DEFAULTS.keywords,
+        timeline:      body.timeline      ?? DEFAULTS.timeline,
+        quickFacts:    body.quickFacts    ?? DEFAULTS.quickFacts,
+        landmarkCases: body.landmarkCases ?? DEFAULTS.landmarkCases,
+        notes:         body.notes         ?? DEFAULTS.notes,
+      },
+
+      update: {
+        ...(body.officialText      !== undefined && { officialText:      body.officialText }),
+        ...(body.simpleExplanation !== undefined && { simpleExplanation: body.simpleExplanation }),
+        ...(body.whyItMatters      !== undefined && { whyItMatters:      body.whyItMatters }),
+
+        ...(body.keywords      !== undefined && { keywords:      body.keywords }),
+        ...(body.timeline      !== undefined && { timeline:      body.timeline }),
+        ...(body.quickFacts    !== undefined && { quickFacts:    body.quickFacts }),
+        ...(body.landmarkCases !== undefined && { landmarkCases: body.landmarkCases }),
+        ...(body.notes         !== undefined && { notes:         body.notes }),
+      },
+    });
+
+    return NextResponse.json(preamble);
+  } catch (error) {
+    console.error("PUT ERROR:", error);
+    return NextResponse.json({ error: "Failed to save" }, { status: 500 });
+  }
 }
