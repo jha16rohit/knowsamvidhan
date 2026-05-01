@@ -41,7 +41,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔴 PASSWORD CHECK
     const isValid = await bcrypt.compare(password, user.password);
 
     if (!isValid) {
@@ -51,7 +50,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const { password: _, ...safeUser } = user;
+    const safeUser = Object.fromEntries(
+      Object.entries(user).filter(([key]) => key !== "password")
+    );
 
     return NextResponse.json({
       message: "Admin login successful",
