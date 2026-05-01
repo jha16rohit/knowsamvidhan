@@ -2,7 +2,7 @@
 
 import FooterSection from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -32,6 +32,93 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
       className="w-4 h-4">
       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
     </svg>
+  );
+}
+
+// ─── Speak Button ─────────────────────────────────────────────────────────────
+
+function SpeakButton({ text }: { text: string }) {
+  const [speaking, setSpeaking] = useState(false);
+  const uttRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  const handleClick = () => {
+    if (!("speechSynthesis" in window)) return;
+
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = "en-IN";
+    utt.rate = 0.92;
+    utt.pitch = 1;
+
+    utt.onend = () => setSpeaking(false);
+    utt.onerror = () => setSpeaking(false);
+
+    uttRef.current = utt;
+    window.speechSynthesis.speak(utt);
+    setSpeaking(true);
+  };
+
+  // Stop on unmount
+  useEffect(() => {
+    return () => { window.speechSynthesis?.cancel(); };
+  }, []);
+
+  return (
+    <button
+      onClick={handleClick}
+      title={speaking ? "Stop speaking" : "Listen to Preamble"}
+      className={`
+        inline-flex items-center gap-2 rounded-full border px-4 py-1.5
+        text-[12px] font-semibold tracking-wide
+        transition-all duration-200 select-none
+        ${speaking
+          ? "border-[#c48232] bg-[#fdf3e3] text-[#c48232] hover:bg-[#fde8c4]"
+          : "border-[#c9b99a] bg-white text-[#7a6a50] hover:border-[#c48232] hover:text-[#c48232] hover:bg-[#fdf3e3]"
+        }
+      `}
+    >
+      {/* Speaker / Stop icon */}
+      {speaking ? (
+        /* Stop icon */
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+          className="w-3.5 h-3.5 shrink-0">
+          <rect x="4" y="4" width="16" height="16" rx="2" />
+        </svg>
+      ) : (
+        /* Volume / speaker icon */
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+          className="w-3.5 h-3.5 shrink-0">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+        </svg>
+      )}
+      {speaking ? "Stop" : "Listen"}
+
+      {/* Animated bars when speaking */}
+      {speaking && (
+        <span className="flex items-end gap-[2px] h-3">
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              className="w-[3px] rounded-full bg-[#c48232] animate-bounce"
+              style={{
+                animationDelay: `${i * 0.18}s`,
+                animationDuration: "0.7s",
+                height: i === 1 ? "12px" : "7px",
+              }}
+            />
+          ))}
+        </span>
+      )}
+    </button>
   );
 }
 
@@ -88,9 +175,8 @@ export default function PreamblePage() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  // Split notes by type for display
-  const amendmentNotes = data?.notes.filter((n) => n.type === "amendment") ?? [];
-  const didYouKnowNotes = data?.notes.filter((n) => n.type === "did-you-know") ?? [];
+  const amendmentNotes  = data?.notes.filter((n) => n.type === "amendment")     ?? [];
+  const didYouKnowNotes = data?.notes.filter((n) => n.type === "did-you-know")  ?? [];
 
   return (
     <>
@@ -115,7 +201,6 @@ export default function PreamblePage() {
             <p className="text-sm sm:text-base md:text-lg text-[#7a6a50] leading-relaxed max-w-xl mb-8">
               The soul of the Constitution — a single paragraph that declares who we are, what we believe, and what we promise each other as a nation.
             </p>
-            
           </div>
         </section>
 
@@ -147,11 +232,22 @@ export default function PreamblePage() {
                         {data?.officialText}
                       </p>
                     )}
-                    <div className="mt-8 pt-6 border-t border-[#f0ece4] flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full border-2 border-[#c48232] flex items-center justify-center">
-                        <span className="text-[#c48232] text-xs font-bold">IN</span>
+
+                    {/* ── Footer row: attribution + SPEAK BUTTON ── */}
+                    <div className="mt-8 pt-6 border-t border-[#f0ece4] flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full border-2 border-[#c48232] flex items-center justify-center shrink-0">
+                          <span className="text-[#c48232] text-xs font-bold">IN</span>
+                        </div>
+                        <p className="text-[11px] text-[#9e8c73] font-medium">
+                          Constitution of India · Adopted 26 November 1949
+                        </p>
                       </div>
-                      <p className="text-[11px] text-[#9e8c73] font-medium">Constitution of India · Adopted 26 November 1949</p>
+
+                      {/* Speak button — only added here, nothing else changed */}
+                      {!isLoading && data?.officialText && (
+                        <SpeakButton text={data.officialText} />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -285,7 +381,7 @@ export default function PreamblePage() {
                 )}
               </div>
 
-              {/* Landmark Cases — multiple */}
+              {/* Landmark Cases */}
               {(isLoading || (data?.landmarkCases?.length ?? 0) > 0) && (
                 <div className="rounded-2xl border border-[#c9b99a] bg-white p-5">
                   <p className="text-[10px] font-bold text-[#c48232] tracking-[2px] uppercase mb-4">Landmark Cases</p>
