@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/email";
+
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, password } = body;
+    const { name, email, password } = body as {
+      name?: string;
+      email?: string;
+      password?: string;
+    };
 
-    // Validation
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: "All fields are required" },
@@ -15,16 +22,17 @@ export async function POST(req: Request) {
       );
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
+        { error: "Password must be at least 8 characters" },
         { status: 400 }
       );
     }
 
-    // Check if user exists
+    const cleanEmail = normalizeEmail(email);
+
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: cleanEmail },
     });
 
     if (existingUser) {
@@ -34,31 +42,47 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    const [passwordHash, otpHash] = await Promise.all([
+      bcrypt.hash(password, 10),
+      bcrypt.hash(otp, 10),
+    ]);
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: "USER",
-        status: "ACTIVE", // default
+    await prisma.registrationOTP.upsert({
+      where: { email: cleanEmail },
+      create: {
+        name: name.trim(),
+        email: cleanEmail,
+        passwordHash,
+        otpHash,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        status: true,
-        createdAt: true,
+      update: {
+        name: name.trim(),
+        passwordHash,
+        otpHash,
+        attempts: 0,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
       },
     });
 
+    await sendEmail({
+      to: cleanEmail,
+      subject: "Verify your KnowSamvidhan account",
+      html: `
+        <div style="font-family:Arial,sans-serif;line-height:1.6">
+          <h2>Verify your email</h2>
+          <p>Your KnowSamvidhan verification code is:</p>
+          <h1 style="letter-spacing:4px">${otp}</h1>
+          <p>This code expires in 10 minutes.</p>
+        </div>
+      `,
+    });
+
     return NextResponse.json({
-      message: "User registered successfully",
-      user,
+      message: "Verification OTP sent to your email",
+      requiresOtp: true,
+      ...(process.env.NODE_ENV !== "production" ? { devOtp: otp } : {}),
     });
 
   } catch (error) {

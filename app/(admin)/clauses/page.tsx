@@ -12,6 +12,43 @@ import {
 
 const CLAUSES_PER_PAGE = 10;
 
+type ArticleOption = {
+  id: string;
+  articleNumber: string;
+  title: string;
+  label: string;
+};
+
+type Clause = {
+  id: string;
+  clauseNumber: string;
+  title: string;
+  text?: string;
+  officialText?: string;
+  simpleExplanation?: string;
+  example?: string;
+  tags?: string;
+  featured: boolean;
+  articleId: string;
+  article?: {
+    id: string;
+    articleNumber: string;
+    title?: string;
+  };
+};
+
+type FormDataType = {
+  articleId: string;
+  clauseNumber: string;
+  title: string;
+  text: string;
+  officialText: string;
+  simpleExplanation: string;
+  example: string;
+  tags: string;
+  featured: boolean;
+};
+
 export default function ClausesPage() {
   const openCount = 4;
 
@@ -32,8 +69,8 @@ export default function ClausesPage() {
   ];
 
   // ─── State ────────────────────────────────────────────────────────────────
-  const [availableArticles, setAvailableArticles] = useState<any[]>([]);
-  const [clauses, setClauses] = useState<any[]>([]);
+  const [availableArticles, setAvailableArticles] = useState<ArticleOption[]>([]);
+  const [clauses, setClauses] = useState<Clause[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,10 +87,16 @@ export default function ClausesPage() {
   const [isArticleDropdownOpen, setIsArticleDropdownOpen] = useState(false);
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
-    articleId: '',
-    clauseNumber: '',
-    text: '',
+  const [formData, setFormData] = useState<FormDataType>({
+    articleId: "",
+    clauseNumber: "",
+    title: "",
+    text: "",
+    officialText: "",
+    simpleExplanation: "",
+    example: "",
+    tags: "",
+    featured: false,
   });
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -92,11 +135,11 @@ export default function ClausesPage() {
       .then((res) => res.json())
       .then((data) => {
         const list = data.articles ?? data;
-        const formatted = list.map((a: any) => ({
-          id: a.id,
-          label: `${a.articleNumber} — ${a.title}`,
-          articleNumber: a.articleNumber,
-          title: a.title,
+        const formatted = list.map((item: ArticleOption) => ({
+          id: item.id,
+          articleNumber: item.articleNumber,
+          title: item.title,
+          label: `${item.articleNumber} — ${item.title}`,
         }));
         setAvailableArticles(formatted);
       })
@@ -107,7 +150,7 @@ export default function ClausesPage() {
     if (availableArticles.length > 0 && !formData.articleId) {
       setFormData((prev) => ({ ...prev, articleId: availableArticles[0].id }));
     }
-  }, [availableArticles]);
+  }, [availableArticles, formData.articleId]);
 
   // ─── Fetch clauses (server-side: search + filter + pagination) ────────────
   const fetchClauses = useCallback(async () => {
@@ -151,7 +194,7 @@ export default function ClausesPage() {
     return found ? found.label : 'All Articles';
   };
 
-  const groupedClauses = clauses.reduce((acc: Record<string, any[]>, clause: any) => {
+  const groupedClauses = clauses.reduce((acc: Record<string, Clause[]>, clause: Clause) => {
     const key = clause.articleId;
     if (!acc[key]) acc[key] = [];
     acc[key].push(clause);
@@ -162,22 +205,54 @@ export default function ClausesPage() {
   const handleOpenModal = (id: string | null = null) => {
     if (id !== null) {
       const toEdit = clauses.find((c) => c.id === id);
+  
       if (toEdit) {
         setFormData({
           articleId: toEdit.articleId,
+  
           clauseNumber: toEdit.clauseNumber,
-          text: toEdit.text,
+  
+          title: toEdit.title,
+  
+          text: toEdit.text ?? "",
+  
+          officialText: toEdit.officialText ?? "",
+  
+          simpleExplanation: toEdit.simpleExplanation ?? "",
+  
+          example: toEdit.example ?? "",
+  
+          tags: toEdit.tags ?? "",
+  
+          featured: toEdit.featured,
         });
+  
         setEditingId(id);
       }
     } else {
       setFormData({
-        articleId: availableArticles[0]?.id ?? '',
-        clauseNumber: '',
-        text: '',
+        articleId: availableArticles[0]?.id ?? "",
+  
+        clauseNumber: "",
+  
+        title: "",
+  
+        text: "",
+  
+        officialText: "",
+  
+        simpleExplanation: "",
+  
+        example: "",
+  
+        tags: "",
+  
+        featured: false,
       });
+  
       setEditingId(null);
     }
+  
     setIsArticleDropdownOpen(false);
     setIsModalOpen(true);
   };
@@ -295,7 +370,7 @@ export default function ClausesPage() {
             <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
           </div>
           <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You're managing live content.<br />Edit with care.
+            You&apos;re managing live content.<br />Edit with care.
           </p>
         </div>
       </aside>
@@ -346,13 +421,13 @@ export default function ClausesPage() {
             <div ref={filterDropdownRef} className="relative shrink-0">
               <div
                 onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-                className={`flex items-center gap-2 px-4 py-2.5 bg-white border rounded-xl cursor-pointer shadow-sm transition min-w-[200px] justify-between ${
+                className={`flex items-center gap-2 px-4 py-2.5 bg-white border rounded-xl cursor-pointer shadow-sm transition min-w-50 justify-between ${
                   isFilterDropdownOpen ? 'border-[#f59e0b]' : 'border-gray-200 hover:border-[#f59e0b]'
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <Filter className="w-4 h-4 text-gray-400 shrink-0" />
-                  <span className="text-sm text-gray-800 truncate max-w-[160px]">{getFilterLabel()}</span>
+                  <span className="text-sm text-gray-800 truncate `max-w-[160px]`">{getFilterLabel()}</span>
                 </div>
                 <svg
                   className={`w-4 h-4 text-gray-500 shrink-0 transition-transform ${isFilterDropdownOpen ? 'rotate-180' : ''}`}
@@ -363,7 +438,7 @@ export default function ClausesPage() {
               </div>
 
               {isFilterDropdownOpen && (
-                <div className="absolute z-50 mt-2 w-full min-w-[260px] bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute z-50 mt-2 w-full min-w-65 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                   <div
                     onClick={() => { setSelectedArticleFilter('all'); setIsFilterDropdownOpen(false); }}
                     className={`px-4 py-3 text-sm cursor-pointer transition flex items-center justify-between ${
@@ -413,13 +488,13 @@ export default function ClausesPage() {
                 <AlignLeft className="w-5 h-5 text-gray-500" />
               </div>
               <h3 className="text-lg font-serif font-bold text-gray-900 mb-1">No clauses found</h3>
-              <p className="text-sm text-gray-500">Try a different search or filter, or click "New clause".</p>
+              <p className="text-sm text-gray-500">Try a different search or filter, or click &quot;New clause&quot;.</p>
             </div>
           ) : (
             <>
               {/* Grouped by article */}
               {Object.entries(groupedClauses).map(([articleId, articleClauses]) => {
-                const articleMeta = (articleClauses as any[])[0]?.article;
+                const articleMeta = (articleClauses as Clause[])[0]?.article;
                 const artNumber = articleMeta?.articleNumber ?? '';
                 const artTitle = articleMeta?.title ?? '';
 
@@ -432,7 +507,7 @@ export default function ClausesPage() {
                         <h3 className="text-lg font-semibold text-gray-900">{artTitle}</h3>
                       </div>
                       <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-semibold">
-                        {(articleClauses as any[]).length} {(articleClauses as any[]).length === 1 ? 'clause' : 'clauses'}
+                      {articleClauses.length} {articleClauses.length === 1 ? 'clause' : 'clauses'}
                       </span>
                     </div>
 
@@ -446,7 +521,7 @@ export default function ClausesPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                          {(articleClauses as any[]).map((clause) => (
+                          {(articleClauses as Clause[]).map((clause) => (
                             <tr key={clause.id} className="hover:bg-gray-50/50 transition-colors">
                               <td className="px-6 py-5 text-sm font-semibold text-gray-900 align-top pt-5">{clause.clauseNumber}</td>
                               <td className="px-6 py-5 text-sm text-gray-600 leading-relaxed pr-10">{clause.text}</td>

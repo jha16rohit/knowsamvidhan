@@ -4,13 +4,14 @@ import { prisma } from "@/lib/prisma";
 // ✅ PUT — update amendment
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const body = await req.json();
 
     const updated = await prisma.amendment.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         number:          body.number,
         year:            body.year,
@@ -31,11 +32,12 @@ export async function PUT(
 // ✅ DELETE — remove amendment
 export async function DELETE(
   _req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     await prisma.amendment.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

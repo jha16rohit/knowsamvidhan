@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { User, Mail, Lock, LucideIcon } from "lucide-react";
+import { Lock, Mail, User, type LucideIcon } from "lucide-react";
 
 interface InputProps {
   label: string;
   value: string;
   setValue: (value: string) => void;
-  type?: "text" | "password" | "email" | "number"; 
+  type?: "text" | "password" | "email" | "number";
   icon?: LucideIcon;
   placeholder?: string;
 }
@@ -20,20 +20,11 @@ function Input({
   icon: Icon,
   placeholder = "",
 }: InputProps) {
-
   const [focused, setFocused] = useState(false);
 
   return (
     <div style={{ flex: 1 }}>
-      <label
-        style={{
-          fontSize: 14,
-          fontWeight: 600,
-          marginBottom: 8,
-          display: "block",
-          color: "#0f172a",
-        }}
-      >
+      <label style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, display: "block", color: "#0f172a" }}>
         {label}
       </label>
 
@@ -44,20 +35,17 @@ function Input({
           gap: 10,
           padding: "12px 14px",
           borderRadius: 12,
-          border: focused
-            ? "1px solid #f97316"
-            : "1px solid #e2e8f0",
+          border: focused ? "1px solid #f97316" : "1px solid #e2e8f0",
           background: "#fff",
           boxShadow: "0 4px 10px rgba(0,0,0,0.04)",
           transition: "border 0.2s ease",
         }}
       >
         {Icon && <Icon size={18} color="#94a3b8" />}
-
         <input
           type={type}
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(event) => setValue(event.target.value)}
           placeholder={placeholder}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
@@ -79,10 +67,15 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [otp, setOtp] = useState("");
   const [agree, setAgree] = useState(false);
+  const [step, setStep] = useState<"details" | "otp">("details");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRegister = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setMessage("");
 
     if (!name || !email || !password || !confirm) {
       alert("All fields required");
@@ -99,38 +92,65 @@ export default function RegisterPage() {
       return;
     }
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
-    
-    let data = null;
-    
-    if (res.headers.get("content-type")?.includes("application/json")) {
-      data = await res.json();
+    setSubmitting(true);
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.error || "Registration failed");
+        return;
+      }
+
+      setStep("otp");
+      setMessage(
+        data?.devOtp
+          ? `OTP sent. Dev OTP: ${data.devOtp}`
+          : "OTP sent to your email. Enter it below to finish creating your account."
+      );
+    } finally {
+      setSubmitting(false);
     }
-    
-    if (!res.ok) {
-      alert(data?.error || "Registration failed");
+  };
+
+  const handleVerifyOtp = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setMessage("");
+
+    if (!otp.trim()) {
+      alert("Enter the OTP sent to your email");
       return;
     }
 
-    alert("Account created");
-    window.location.href = "/user_login";
+    setSubmitting(true);
+
+    try {
+      const res = await fetch("/api/auth/register/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.error || "OTP verification failed");
+        return;
+      }
+
+      alert("Account verified. You can now log in.");
+      window.location.href = "/user_login";
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-        fontFamily: "system-ui, sans-serif",
-      }}
-    >
-      {/* ── LEFT PANEL (FORM NOW) ── */}
+    <div style={{ display: "flex", minHeight: "100vh", fontFamily: "system-ui, sans-serif" }}>
       <div
         style={{
           flex: 1,
@@ -142,8 +162,6 @@ export default function RegisterPage() {
         }}
       >
         <div style={{ width: "100%", maxWidth: 440 }}>
-
-          {/* Heading */}
           <h2
             style={{
               fontSize: 36,
@@ -163,80 +181,50 @@ export default function RegisterPage() {
             </a>
           </p>
 
-          <form
-            onSubmit={handleRegister}
-            style={{ display: "flex", flexDirection: "column", gap: 20 }}
-          >
-
-            {/* NAME */}
-            <Input
-              label="Full name"
-              icon={User}
-              value={name}
-              setValue={setName}
-              placeholder="Aarav Sharma"
-            />
-
-            {/* EMAIL */}
-            <Input
-              label="Email"
-              icon={Mail}
-              value={email}
-              setValue={setEmail}
-              type="email"
-              placeholder="aarav.sharma@example.com"
-            />
-
-            {/* PASSWORD ROW */}
-            <div style={{ display: "flex", gap: 14 }}>
-            <Input
-              label="Password"
-              icon={Lock}
-              value={password}
-              setValue={setPassword}
-              type="password"
-              placeholder="••••••••"
-            />
-
-            <Input
-              label="Confirm"
-              icon={Lock}
-              value={confirm}
-              setValue={setConfirm}
-              type="password"
-              placeholder="••••••••"
-            />
-            </div>
-
-            {/* TERMS */}
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                fontSize: 14,
-                color: "#475569",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={agree}
-                onChange={() => setAgree(!agree)}
+          <form onSubmit={step === "details" ? handleRegister : handleVerifyOtp} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {message && (
+              <div
                 style={{
-                  width: 16,
-                  height: 16,
-                  accentColor: "#f97316",
-                  cursor: "pointer",
+                  padding: "12px 14px",
+                  borderRadius: 10,
+                  background: "#fff7ed",
+                  color: "#9a3412",
+                  fontSize: 14,
+                  lineHeight: 1.5,
                 }}
-              />
-              I agree to the {""}
-              <span style={{ color: "#f97316", fontWeight: 500 }}>Terms</span> and {""}
-              <span style={{ color: "#f97316", fontWeight: 500 }}>Privacy Policy</span>
-            </label>
+              >
+                {message}
+              </div>
+            )}
 
-            {/* BUTTON */}
+            {step === "details" ? (
+              <>
+                <Input label="Full name" icon={User} value={name} setValue={setName} placeholder="Aarav Sharma" />
+                <Input label="Email" icon={Mail} value={email} setValue={setEmail} type="email" placeholder="aarav.sharma@example.com" />
+
+                <div style={{ display: "flex", gap: 14 }}>
+                  <Input label="Password" icon={Lock} value={password} setValue={setPassword} type="password" placeholder="********" />
+                  <Input label="Confirm" icon={Lock} value={confirm} setValue={setConfirm} type="password" placeholder="********" />
+                </div>
+
+                <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 14, color: "#475569" }}>
+                  <input
+                    type="checkbox"
+                    checked={agree}
+                    onChange={() => setAgree((current) => !current)}
+                    style={{ width: 16, height: 16, accentColor: "#f97316", cursor: "pointer" }}
+                  />
+                  I agree to the <span style={{ color: "#f97316", fontWeight: 500 }}>Terms</span> and{" "}
+                  <span style={{ color: "#f97316", fontWeight: 500 }}>Privacy Policy</span>
+                </label>
+              </>
+            ) : (
+              <Input label="Email OTP" icon={Mail} value={otp} setValue={setOtp} type="number" placeholder="123456" />
+            )}
+
             <button
               type="submit"
+              disabled={submitting}
               style={{
                 marginTop: 8,
                 padding: "16px",
@@ -246,27 +234,32 @@ export default function RegisterPage() {
                 borderRadius: 14,
                 fontSize: 16,
                 fontWeight: 700,
-                cursor: "pointer",
+                cursor: submitting ? "not-allowed" : "pointer",
                 boxShadow: "0 10px 25px rgba(249,115,22,0.25)",
                 transition: "all 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.92")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              onMouseEnter={(event) => (event.currentTarget.style.opacity = "0.92")}
+              onMouseLeave={(event) => (event.currentTarget.style.opacity = "1")}
             >
-              Create account →
+              {submitting ? "Please wait..." : step === "details" ? "Send OTP" : "Verify and create account"}
             </button>
           </form>
         </div>
       </div>
 
-
-      {/* ── RIGHT PANEL (UNCHANGED LOGIN HERO) ── */}
       <div
-        style={{ flex: "0 0 52%", background: "linear-gradient(160deg, #0f1f3d 0%, #1a2e52 60%, #0f1f3d 100%)", position: "relative", display: "flex", flexDirection: "column",
-          justifyContent: "center", padding: "80px 64px", overflow: "hidden", minHeight: "calc(100vh - 72px)", 
+        style={{
+          flex: "0 0 52%",
+          background: "linear-gradient(160deg, #0f1f3d 0%, #1a2e52 60%, #0f1f3d 100%)",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          padding: "80px 64px",
+          overflow: "hidden",
+          minHeight: "calc(100vh - 72px)",
         }}
       >
-        {/* Decorative Ring (RIGHT SIDE like design) */}
         <div
           style={{
             position: "absolute",
@@ -280,7 +273,6 @@ export default function RegisterPage() {
             pointerEvents: "none",
           }}
         />
-
         <div
           style={{
             position: "absolute",
@@ -295,39 +287,10 @@ export default function RegisterPage() {
           }}
         />
 
-        {/* Glow */}
-        <div
-          style={{
-            position: "absolute",
-            right: "120px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            width: 240,
-            height: 240,
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(196,130,50,0.18) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* CONTENT */}
         <div style={{ zIndex: 1, maxWidth: 460 }}>
-          {/* Tagline */}
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: 3,
-              color: "#f97316",
-              textTransform: "uppercase",
-              marginBottom: 18,
-            }}
-          >
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 3, color: "#f97316", textTransform: "uppercase", marginBottom: 18 }}>
             Join thousands learning the Constitution every day.
           </div>
-
-          {/* Main Heading */}
           <h1
             style={{
               fontSize: 42,
@@ -340,38 +303,16 @@ export default function RegisterPage() {
           >
             Continue your journey through the Constitution.
           </h1>
-
-          {/* Sub points */}
-          <ul
-            style={{
-              marginTop: 12,
-              color: "#94a3b8",
-              lineHeight: 1.9,
-              fontSize: 15,
-            }}
-          >
-            <li style={{ marginBottom: 6,display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "#f97316", fontSize: "28px", lineHeight: 0 }}>•</span> Articles with simple explanations
-            </li>
-            <li style={{ marginBottom: 6,display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "#f97316", fontSize: "28px", lineHeight: 0 }}>•</span> AI tutor for any constitutional doubt
-            </li>
-            <li style={{ marginBottom: 6,display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "#f97316", fontSize: "28px", lineHeight: 0 }}>•</span> Adaptive quizzes & progress tracking
-            </li>
+          <ul style={{ marginTop: 12, color: "#94a3b8", lineHeight: 1.9, fontSize: 15 }}>
+            <li>Articles with simple explanations</li>
+            <li>AI tutor for constitutional doubts</li>
+            <li>Adaptive quizzes and progress tracking</li>
           </ul>
         </div>
 
-        {/* Bottom Quote */}
         <div style={{ position: "absolute", bottom: 32, left: 64, zIndex: 1 }}>
-          <p
-            style={{
-              fontSize: 13,
-              color: "#475569",
-              fontStyle: "italic",
-            }}
-          >
-            &quot;We the people of India...&quot; — Preamble of the Constitution
+          <p style={{ fontSize: 13, color: "#64748b", fontStyle: "italic" }}>
+            &quot;We the people of India...&quot; - Preamble of the Constitution
           </p>
         </div>
       </div>

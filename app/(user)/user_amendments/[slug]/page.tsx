@@ -25,21 +25,21 @@ interface Article {
 }
 
 const COLOR_MAP: Record<string, string> = {
-  "1st":   "#b85c38",
-  "42nd":  "#6b4c9a",
-  "44th":  "#2d7d6f",
-  "73rd":  "#4a7c3f",
-  "86th":  "#c48232",
+  "1st": "#b85c38",
+  "42nd": "#6b4c9a",
+  "44th": "#2d7d6f",
+  "73rd": "#4a7c3f",
+  "86th": "#c48232",
   "101st": "#1a6b99",
   "103rd": "#8b4a6b",
 };
 
 const ERA_MAP: Record<string, string> = {
-  "1st":   "Post-Independence",
-  "42nd":  "Emergency Era",
-  "44th":  "Post-Emergency",
-  "73rd":  "Liberalisation",
-  "86th":  "Modern Era",
+  "1st": "Post-Independence",
+  "42nd": "Emergency Era",
+  "44th": "Post-Emergency",
+  "73rd": "Liberalisation",
+  "86th": "Modern Era",
   "101st": "Digital Era",
   "103rd": "Digital Era",
 };
@@ -74,12 +74,12 @@ const proseStyle: React.CSSProperties = {
 export default function AmendmentDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const slug   = params?.slug as string;
+  const slug = params?.slug as string;
 
-  const [amendment,       setAmendment]       = useState<Amendment | null>(null);
-  const [allAmendments,   setAllAmendments]   = useState<Amendment[]>([]);
+  const [amendment, setAmendment] = useState<Amendment | null>(null);
+  const [allAmendments, setAllAmendments] = useState<Amendment[]>([]);
   const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
-  const [loading,         setLoading]         = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!slug) return;
@@ -89,9 +89,9 @@ export default function AmendmentDetailPage() {
       fetch("/api/amendments").then((r) => r.json()),
     ])
       .then(async ([detail, all]) => {
-        const a: Amendment = detail.error ? null : detail;
+        const a: Amendment | null = detail.error ? null : detail;
         setAmendment(a);
-        setAllAmendments(Array.isArray(all) ? all : all.amendments ?? []);
+        setAllAmendments(Array.isArray(all) ? all : (all.amendments ?? []));
 
         if (a?.relatedArticles) {
           const refs = a.relatedArticles
@@ -103,11 +103,13 @@ export default function AmendmentDetailPage() {
             refs.map((ref: string) =>
               fetch(`/api/articles/${ref}`)
                 .then((r) => r.json())
-                .catch(() => null)
-            )
+                .catch(() => null),
+            ),
           );
           setRelatedArticles(
-            fetched.filter(Boolean).filter((r: Article) => !r.error)
+            fetched.filter((article): article is Article => {
+              return Boolean(article) && !("error" in article);
+            }),
           );
         }
 
@@ -137,8 +139,13 @@ export default function AmendmentDetailPage() {
     return (
       <div className="min-h-screen bg-[#faf7f2] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-2xl font-bold text-[#1a1208] mb-2">Amendment not found</p>
-          <Link href="/user_amendments" className="text-[#c48232] underline text-sm">
+          <p className="text-2xl font-bold text-[#1a1208] mb-2">
+            Amendment not found
+          </p>
+          <Link
+            href="/user_amendments"
+            className="text-[#c48232] underline text-sm"
+          >
             ← Back to timeline
           </Link>
         </div>
@@ -146,8 +153,8 @@ export default function AmendmentDetailPage() {
     );
   }
 
-  const color  = getColor(amendment.number);
-  const era    = getEra(amendment.number);
+  const color = getColor(amendment.number);
+  const era = getEra(amendment.number);
   const others = allAmendments.filter((a) => a.id !== amendment.id);
 
   return (
@@ -160,7 +167,6 @@ export default function AmendmentDetailPage() {
       `}</style>
 
       <div className="detail-root bg-[#faf7f2] min-h-screen font-sans pt-16">
-
         {/* ── Hero ── */}
         <section
           className="relative overflow-hidden border-b border-[#ddd5c0] px-6 pt-12 pb-14 md:px-12 lg:px-16"
@@ -185,7 +191,6 @@ export default function AmendmentDetailPage() {
           />
 
           <div className="relative max-w-5xl mx-auto overflow-hidden">
-
             {/* Back button */}
             <button
               onClick={() => router.push("/user_amendments")}
@@ -199,7 +204,11 @@ export default function AmendmentDetailPage() {
                 stroke="currentColor"
                 strokeWidth={2}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5M12 5l-7 7 7 7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 12H5M12 5l-7 7 7 7"
+                />
               </svg>
               Back to timeline
             </button>
@@ -207,7 +216,7 @@ export default function AmendmentDetailPage() {
             {/* Breadcrumb */}
             <div className="flex flex-wrap items-center gap-2 mb-5">
               <span
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold tracking-wide flex-shrink-0"
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold tracking-wide shrink-0"
                 style={{ background: "rgba(196,130,50,.12)", color: "#c48232" }}
               >
                 <svg
@@ -229,6 +238,31 @@ export default function AmendmentDetailPage() {
               </span>
             </div>
 
+            {/* Era Badge */}
+            <div className="flex flex-wrap items-center gap-3 mb-5">
+              <span
+                className="inline-flex items-center rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.08em] uppercase"
+                style={{
+                  backgroundColor: `${color}18`,
+                  color,
+                  border: `1px solid ${color}30`,
+                }}
+              >
+                {era}
+              </span>
+
+              <span
+                className="inline-flex items-center rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.08em] uppercase"
+                style={{
+                  backgroundColor: "#ffffff",
+                  color: "#7a6a50",
+                  border: "1px solid #e7dcc8",
+                }}
+              >
+                Constitutional Amendment
+              </span>
+            </div>
+
             {/* Title — break-words prevents overflow */}
             <h1
               className="text-[clamp(28px,4vw,52px)] font-extrabold text-[#1a1208] leading-[1.1] tracking-tight mb-4 font-serif"
@@ -241,10 +275,8 @@ export default function AmendmentDetailPage() {
 
         {/* ── Body ── */}
         <div className="max-w-full mx-auto px-6 md:px-12 lg:px-16 py-10 flex flex-col lg:flex-row gap-8 items-start overflow-hidden">
-
           {/* Left column */}
           <div className="flex-1 min-w-0 space-y-5 overflow-hidden">
-
             {/* Why it matters */}
             {amendment.whyItMatters && (
               <div className="bg-white border border-[#ede8df] rounded-2xl p-7 overflow-hidden">
@@ -296,7 +328,10 @@ export default function AmendmentDetailPage() {
               >
                 What this amendment did
               </h2>
-              <p className="text-[15px] text-[#6b5a3e] leading-relaxed" style={proseStyle}>
+              <p
+                className="text-[15px] text-[#6b5a3e] leading-relaxed"
+                style={proseStyle}
+              >
                 {amendment.summary}
               </p>
             </div>
@@ -342,7 +377,7 @@ export default function AmendmentDetailPage() {
                     >
                       {article.tags && (
                         <span
-                          className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold tracking-[0.10em] uppercase mb-3"
+                          className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold tracking-widest uppercase mb-3"
                           style={{
                             background: "rgba(196,130,50,.12)",
                             color: "#c48232",
@@ -351,7 +386,7 @@ export default function AmendmentDetailPage() {
                           {article.tags.split(",")[0].trim()}
                         </span>
                       )}
-                      <div className="text-[11px] font-bold text-[#c48232] tracking-[0.08em] uppercase mb-1 break-words">
+                      <div className="text-[11px] font-bold text-[#c48232] tracking-[0.08em] uppercase mb-1 wrap-break-words">
                         {article.articleNumber}
                       </div>
                       <h3
@@ -377,7 +412,7 @@ export default function AmendmentDetailPage() {
           </div>
 
           {/* Right sticky sidebar */}
-          <div className="w-full lg:w-[280px] xl:w-[300px] flex-shrink-0 lg:sticky lg:top-6 overflow-hidden">
+          <div className="w-full lg:w-70 xl:w-75 shrink-0 lg:sticky lg:top-6 overflow-hidden">
             <div className="bg-white border border-[#ede8df] rounded-2xl p-6">
               <div className="text-[11px] font-bold tracking-[0.12em] uppercase text-[#c48232] mb-4">
                 Other Amendments

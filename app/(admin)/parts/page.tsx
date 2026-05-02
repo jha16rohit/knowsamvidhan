@@ -48,7 +48,7 @@ export default function PartsPage() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastMessage] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     id: '', title: '', range: '', description: '', articles: 0
@@ -58,7 +58,7 @@ export default function PartsPage() {
     fetch("/api/admin/parts")
       .then(res => res.json())
       .then(data => {
-        const fixedData = data.map((item: any) => ({
+        const fixedData = data.map((item: Part) => ({
           ...item,
           description: item.description || ""
         }));
@@ -145,7 +145,7 @@ export default function PartsPage() {
     const res = await fetch("/api/admin/parts");
     const data = await res.json();
 
-    const fixedData = data.map((item: any) => ({
+    const fixedData = data.map((item: Part) => ({
       ...item,
       description: item.description || "",
     }));
@@ -233,7 +233,7 @@ export default function PartsPage() {
             <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
           </div>
           <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You're managing live content.<br />Edit with care.
+            You&apos;re managing live content.<br />Edit with care.
           </p>
         </div>
       </aside>

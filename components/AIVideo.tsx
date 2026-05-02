@@ -81,7 +81,7 @@ export default function AIVideo() {
             {/* Overlay gradient on hover */}
             <div
               className={`
-                absolute inset-0 bg-gradient-to-t from-orange-600/30 to-transparent
+                absolute inset-0 bg-linear-to-t from-orange-600/30 to-transparent
                 transition-opacity duration-300
                 ${hovered ? "opacity-100" : "opacity-0"}
               `}
@@ -89,7 +89,7 @@ export default function AIVideo() {
           </div>
 
           {/* "AI" badge — top right corner */}
-          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-600 text-[8px] font-black text-white shadow-[0_2px_8px_rgba(249,115,22,0.5)]">
+          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-linear-to-r from-amber-400 to-orange-600 text-[8px] font-black text-white shadow-[0_2px_8px_rgba(249,115,22,0.5)]">
             AI
           </div>
 

@@ -203,7 +203,7 @@ export default function SchedulesPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-8 right-8 z-[70] bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3">
+        <div className="fixed bottom-8 right-8 z-70 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3">
           <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
@@ -281,7 +281,7 @@ export default function SchedulesPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[1100px]">
+                <table className="w-full text-left border-collapse min-w-275">
                   <thead>
                     <tr className="border-b border-gray-200 bg-white">
                       <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase w-16">#</th>
@@ -489,7 +489,7 @@ export default function SchedulesPage() {
 
       {/* Delete Modal */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-7">
             <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">Delete this Schedule?</h3>
             <p className="text-[15px] text-gray-500 leading-relaxed mb-2">

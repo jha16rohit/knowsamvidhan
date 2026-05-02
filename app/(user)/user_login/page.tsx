@@ -28,20 +28,18 @@ export default function LoginPage() {
   
       const data = await res.json();
   
-      if (res.ok) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      
-        if (data.user.role === "ADMIN") {
-          window.location.replace("/ad-dashboard");
-        } else {
-          window.location.replace("/");
-        }
+      if (!res.ok) {
+        alert(data?.error || "Login failed");
+        return;
       }
-  
+
       localStorage.setItem("user", JSON.stringify(data.user));
-  
-      window.location.replace("/");
-  
+
+      if (data.user.role === "ADMIN") {
+        window.location.replace("/ad-dashboard");
+      } else {
+        window.location.replace("/");
+      }
     } catch (err) {
       console.error(err);
       alert("Server error");

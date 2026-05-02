@@ -283,7 +283,7 @@ export default function AdminPreamblePage() {
             <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
           </div>
           <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You're managing live content.<br />Edit with care.
+            You&apos;re managing live content.<br />Edit with care.
           </p>
         </div>
       </aside>

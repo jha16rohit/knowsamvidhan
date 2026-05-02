@@ -100,7 +100,7 @@ export default function ScheduleDetailPage() {
       <Navbar />
       <div className="min-h-screen bg-stone-50 text-stone-900 pt-16">
         {/* Hero */}
-        <section className="bg-gradient-to-br from-stone-100 via-stone-50 to-amber-50/60 border-b border-stone-200">
+        <section className="`bg-gradient-to-br from-stone-100 via-stone-50 to-amber-50/60 border-b border-stone-200">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 lg:py-14">
             <button onClick={() => router.push("/user_schedules")}
               className="inline-flex items-center gap-1.5 text-stone-500 text-sm hover:text-stone-800 transition-colors mb-8 group"

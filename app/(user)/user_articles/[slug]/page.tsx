@@ -212,7 +212,7 @@ export default function ArticleDetailPage() {
       <div className="font-sans bg-[#faf7f2] min-h-screen text-[#1a1208] pt-16">
 
         {/* ── Hero ── */}
-        <section className="bg-gradient-to-br from-[#f5f3ef] via-[#f0ece4] to-[#ede8df] border-b border-[#ede8df] px-4 sm:px-6 md:px-10 lg:px-16 py-8 sm:py-10 md:py-14">
+        <section className="`bg-gradient-to-br` from-[#f5f3ef] via-[#f0ece4] to-[#ede8df] border-b border-[#ede8df] px-4 sm:px-6 md:px-10 lg:px-16 py-8 sm:py-10 md:py-14">
           <div className="max-w-5xl mx-auto">
 
             {/* Breadcrumb */}
@@ -246,18 +246,18 @@ export default function ArticleDetailPage() {
                   {article.articleNumber}
                 </p>
                 <h1 className="font-extrabold text-[#1a1208] font-serif leading-tight mb-3
-                  text-2xl sm:text-3xl md:text-4xl lg:text-5xl break-words overflow-wrap-anywhere">
+                  text-2xl sm:text-3xl md:text-4xl lg:text-5xl wrap-break-words overflow-wrap-anywhere">
                   {article.title}
                 </h1>
                 {article.shortSummary && (
-                  <p className="text-sm sm:text-base text-[#7a6a50] leading-relaxed max-w-2xl break-words overflow-wrap-anywhere">
+                  <p className="text-sm sm:text-base text-[#7a6a50] leading-relaxed max-w-2xl wrap-break-words overflow-wrap-anywhere">
                     {article.shortSummary}
                   </p>
                 )}
               </div>
 
               {/* Action buttons */}
-              <div className="flex items-center gap-2 flex-shrink-0 self-start md:self-center">
+              <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
                 <button
                   onClick={() => setSaved(!saved)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold transition-all duration-150
@@ -298,8 +298,8 @@ export default function ArticleDetailPage() {
                       Official Text
                     </span>
                   </div>
-                  <p className="text-sm sm:text-base text-[#1a1208] leading-relaxed font-serif italic break-words overflow-wrap-anywhere">
-                    "{article.officialText}"
+                  <p className="text-sm sm:text-base text-[#1a1208] leading-relaxed font-serif italic wrap-break-words overflow-wrap-anywhere">
+                    &quot;{article.officialText}&quot;
                   </p>
                 </div>
               )}
@@ -310,7 +310,7 @@ export default function ArticleDetailPage() {
                   <h2 className="font-extrabold text-[#1a1208] text-xl sm:text-2xl font-serif mb-3 sm:mb-4">
                     In plain English
                   </h2>
-                  <p className="text-sm sm:text-base text-[#4a3c28] leading-relaxed mb-4 break-words overflow-wrap-anywhere">
+                  <p className="text-sm sm:text-base text-[#4a3c28] leading-relaxed mb-4 wrap-break-words overflow-wrap-anywhere">
                     {article.simpleExplanation}
                   </p>
 
@@ -323,7 +323,7 @@ export default function ArticleDetailPage() {
                           Example
                         </span>
                       </div>
-                      <p className="text-sm text-[#2e5c3a] leading-relaxed break-words overflow-wrap-anywhere">
+                      <p className="text-sm text-[#2e5c3a] leading-relaxed wrap-break-words overflow-wrap-anywhere">
                         {article.example}
                       </p>
                     </div>
@@ -354,7 +354,7 @@ export default function ArticleDetailPage() {
                         <span className="text-sm font-bold text-[#c48232] font-serif shrink-0 w-8">
                           ({clause.clauseNumber})
                         </span>
-                        <p className="text-sm text-[#4a3c28] leading-relaxed break-words overflow-wrap-anywhere">
+                        <p className="text-sm text-[#4a3c28] leading-relaxed wrap-break-words overflow-wrap-anywhere">
                           {clause.text}
                         </p>
                       </div>
@@ -383,7 +383,7 @@ export default function ArticleDetailPage() {
             </div>
 
             {/* ── Right: Sidebar ── */}
-            <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0 space-y-5 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            <aside className="w-full lg:w-72 xl:w-80 shrink-0 space-y-5 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
 
               {/* At a Glance */}
               <div className="rounded-2xl border border-[#e8d4a0] bg-white p-5">
@@ -412,7 +412,7 @@ export default function ArticleDetailPage() {
                 </p>
                 <div className="rounded-xl border border-[#f0ece4] p-3.5">
                   <p className="text-xs text-[#9e8c73] mb-0.5">{article.part.partNumber}</p>
-                  <p className="font-extrabold text-base text-[#1a1208] font-serif break-words overflow-wrap-anywhere">
+                  <p className="font-extrabold text-base text-[#1a1208] font-serif wrap-break-words overflow-wrap-anywhere">
                     {article.part.title}
                   </p>
                   <p className="text-xs text-[#9e8c73] mt-1">{article.part.range}</p>

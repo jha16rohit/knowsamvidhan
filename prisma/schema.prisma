@@ -34,6 +34,21 @@ model PasswordResetOTP {
   expiresAt DateTime
 }
 
+model RegistrationOTP {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  otpHash      String
+  attempts     Int      @default(0)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
 model Part {
   id           String    @id @default(uuid())
   partNumber   String

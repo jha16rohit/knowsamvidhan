@@ -1,11 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
+import { signSessionToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const { email, password } = (await req.json()) as {
+      email?: string;
+      password?: string;
+    };
 
     if (!email || !password) {
       return NextResponse.json(
@@ -15,10 +18,10 @@ export async function POST(req: Request) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.trim().toLowerCase() },
     });
 
-    if (!user) {
+    if (!user || user.isDeleted) {
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
@@ -27,16 +30,13 @@ export async function POST(req: Request) {
 
     if (user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Not Authorized (Admin only)" },
+        { error: "Not authorized (admin only)" },
         { status: 403 }
       );
     }
 
     if (user.status !== "ACTIVE") {
-      return NextResponse.json(
-        { error: "Account inactive" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Account inactive" }, { status: 403 });
     }
 
     const isValid = await bcrypt.compare(password, user.password);
@@ -48,38 +48,33 @@ export async function POST(req: Request) {
       );
     }
 
-    const safeUser = Object.fromEntries(
-      Object.entries(user).filter(([key]) => key !== "password")
+    const token = signSessionToken(
+      { id: user.id, email: user.email, role: user.role },
+      "7d"
     );
 
-    // ✅ CREATE JWT TOKEN
-const token = jwt.sign(
-  { id: user.id, email: user.email, role: user.role }, // ← user.role = "ADMIN"
-  process.env.JWT_SECRET!,
-  { expiresIn: "7d" }
-);
-
-    // ✅ SET TOKEN AS COOKIE
     const response = NextResponse.json({
       message: "Admin login successful",
-      user: safeUser,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+      },
     });
 
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
 
     return response;
-
   } catch (error) {
     console.error("ADMIN LOGIN ERROR:", error);
-    return NextResponse.json(
-      { error: "Server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

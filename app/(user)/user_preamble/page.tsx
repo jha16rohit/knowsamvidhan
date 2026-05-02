@@ -25,15 +25,15 @@ interface PreambleData {
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
-function BookmarkIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"}
-      stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-      className="w-4 h-4">
-      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
+// function BookmarkIcon({ filled }: { filled: boolean }) {
+//   return (
+//     <svg viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"}
+//       stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+//       className="w-4 h-4">
+//       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+//     </svg>
+//   );
+// }
 
 // ─── Speak Button ─────────────────────────────────────────────────────────────
 
@@ -104,11 +104,11 @@ function SpeakButton({ text }: { text: string }) {
 
       {/* Animated bars when speaking */}
       {speaking && (
-        <span className="flex items-end gap-[2px] h-3">
+        <span className="flex items-end gap-0.5 h-3">
           {[0, 1, 2].map((i) => (
             <span
               key={i}
-              className="w-[3px] rounded-full bg-[#c48232] animate-bounce"
+              className="w-0.75 rounded-full bg-[#c48232] animate-bounce"
               style={{
                 animationDelay: `${i * 0.18}s`,
                 animationDuration: "0.7s",
@@ -148,7 +148,7 @@ function Skeleton({ className }: { className?: string }) {
 export default function PreamblePage() {
   const [data,       setData]       = useState<PreambleData | null>(null);
   const [isLoading,  setIsLoading]  = useState(true);
-  const [bookmarked, setBookmarked] = useState(false);
+  // const [bookmarked, setBookmarked] = useState(false);
 
   const parse = <T,>(raw: unknown, fallback: T): T => {
     if (!raw) return fallback;
@@ -185,9 +185,9 @@ export default function PreamblePage() {
       <div className="font-sans bg-[#faf7f2] min-h-screen text-[#1a1208] pt-16">
 
         {/* ── Hero ── */}
-        <section className="relative bg-gradient-to-br from-[#fdf6ec] via-[#f5ede0] to-[#ede8df] border-b border-[#d6c7a8] overflow-hidden">
+        <section className="relative `bg-gradient-to-br from-[#fdf6ec] via-[#f5ede0] to-[#ede8df] border-b border-[#d6c7a8] overflow-hidden">
           <span className="absolute -right-8 top-0 text-[180px] sm:text-[260px] font-extrabold font-serif text-[#e8d8c0]/40 select-none pointer-events-none leading-none">We</span>
-          <div className="relative max-w-[92rem] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 pt-12 sm:pt-16 md:pt-20 pb-10 sm:pb-14">
+          <div className="relative max-w-368 mx-auto px-4 sm:px-8 md:px-12 lg:px-16 pt-12 sm:pt-16 md:pt-20 pb-10 sm:pb-14">
             <div className="flex items-center gap-3 mb-6">
               <span className="inline-flex items-center gap-1.5 bg-[#fdf3e3] border border-[#e0c99a] rounded-full px-3 py-1 text-[11px] font-bold text-[#c48232] tracking-wide">
                 Foundational Document
@@ -218,9 +218,9 @@ export default function PreamblePage() {
                   <div className="flex-1 h-px bg-[#e8d4a0]" />
                 </div>
                 <div className="relative bg-white border border-[#c9b99a] rounded-3xl overflow-hidden shadow-[0_4px_24px_rgba(196,130,50,0.08)]">
-                  <div className="h-1.5 bg-gradient-to-r from-[#c48232] via-[#e8a84a] to-[#c48232]" />
+                  <div className="h-1.5 `bg-gradient-to-r from-[#c48232] via-[#e8a84a] to-[#c48232]" />
                   <div className="px-6 sm:px-10 py-8 sm:py-10">
-                    <div className="text-7xl font-serif text-[#f0e0c4] leading-none mb-2 select-none">"</div>
+                    <div className="text-7xl font-serif text-[#f0e0c4] leading-none mb-2 select-none">&quot;</div>
                     {isLoading ? (
                       <div className="space-y-3">
                         {[100, 80, 90, 70, 85].map((w, i) => (
@@ -337,7 +337,7 @@ export default function PreamblePage() {
                       </div>
                     ) : (
                       <div className="relative">
-                        <div className="absolute left-[11px] top-2 bottom-2 w-px bg-[#e8d4a0]" />
+                        <div className="absolute left-2.75 top-2 bottom-2 w-px bg-[#e8d4a0]" />
                         <div className="space-y-6">
                           {data?.timeline.map((item, i) => (
                             <div key={i} className="flex gap-5 items-start relative">
@@ -360,7 +360,7 @@ export default function PreamblePage() {
             </div>
 
             {/* ── Right Sidebar ── */}
-            <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0 space-y-5 lg:sticky lg:top-20 lg:self-start">
+            <aside className="w-full lg:w-64 xl:w-72 shrink-0 space-y-5 lg:sticky lg:top-20 lg:self-start">
 
               {/* Quick Facts */}
               <div className="rounded-2xl border border-[#c9b99a] bg-white p-5">

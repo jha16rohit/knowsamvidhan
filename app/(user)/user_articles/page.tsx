@@ -62,7 +62,7 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white border border-[#e8d4a0] rounded-2xl p-4 sm:p-5 min-h-[170px] animate-pulse flex flex-col gap-3">
+    <div className="bg-white border border-[#e8d4a0] rounded-2xl p-4 sm:p-5 min-h-42.5 animate-pulse flex flex-col gap-3">
       <div className="h-4 w-24 bg-[#f0ece4] rounded-full" />
       <div className="h-6 w-32 bg-[#f0ece4] rounded" />
       <div className="h-4 w-48 bg-[#f0ece4] rounded" />
@@ -90,7 +90,7 @@ function ArticleCard({
       group relative bg-white
       border border-[#d6c7a8] rounded-2xl
       p-4 sm:p-5 flex flex-col justify-between
-      min-h-[170px]
+      min-h-42.5
       transition-all duration-200
       hover:-translate-y-1
       hover:shadow-[0_8px_24px_rgba(0,0,0,0.2)]
@@ -122,7 +122,7 @@ function ArticleCard({
 
       <p className="font-semibold text-sm text-[#4a3c28]">{article.title}</p>
 
-      <p className="text-xs text-[#7a6a50] leading-relaxed flex-1 line-clamp-2 break-words overflow-wrap-anywhere">
+      <p className="text-xs text-[#7a6a50] leading-relaxed flex-1 line-clamp-2 wrap-break-words overflow-wrap-anywhere">
         {article.shortSummary ?? ""}
       </p>
 
@@ -185,7 +185,13 @@ export default function ArticlesPage() {
   const toggleBookmark = (num: string) => {
     setBookmarks((prev) => {
       const next = new Set(prev);
-      next.has(num) ? next.delete(num) : next.add(num);
+  
+      if (next.has(num)) {
+        next.delete(num);
+      } else {
+        next.add(num);
+      }
+  
       return next;
     });
   };
@@ -198,12 +204,12 @@ export default function ArticlesPage() {
 
         {/* ── Hero Header ── */}
         <section className="
-          bg-gradient-to-br from-[#f5f3ef] via-[#f0ece4] to-[#ede8df]
+          `bg-gradient-to-br` from-[#f5f3ef] via-[#f0ece4] to-[#ede8df]
           border-b border-[#ede8df]
           px-4 sm:px-6 md:px-10 lg:px-16
           py-8 sm:py-10 md:py-14 lg:py-16
         ">
-          <div className="max-w-[92rem] mx-auto">
+          <div className="max-w-368 mx-auto">
 
             <p className="text-[10px] sm:text-[11px] font-bold text-[#c48232] tracking-[1.5px] uppercase mb-2 sm:mb-3">
               Library
@@ -252,7 +258,7 @@ export default function ArticlesPage() {
                   <button
                     key={tab}
                     onClick={() => setActiveFilter(tab)}
-                    className={`flex-shrink-0 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full
+                    className={`shrink-0 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full
                       text-[11px] sm:text-[13px] font-medium border
                       transition-all duration-150 whitespace-nowrap
                       ${activeFilter === tab

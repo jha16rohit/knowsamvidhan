@@ -123,7 +123,7 @@ export default function PartDetailPage() {
       <div className="font-sans bg-[#faf7f2] min-h-screen text-[#1a1208] pt-16">
 
         {/* Hero */}
-        <section className="bg-gradient-to-br from-[#fdf6ec] via-[#f5ede0] to-[#ede8df] border-b border-[#d6c7a8] px-4 sm:px-8 md:px-12 lg:px-16 py-10 sm:py-14 md:py-16">
+        <section className="`bg-gradient-to-br from-[#fdf6ec] via-[#f5ede0] to-[#ede8df] border-b border-[#d6c7a8] px-4 sm:px-8 md:px-12 lg:px-16 py-10 sm:py-14 md:py-16">
           <div className="max-w-5xl mx-auto">
             <button
               onClick={() => router.push("/user_parts")}
@@ -181,7 +181,7 @@ export default function PartDetailPage() {
                     {part.articlesList.map((article) => (
                       <div
                         key={article.id}
-                        className="group relative bg-white border border-[#c9b99a] rounded-2xl p-5 flex flex-col justify-between min-h-[160px] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(196,130,50,0.15)] hover:border-[#c48232]"
+                        className="group relative bg-white border border-[#c9b99a] rounded-2xl p-5 flex flex-col justify-between min-h-40 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(196,130,50,0.15)] hover:border-[#c48232]"
                       >
                         <div className="flex items-start justify-between gap-2 mb-2">
                           {article.tags && (
@@ -217,7 +217,7 @@ export default function PartDetailPage() {
             </div>
 
             {/* Sidebar */}
-            <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0 space-y-5 lg:sticky lg:top-20 lg:self-start">
+            <aside className="w-full lg:w-72 xl:w-80 shrink-0 space-y-5 lg:sticky lg:top-20 lg:self-start">
               <div className="rounded-2xl border border-[#c9b99a] bg-white p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <BookOpenIcon />

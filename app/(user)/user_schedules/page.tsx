@@ -75,8 +75,8 @@ export default function SchedulesPage() {
     <>
       <Navbar />
       <div className="font-sans bg-stone-50 min-h-screen text-stone-900 pt-16">
-        <section className="bg-gradient-to-br from-[#f5f3ef] via-[#f0ece4] to-[#ede8df] border-b border-stone-200 px-6 py-12 sm:px-10 sm:py-14 lg:px-16 lg:py-16">
-          <div className="max-w-[92rem] mx-auto">
+        <section className="`bg-gradient-to-br from-[#f5f3ef] via-[#f0ece4] to-[#ede8df] border-b border-stone-200 px-6 py-12 sm:px-10 sm:py-14 lg:px-16 lg:py-16">
+          <div className="max-w-368 mx-auto">
             <p className="text-[11px] font-bold text-amber-600 tracking-[0.15em] uppercase mb-3">Reference</p>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 font-serif leading-tight mb-4">
               Schedules of the Constitution

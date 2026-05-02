@@ -218,7 +218,7 @@ export default function AlertsPage() {
             <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
           </div>
           <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You're managing live content.<br />Edit with care.
+            You&apos;re managing live content.<br />Edit with care.
           </p>
         </div>
       </aside>
@@ -274,7 +274,7 @@ export default function AlertsPage() {
               <div className="bg-white border border-dashed border-gray-200 rounded-2xl py-16 flex flex-col items-center justify-center">
                 <ShieldCheck className="w-8 h-8 text-green-500 mb-3" />
                 <p className="text-gray-900 font-semibold">No alerts here</p>
-                <p className="text-sm text-gray-500 mt-1">You're all caught up!</p>
+                <p className="text-sm text-gray-500 mt-1">You&apos;re all caught up!</p>
               </div>
             ) : (
               displayedAlerts.map((alert) => (

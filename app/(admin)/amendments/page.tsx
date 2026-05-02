@@ -315,10 +315,10 @@ export default function AmendmentsPage() {
 
                   {/* Title + summary */}
                   <div className="min-w-0">
-                    <h3 className="text-xl font-serif font-bold text-gray-900 mb-2 break-words">
+                    <h3 className="text-xl font-serif font-bold text-gray-900 mb-2 wrap-break-words">
                       {amendment.number} — {amendment.title}
                     </h3>
-                    <p className="text-sm text-gray-500 leading-relaxed break-words">{amendment.summary}</p>
+                    <p className="text-sm text-gray-500 leading-relaxed wrap-break-words">{amendment.summary}</p>
                   </div>
 
                   {/* Why it matters */}
@@ -327,7 +327,7 @@ export default function AmendmentsPage() {
                       <Lightbulb className="w-4 h-4 text-[#f59e0b] shrink-0 mt-0.5" />
                       <div className="min-w-0">
                         <p className="text-[10px] font-bold tracking-widest text-[#f59e0b] uppercase mb-1">Why it matters</p>
-                        <p className="text-sm text-amber-900 leading-relaxed break-words">{amendment.whyItMatters}</p>
+                        <p className="text-sm text-amber-900 leading-relaxed wrap-break-words">{amendment.whyItMatters}</p>
                       </div>
                     </div>
                   )}
@@ -484,7 +484,7 @@ export default function AmendmentsPage() {
             </h3>
             <p className="text-[15px] text-gray-500 leading-relaxed mb-2">
               You&apos;re about to delete{' '}
-              <span className="font-semibold text-gray-800 break-words">
+              <span className="font-semibold text-gray-800 wrap-break-words">
                 {deleteTarget.number} — {deleteTarget.title}
               </span>.
             </p>

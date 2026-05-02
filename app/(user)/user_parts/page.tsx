@@ -30,7 +30,7 @@ function PartCard({ part, onClick }: { part: Part; onClick: () => void }) {
         {part.articles} articles
       </span>
 
-      <div className="w-12 h-12 rounded-[12px] bg-[#c48232] flex items-center justify-center mb-5 shrink-0">
+      <div className="w-12 h-12 rounded-xl bg-[#c48232] flex items-center justify-center mb-5 shrink-0">
         <span className="text-white font-extrabold text-base font-serif tracking-wide">
           {roman}
         </span>
@@ -77,8 +77,8 @@ export default function PartsPage() {
     <>
       <Navbar />
       <div className="font-sans bg-[#faf7f2] min-h-screen text-[#1a1208] pt-16">
-        <section className="bg-gradient-to-br from-[#f5f3ef] via-[#f0ece4] to-[#ede8df] border-b border-[#d6c7a8] px-5 sm:px-8 md:px-12 lg:px-16 py-10 sm:py-14 md:py-16">
-          <div className="max-w-[92rem] mx-auto">
+        <section className="`bg-gradient-to-br from-[#f5f3ef] via-[#f0ece4] to-[#ede8df] border-b border-[#d6c7a8] px-5 sm:px-8 md:px-12 lg:px-16 py-10 sm:py-14 md:py-16">
+          <div className="max-w-368 mx-auto">
             <p className="text-[11px] font-bold text-[#c48232] tracking-[1.5px] uppercase mb-3">
               Chapters
             </p>

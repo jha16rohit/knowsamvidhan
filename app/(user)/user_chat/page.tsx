@@ -274,7 +274,7 @@ export default function ChatPage() {
 
       <aside
         className={`
-          fixed left-0 top-0 z-40 flex h-full w-[272px] flex-col
+          fixed left-0 top-0 z-40 flex h-full w-68 flex-col
           bg-white
           border-r-[1.5px] border-slate-300
           shadow-[6px_0_32px_rgba(0,0,0,0.08)]
@@ -284,7 +284,7 @@ export default function ChatPage() {
         `}
       >
         {/* Top accent bar */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-amber-800" />
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-amber-800" />
 
         {/* Brand */}
         <div className="flex items-center justify-between border-b-[1.5px] border-slate-200 px-5 py-4">
@@ -417,7 +417,7 @@ export default function ChatPage() {
         {/* ── TOP HEADER ── */}
         <header className="relative z-10 flex items-center justify-between border-b-[1.5px] border-slate-200 bg-white/85 px-4 py-3 backdrop-blur-xl sm:px-6">
           {/* Accent line */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-amber-800" />
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-amber-800" />
 
           <div className="flex items-center gap-3">
             {/* Sidebar toggle */}
@@ -551,7 +551,7 @@ export default function ChatPage() {
 
         {/* ── INPUT BAR ── */}
         <div className="relative border-t-[1.5px] border-slate-200 bg-white/90 px-4 py-3 backdrop-blur-xl sm:px-6">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-800/20 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-px `bg-gradient-to-r` from-transparent via-amber-800/20 to-transparent" />
 
           <div className="mx-auto max-w-4xl">
             <div
@@ -603,7 +603,7 @@ export default function ChatPage() {
                 "
               >
                 {/* Shimmer */}
-                <span className="absolute inset-0 -skew-x-12 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-[200%]" />
+                <span className="absolute inset-0 -skew-x-12 -translate-x-full `] `bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-[200%]" />
                 <Send size={14} strokeWidth={2} className="relative text-amber-100 -translate-x-px" />
               </button>
             </div>

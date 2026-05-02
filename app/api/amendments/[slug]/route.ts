@@ -1,22 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// slug = amendment.number.toLowerCase().replace(/\s+/g, "-")
-// e.g. "42nd" → "42nd", "101st" → "101st"
-function slugToNumber(slug: string): string {
-  // slugify just lowercases + replaces spaces, numbers like "42nd" don't change
-  // We need to do a case-insensitive lookup
-  return slug; // slug IS the number in lowercase
-}
-
 export async function GET(
   _req: Request,
-  { params }: { params: { slug: string } }
+  context: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const slug = params.slug; // e.g. "42nd"
+    const { slug } = await context.params;
 
-    // Find amendment where number matches the slug (case-insensitive)
     const amendment = await prisma.amendment.findFirst({
       where: {
         number: {
