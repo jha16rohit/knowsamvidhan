@@ -1,15 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Volume2, Square, Loader2 } from "lucide-react";
 import { GoogleGenAI } from "@google/genai";
-
 
 const ai = new GoogleGenAI({
   apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY!,
 });
-
-// ─── Speak Button ─────────────────────────────────────────────────────────────
 
 interface SpeakButtonProps {
   text: string;
@@ -26,8 +23,6 @@ export function SpeakButton({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
 
-  // ─── Cleanup ───────────────────────────────────────────────────────────────
-
   const cleanupAudio = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -41,15 +36,11 @@ export function SpeakButton({
     }
   };
 
-  // ─── Stop Speaking ─────────────────────────────────────────────────────────
-
-  const stopAudio = () => {
+  const stopAudio = useCallback(() => {
     cleanupAudio();
     setSpeaking(false);
     setLoading(false);
-  };
-
-  // ─── Convert PCM To WAV ────────────────────────────────────────────────────
+  }, []);
 
   const pcmToWav = (
     pcmData: Uint8Array,
@@ -72,12 +63,10 @@ export function SpeakButton({
       }
     };
 
-    // RIFF chunk descriptor
     writeString(view, 0, "RIFF");
     view.setUint32(4, 36 + pcmData.length, true);
     writeString(view, 8, "WAVE");
 
-    // fmt sub-chunk
     writeString(view, 12, "fmt ");
     view.setUint32(16, 16, true);
     view.setUint16(20, 1, true);
@@ -95,11 +84,9 @@ export function SpeakButton({
     view.setUint16(32, blockAlign, true);
     view.setUint16(34, bitsPerSample, true);
 
-    // data sub-chunk
     writeString(view, 36, "data");
     view.setUint32(40, pcmData.length, true);
 
-    // PCM data
     new Uint8Array(wavBuffer, 44).set(pcmData);
 
     return new Blob([wavBuffer], {
@@ -107,18 +94,14 @@ export function SpeakButton({
     });
   };
 
-  // ─── Speak Handler ─────────────────────────────────────────────────────────
-
   const handleSpeak = async () => {
     try {
-      // Stop if already speaking
       if (speaking) {
         stopAudio();
         return;
       }
 
       setLoading(true);
-
       const response = await ai.models.generateContent({
         model: "gemini-3.1-flash-tts-preview",
 
@@ -154,9 +137,7 @@ export function SpeakButton({
         throw new Error("No audio returned from Gemini.");
       }
 
-      // Base64 → Uint8Array
       const binaryString = atob(base64Audio);
-
       const audioBytes = new Uint8Array(
         binaryString.length
       );
@@ -165,46 +146,34 @@ export function SpeakButton({
         audioBytes[i] = binaryString.charCodeAt(i);
       }
 
-      // PCM → WAV
       const wavBlob = pcmToWav(audioBytes);
-
-      // Create playable URL
       const audioUrl = URL.createObjectURL(wavBlob);
 
       objectUrlRef.current = audioUrl;
 
       const audio = new Audio(audioUrl);
-
       audioRef.current = audio;
-
       audio.onended = () => {
         stopAudio();
       };
-
       audio.onerror = () => {
         stopAudio();
       };
-
       setSpeaking(true);
       setLoading(false);
-
       await audio.play();
     } catch (error) {
       console.error("Gemini TTS Error:", error);
-
       stopAudio();
     }
   };
-
-  // ─── Cleanup On Unmount ────────────────────────────────────────────────────
 
   useEffect(() => {
     return () => {
       stopAudio();
     };
-  }, []);
+  }, [stopAudio]);
 
-  // ─── UI ────────────────────────────────────────────────────────────────────
 
   return (
     <button
