@@ -13,7 +13,6 @@ export default function LogoutPage() {
       localStorage.removeItem("user");
       window.location.replace("/user_login");
     };
-
     logout();
   }, []);
 

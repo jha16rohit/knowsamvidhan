@@ -54,7 +54,9 @@ export default function Navbar() {
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -62,7 +64,7 @@ export default function Navbar() {
 
     const loadCurrentUser = async () => {
       try {
-        const response = await fetch("/api/auth/me", {
+        const response = await fetch("/api/auth/profile", {
           credentials: "include",
           cache: "no-store",
           signal: controller.signal,
@@ -167,7 +169,10 @@ export default function Navbar() {
             }`}
           >
             {/* ══ LOGO ══ */}
-            <Link href="/" className="group relative flex shrink-0 items-center gap-3 no-underline">
+            <Link
+              href="/"
+              className="group relative flex shrink-0 items-center gap-3 no-underline"
+            >
               <div className="relative shrink-0">
                 <div className="absolute inset-0 rounded-full bg-orange-500/10 scale-110 transition-transform duration-300 group-hover:scale-125 group-hover:bg-orange-500/15" />
                 <div className="absolute inset-0 rounded-full border border-orange-500/20 scale-[1.18] transition-all duration-500 group-hover:scale-[1.35] group-hover:border-orange-500/30" />
@@ -214,7 +219,9 @@ export default function Navbar() {
                       onMouseEnter={() => handleMouseEnter(link.label)}
                       onMouseLeave={handleMouseLeave}
                       className={`relative rounded-xl px-3 py-1.5 text-[13px] font-semibold no-underline transition-all duration-200 ${
-                        active ? "text-white" : "text-gray-600 hover:text-gray-900"
+                        active
+                          ? "text-white"
+                          : "text-gray-600 hover:text-gray-900"
                       }`}
                     >
                       {active && (
@@ -233,7 +240,10 @@ export default function Navbar() {
             {/* ══ DESKTOP BUTTONS (md+) ══ */}
             <div className="hidden items-center gap-2.5 md:flex">
               {authLoading ? (
-                <div className="h-9 w-28 animate-pulse rounded-xl bg-gray-100" aria-label="Checking account" />
+                <div
+                  className="h-9 w-28 animate-pulse rounded-xl bg-gray-100"
+                  aria-label="Checking account"
+                />
               ) : currentUser ? (
                 <div ref={profileMenuRef} className="relative">
                   <button
@@ -298,6 +308,20 @@ export default function Navbar() {
                         </span>
                       </div>
 
+                      <Link
+                        href="/user_profile"
+                        className="
+                          flex items-center gap-3 rounded-xl px-3 py-2.5
+                          text-sm font-medium text-gray-700
+                          transition-all duration-200
+                          hover:bg-orange-50 hover:text-orange-600
+                        "
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <UserCircle className="h-4 w-4" />
+                        Profile
+                      </Link>
+
                       <button
                         type="button"
                         onClick={handleLogout}
@@ -327,7 +351,16 @@ export default function Navbar() {
                     <span className="absolute inset-0 rounded-xl bg-linear-to-t from-black/10 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
                     <span className="absolute inset-0 -skew-x-12 -translate-x-full bg-linear-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-[200%]" />
                     <span className="relative flex items-center gap-1.5">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                         <circle cx="8.5" cy="7" r="4" />
                         <line x1="20" y1="8" x2="20" y2="14" />
@@ -426,18 +459,30 @@ export default function Navbar() {
         <div className="relative flex items-center justify-between border-b border-gray-100 px-5 py-4">
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-amber-400 via-orange-500 to-rose-400" />
 
-          <Link href="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2.5 no-underline">
+          <Link
+            href="/"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-2.5 no-underline"
+          >
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-linear-to-t from-orange-500/10 to-transparent scale-125" />
               <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-orange-500/25 bg-white shadow-[0_2px_10px_rgba(249,115,22,0.15)]">
-                <Image src="/image/logo.png" alt="Logo" width={36} height={36} className="h-full w-full object-cover" />
+                <Image
+                  src="/image/logo.png"
+                  alt="Logo"
+                  width={36}
+                  height={36}
+                  className="h-full w-full object-cover"
+                />
               </div>
             </div>
             <div>
               <div className="text-[15px] font-black text-gray-900 font-['Playfair_Display',serif]">
                 Know<span className="text-orange-500">Samvidhan</span>
               </div>
-              <div className="text-[9px] tracking-[0.2em] text-gray-400 uppercase">Constitution · Learn</div>
+              <div className="text-[9px] tracking-[0.2em] text-gray-400 uppercase">
+                Constitution · Learn
+              </div>
             </div>
           </Link>
 
@@ -446,7 +491,15 @@ export default function Navbar() {
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-500 transition-all duration-200 hover:border-orange-500/40 hover:bg-orange-50 hover:text-orange-500"
             aria-label="Close"
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -493,7 +546,14 @@ export default function Navbar() {
                   <span className="flex-1">{link.label}</span>
 
                   <svg
-                    width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     className={`shrink-0 transition-all duration-200 ${
                       active
                         ? "text-orange-500 translate-x-0.5"
@@ -512,13 +572,18 @@ export default function Navbar() {
         <div className="relative border-t border-gray-100 px-4 pt-4 pb-8">
           <div className="mb-3 flex items-center gap-2">
             <div className="h-px flex-1 bg-gray-100" />
-            <span className="text-[10px] font-semibold uppercase tracking-[1.5px] text-gray-400">Account</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[1.5px] text-gray-400">
+              Account
+            </span>
             <div className="h-px flex-1 bg-gray-100" />
           </div>
 
           <div className="flex flex-col gap-2.5">
             {authLoading ? (
-              <div className="h-21 animate-pulse rounded-2xl bg-gray-100" aria-label="Checking account" />
+              <div
+                className="h-21 animate-pulse rounded-2xl bg-gray-100"
+                aria-label="Checking account"
+              />
             ) : currentUser ? (
               <>
                 <div className="rounded-2xl border border-orange-500/15 bg-orange-50/50 p-3.5">
@@ -567,7 +632,16 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                   className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl border border-gray-200 bg-white py-3 text-[13.5px] font-semibold text-gray-700 no-underline transition-all duration-200 hover:border-orange-500/30 hover:text-orange-600 hover:shadow-[0_4px_16px_rgba(249,115,22,0.1)]"
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
                     <polyline points="10 17 15 12 10 7" />
                     <line x1="15" y1="12" x2="3" y2="12" />
@@ -582,7 +656,17 @@ export default function Navbar() {
                 >
                   <span className="absolute inset-0 rounded-2xl bg-linear-to-br from-amber-400 via-orange-500 to-orange-600 shadow-[0_6px_20px_rgba(249,115,22,0.4)]" />
                   <span className="absolute inset-0 -skew-x-12 -translate-x-full bg-linear-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-[200%]" />
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="relative">
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="relative"
+                  >
                     <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="8.5" cy="7" r="4" />
                     <line x1="20" y1="8" x2="20" y2="14" />

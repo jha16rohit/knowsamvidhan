@@ -1,13 +1,13 @@
 # 📁 knowsamvidhan - Project Structure
 
-*Generated on: 4/30/2026, 2:27:08 PM*
+*Generated on: 5/2/2026, 12:24:11 PM*
 
 ## 📋 Quick Overview
 
 | Metric | Value |
 |--------|-------|
-| 📄 Total Files | 86 |
-| 📁 Total Folders | 66 |
+| 📄 Total Files | 108 |
+| 📁 Total Folders | 82 |
 | 🌳 Max Depth | 5 levels |
 | 🛠️ Tech Stack | React, Next.js, TypeScript, CSS, Node.js |
 
@@ -25,39 +25,40 @@
 
 ### By File Type
 
-- ⚛️ **.tsx** (React TypeScript files): 32 files (37.2%)
-- 🔷 **.ts** (TypeScript files): 27 files (31.4%)
-- 📄 **.sql** (Other files): 5 files (5.8%)
-- 🎨 **.svg** (SVG images): 5 files (5.8%)
-- 📖 **.md** (Markdown files): 3 files (3.5%)
-- ⚙️ **.json** (JSON files): 3 files (3.5%)
-- 🖼️ **.png** (PNG images): 3 files (3.5%)
-- 📄 **.mjs** (Other files): 2 files (2.3%)
-- 🚫 **.gitignore** (Git ignore): 1 files (1.2%)
-- 🖼️ **.ico** (Icon files): 1 files (1.2%)
-- 🎨 **.css** (Stylesheets): 1 files (1.2%)
-- 📄 **.** (Other files): 1 files (1.2%)
-- ⚙️ **.toml** (TOML files): 1 files (1.2%)
-- 📄 **.prisma** (Other files): 1 files (1.2%)
+- 🔷 **.ts** (TypeScript files): 40 files (37.0%)
+- ⚛️ **.tsx** (React TypeScript files): 39 files (36.1%)
+- 📄 **.sql** (Other files): 5 files (4.6%)
+- 🎨 **.svg** (SVG images): 5 files (4.6%)
+- 📖 **.md** (Markdown files): 4 files (3.7%)
+- ⚙️ **.json** (JSON files): 3 files (2.8%)
+- 🖼️ **.png** (PNG images): 3 files (2.8%)
+- 📄 **.mjs** (Other files): 2 files (1.9%)
+- 🚫 **.gitignore** (Git ignore): 1 files (0.9%)
+- 🖼️ **.ico** (Icon files): 1 files (0.9%)
+- 🎨 **.css** (Stylesheets): 1 files (0.9%)
+- 📄 **.** (Other files): 1 files (0.9%)
+- ⚙️ **.toml** (TOML files): 1 files (0.9%)
+- 📄 **.prisma** (Other files): 1 files (0.9%)
+- 📄 **.mp4** (Other files): 1 files (0.9%)
 
 ### By Category
 
-- **React**: 32 files (37.2%)
-- **TypeScript**: 27 files (31.4%)
-- **Assets**: 9 files (10.5%)
-- **Other**: 9 files (10.5%)
-- **Config**: 4 files (4.7%)
-- **Docs**: 3 files (3.5%)
-- **DevOps**: 1 files (1.2%)
-- **Styles**: 1 files (1.2%)
+- **TypeScript**: 40 files (37.0%)
+- **React**: 39 files (36.1%)
+- **Other**: 10 files (9.3%)
+- **Assets**: 9 files (8.3%)
+- **Docs**: 4 files (3.7%)
+- **Config**: 4 files (3.7%)
+- **DevOps**: 1 files (0.9%)
+- **Styles**: 1 files (0.9%)
 
 ### 📁 Largest Directories
 
-- **root**: 86 files
-- **app**: 54 files
-- **app\api**: 23 files
+- **root**: 108 files
+- **app**: 71 files
+- **app\api**: 34 files
 - **app\api\admin**: 20 files
-- **app\(admin)**: 16 files
+- **app\(user)**: 17 files
 
 ## 🌳 Directory Structure
 
@@ -107,18 +108,29 @@ knowsamvidhan/
 │   │   ├── 📂 signup/
 │   │   │   └── ⚛️ page.tsx
 │   │   ├── 📂 user_amendments/
+│   │   │   ├── 📂 [slug]/
+│   │   │   │   └── ⚛️ page.tsx
 │   │   │   └── ⚛️ page.tsx
 │   │   ├── 📂 user_articles/
+│   │   │   ├── 📂 [slug]/
+│   │   │   │   └── ⚛️ page.tsx
+│   │   │   └── ⚛️ page.tsx
+│   │   ├── 📂 user_chat/
+│   │   │   ├── ⚛️ layout.tsx
 │   │   │   └── ⚛️ page.tsx
 │   │   ├── 📂 user_login/
 │   │   │   └── ⚛️ page.tsx
 │   │   ├── 📂 user_parts/
+│   │   │   ├── 📂 [slug]/
+│   │   │   │   └── ⚛️ page.tsx
 │   │   │   └── ⚛️ page.tsx
 │   │   ├── 📂 user_preamble/
 │   │   │   └── ⚛️ page.tsx
 │   │   ├── 📂 user_quiz/
 │   │   │   └── ⚛️ page.tsx
 │   │   └── 📂 user_schedules/
+│   │   │   ├── 📂 [slug]/
+│   │   │   │   └── ⚛️ page.tsx
 │   │   │   └── ⚛️ page.tsx
 │   ├── 🔌 api/
 │   │   ├── 📂 admin/
@@ -162,13 +174,35 @@ knowsamvidhan/
 │   │   │   │   └── 🔷 route.ts
 │   │   │   └── 📂 verify-otp/
 │   │   │   │   └── 🔷 route.ts
-│   │   └── 📂 auth/
+│   │   ├── 📂 amendments/
+│   │   │   ├── 📂 [slug]/
+│   │   │   │   └── 🔷 route.ts
+│   │   │   └── 🔷 route.ts
+│   │   ├── 📂 articles/
+│   │   │   ├── 📂 [slug]/
+│   │   │   │   └── 🔷 route.ts
+│   │   │   └── 🔷 route.ts
+│   │   ├── 📂 auth/
 │   │   │   ├── 📂 login/
 │   │   │   │   └── 🔷 route.ts
 │   │   │   ├── 📂 logout/
 │   │   │   │   └── 🔷 route.ts
-│   │   │   └── 📂 register/
+│   │   │   ├── 📂 profile/
 │   │   │   │   └── 🔷 route.ts
+│   │   │   └── 📂 register/
+│   │   │   │   ├── 🔷 route.ts
+│   │   │   │   └── 📂 verify/
+│   │   │   │   │   └── 🔷 route.ts
+│   │   ├── 📂 parts/
+│   │   │   ├── 📂 [slug]/
+│   │   │   │   └── 🔷 route.ts
+│   │   │   └── 🔷 route.ts
+│   │   ├── 📂 preamble/
+│   │   │   └── 🔷 route.ts
+│   │   └── 📂 schedules/
+│   │   │   ├── 📂 [slug]/
+│   │   │   │   └── 🔷 route.ts
+│   │   │   └── 🔷 route.ts
 │   ├── 🖼️ favicon.ico
 │   ├── 🎨 globals.css
 │   ├── ⚛️ layout.tsx
@@ -176,11 +210,14 @@ knowsamvidhan/
 │   │   └── ⚛️ page.tsx
 ├── 📖 CLAUDE.md
 ├── 🧩 components/
+│   ├── ⚛️ AIVideo.tsx
 │   ├── ⚛️ ConstitutionHero.tsx
 │   ├── ⚛️ Footer.tsx
 │   └── ⚛️ Navbar.tsx
 ├── 🔵 🔍 **eslint.config.mjs**
 ├── 📚 lib/
+│   ├── 🔷 auth.ts
+│   ├── 🔷 email.ts
 │   └── 🔷 prisma.ts
 ├── 📄 LICENSE
 ├── 🔷 next-env.d.ts
@@ -190,20 +227,22 @@ knowsamvidhan/
 ├── 📄 postcss.config.mjs
 ├── 📂 prisma/
 │   ├── 📂 migrations/
-│   │   ├── 📂 20260428094838_init/
+│   │   ├── 📂 20260430173542_init/
 │   │   │   └── 📄 migration.sql
-│   │   ├── 📂 20260428101337_add_schedule_model/
+│   │   ├── 📂 20260430175902_fix_preamble_structure/
 │   │   │   └── 📄 migration.sql
-│   │   ├── 📂 20260428104217_add_amendment_model/
+│   │   ├── 📂 20260501115626_add_schedule_slug_tagdetails/
 │   │   │   └── 📄 migration.sql
-│   │   ├── 📂 20260429055747_add_quiz_models/
+│   │   ├── 📂 20260501131410_quiz_update/
 │   │   │   └── 📄 migration.sql
-│   │   ├── 📂 20260429175327_init/
+│   │   ├── 📂 20260502000000_add_registration_otp/
 │   │   │   └── 📄 migration.sql
 │   │   └── ⚙️ migration_lock.toml
 │   └── 📄 schema.prisma
+├── 📖 project_structure.md
 ├── 🔷 proxy.ts
 ├── 🌐 public/
+│   ├── 📄 ai-avatar.mp4
 │   ├── 🎨 file.svg
 │   ├── 🎨 globe.svg
 │   ├── 📂 image/

@@ -14,7 +14,6 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
       <Navbar />
       {children}
 
-      {/* ❌ Hide on chat page */}
       {!isChatPage && <AIVideo />}
     </>
   );
