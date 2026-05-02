@@ -2,10 +2,10 @@
 
 import FooterSection from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import { useEffect, useState, useRef } from "react";
+import SpeakButton from "@/components/speak";
+import { useEffect, useState } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
 interface Keyword      { word: string; meaning: string; icon: string }
 interface Timeline     { year: string; event: string }
 interface QuickFact    { label: string; value: string }
@@ -23,107 +23,8 @@ interface PreambleData {
   notes:             Note[];
 }
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-
-// function BookmarkIcon({ filled }: { filled: boolean }) {
-//   return (
-//     <svg viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"}
-//       stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-//       className="w-4 h-4">
-//       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-//     </svg>
-//   );
-// }
-
-// ─── Speak Button ─────────────────────────────────────────────────────────────
-
-function SpeakButton({ text }: { text: string }) {
-  const [speaking, setSpeaking] = useState(false);
-  const uttRef = useRef<SpeechSynthesisUtterance | null>(null);
-
-  const handleClick = () => {
-    if (!("speechSynthesis" in window)) return;
-
-    if (speaking) {
-      window.speechSynthesis.cancel();
-      setSpeaking(false);
-      return;
-    }
-
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = "en-IN";
-    utt.rate = 0.92;
-    utt.pitch = 1;
-
-    utt.onend = () => setSpeaking(false);
-    utt.onerror = () => setSpeaking(false);
-
-    uttRef.current = utt;
-    window.speechSynthesis.speak(utt);
-    setSpeaking(true);
-  };
-
-  // Stop on unmount
-  useEffect(() => {
-    return () => { window.speechSynthesis?.cancel(); };
-  }, []);
-
-  return (
-    <button
-      onClick={handleClick}
-      title={speaking ? "Stop speaking" : "Listen to Preamble"}
-      className={`
-        inline-flex items-center gap-2 rounded-full border px-4 py-1.5
-        text-[12px] font-semibold tracking-wide
-        transition-all duration-200 select-none
-        ${speaking
-          ? "border-[#c48232] bg-[#fdf3e3] text-[#c48232] hover:bg-[#fde8c4]"
-          : "border-[#c9b99a] bg-white text-[#7a6a50] hover:border-[#c48232] hover:text-[#c48232] hover:bg-[#fdf3e3]"
-        }
-      `}
-    >
-      {/* Speaker / Stop icon */}
-      {speaking ? (
-        /* Stop icon */
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-          className="w-3.5 h-3.5 shrink-0">
-          <rect x="4" y="4" width="16" height="16" rx="2" />
-        </svg>
-      ) : (
-        /* Volume / speaker icon */
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-          className="w-3.5 h-3.5 shrink-0">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-        </svg>
-      )}
-      {speaking ? "Stop" : "Listen"}
-
-      {/* Animated bars when speaking */}
-      {speaking && (
-        <span className="flex items-end gap-0.5 h-3">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className="w-0.75 rounded-full bg-[#c48232] animate-bounce"
-              style={{
-                animationDelay: `${i * 0.18}s`,
-                animationDuration: "0.7s",
-                height: i === 1 ? "12px" : "7px",
-              }}
-            />
-          ))}
-        </span>
-      )}
-    </button>
-  );
-}
 
 // ─── Keyword Card ─────────────────────────────────────────────────────────────
-
 function KeywordCard({ word, meaning, icon }: Keyword) {
   return (
     <div className="group relative bg-white border border-[#c9b99a] rounded-2xl p-5 sm:p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(196,130,50,0.15)] hover:border-[#c48232] overflow-hidden">
@@ -138,13 +39,11 @@ function KeywordCard({ word, meaning, icon }: Keyword) {
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
-
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-[#f0e8d8] rounded ${className}`} />;
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
-
 export default function PreamblePage() {
   const [data,       setData]       = useState<PreambleData | null>(null);
   const [isLoading,  setIsLoading]  = useState(true);
