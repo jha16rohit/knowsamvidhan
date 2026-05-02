@@ -1500,8 +1500,10 @@ function QuizListScreen({
             </p>
           </div>
           <Image
-            src="https://cdn-icons-png.flaticon.com/512/2436/2436874.png"
-            alt=""
+            src="/image/quiz.png"
+            alt="Quiz Illustration"
+            width={80}
+            height={80}
             className="hidden w-16 opacity-85 sm:block lg:w-20"
           />
         </div>
@@ -2212,7 +2214,6 @@ function ResultsScreen({
                   >
                     {item.icon}
                   </span>
-
                   <span className="text-gray-700">{item.label}</span>
                 </div>
               ))}

@@ -175,6 +175,20 @@ model UserQuizAttempt {
   @@index([quizId])
 }
 
+model Feedback {
+  id        String   @id @default(uuid())
+  userId    String
+  rating    Int
+  name      String?
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
 // ==================
 // USER MODEL
 // ==================
@@ -209,6 +223,7 @@ model User {
   posts               Post[]
   passwordResetTokens PasswordResetToken[]
   quizAttempts        UserQuizAttempt[]
+  feedbacks           Feedback[]
 
   @@index([email])
   @@index([role])
