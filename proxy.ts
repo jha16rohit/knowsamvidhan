@@ -63,7 +63,7 @@ const verifyToken = (token?: string): JwtPayload | null => {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const adminToken = request.cookies.get("token")?.value;
+  const adminToken = request.cookies.get("admin_token")?.value;
   const userToken = request.cookies.get("user_token")?.value;
 
   if (adminPublicRoutes.has(pathname) || adminPublicApiRoutes.has(pathname)) {

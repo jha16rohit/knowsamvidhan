@@ -13,9 +13,8 @@ model Post {
   content   String
   category  String
   createdAt DateTime @default(now())
-
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id])
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
 }
 
 model PasswordResetToken {
@@ -23,8 +22,7 @@ model PasswordResetToken {
   token     String   @unique
   userId    String
   expiresAt DateTime
-
-  user User @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model PasswordResetOTP {
@@ -61,7 +59,7 @@ model Part {
 }
 
 model Article {
-  id                String  @id @default(uuid())
+  id                String   @id @default(uuid())
   articleNumber     String
   title             String
   shortSummary      String?
@@ -69,14 +67,11 @@ model Article {
   simpleExplanation String?
   example           String?
   tags              String?
-  featured          Boolean @default(false)
-
-  partId String
-  part   Part   @relation(fields: [partId], references: [id])
-
-  clauses Clause[]
-
-  createdAt DateTime @default(now())
+  featured          Boolean  @default(false)
+  partId            String
+  createdAt         DateTime @default(now())
+  part              Part     @relation(fields: [partId], references: [id])
+  clauses           Clause[]
 }
 
 model Clause {
@@ -84,35 +79,34 @@ model Clause {
   clauseNumber String
   text         String
   createdAt    DateTime @default(now())
-
-  articleId String
-  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId    String
+  article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 }
 
 model Preamble {
   id                String   @id @default("singleton")
-  officialText      String   @db.Text
-  simpleExplanation String   @db.Text
-  whyItMatters      String   @db.Text
-  keywords          String   @default("[]") @db.Text
-  timeline          String   @default("[]") @db.Text
-  quickFacts        String   @default("[]") @db.Text
-  landmarkCases     String   @default("[]") @db.Text
-  notes             String   @default("[]") @db.Text
+  officialText      String
+  simpleExplanation String
+  whyItMatters      String
+  keywords          String   @default("[]")
+  timeline          String   @default("[]")
+  quickFacts        String   @default("[]")
   updatedAt         DateTime @updatedAt
+  landmarkCases     String   @default("[]")
+  notes             String   @default("[]")
 }
 
 model Schedule {
   id          String   @id @default(uuid())
   shortId     String
   schedule    String
-  slug        String   @unique
   title       String
-  description String?  @db.Text
+  description String?
   topics      String   @default("")
-  tagDetails  String   @default("[]") @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  slug        String   @unique
+  tagDetails  String   @default("[]")
 }
 
 model Amendment {
@@ -120,57 +114,53 @@ model Amendment {
   number          String
   year            String
   title           String
-  summary         String   @db.Text
-  whyItMatters    String?  @db.Text
+  summary         String
+  whyItMatters    String?
   relatedArticles String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
 model Quiz {
-  id          String   @id @default(uuid())
+  id          String            @id @default(uuid())
   title       String
-  description String?  @db.Text   // ← NEW: quiz description shown to users
-  level       String              // "basic" | "intermediate" | "advanced"
-  status      String   @default("draft") // "draft" | "published"
-  timeMinutes Int      @default(10)      // ← NEW: time limit in minutes, set by admin
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  questions Question[]
-  attempts  UserQuizAttempt[]
+  level       String
+  status      String            @default("draft")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  description String?
+  timeMinutes Int               @default(10)
+  questions   Question[]
+  attempts    UserQuizAttempt[]
 }
 
 model Question {
   id            String   @id @default(uuid())
-  questionText  String   @db.Text
+  questionText  String
   optionA       String
   optionB       String
   optionC       String
   optionD       String
-  correctAnswer String   // "A" | "B" | "C" | "D"
-  explanation   String?  @db.Text
+  correctAnswer String
+  explanation   String?
   order         Int      @default(0)
   createdAt     DateTime @default(now())
-
-  quizId String
-  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
 
-// ← NEW: tracks each user's quiz submission (prevents retakes)
 model UserQuizAttempt {
   id          String   @id @default(uuid())
   userId      String
   quizId      String
-  score       Int      // number of correct answers
-  totalQ      Int      // total questions at time of attempt
-  answers     String   @db.Text  // JSON: Record<number, number> — questionIndex → chosenOptionIndex
+  score       Int
+  totalQ      Int
+  answers     String
   submittedAt DateTime @default(now())
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, quizId])  // one attempt per user per quiz
+  @@unique([userId, quizId])
   @@index([userId])
   @@index([quizId])
 }
@@ -180,18 +170,36 @@ model Feedback {
   userId    String
   rating    Int
   name      String?
-  comment   String?  @db.Text
+  comment   String?
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([createdAt])
 }
 
-// ==================
-// USER MODEL
-// ==================
+model User {
+  id                  String               @id @default(uuid())
+  name                String?
+  email               String               @unique
+  password            String
+  role                Role                 @default(USER)
+  status              Status               @default(ACTIVE)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  avatar              String?
+  lastLogin           DateTime?
+  isDeleted           Boolean              @default(false)
+  feedbacks           Feedback[]
+  passwordResetTokens PasswordResetToken[]
+  posts               Post[]
+  quizAttempts        UserQuizAttempt[]
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+}
+
 enum Role {
   USER
   ADMIN
@@ -201,31 +209,4 @@ enum Status {
   ACTIVE
   BLOCKED
   SUSPENDED
-}
-
-model User {
-  id       String  @id @default(uuid())
-  name     String?
-  email    String  @unique
-  password String
-
-  role     Role    @default(USER)
-  status   Status  @default(ACTIVE)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  avatar    String?
-  lastLogin DateTime?
-
-  isDeleted Boolean @default(false)
-
-  posts               Post[]
-  passwordResetTokens PasswordResetToken[]
-  quizAttempts        UserQuizAttempt[]
-  feedbacks           Feedback[]
-
-  @@index([email])
-  @@index([role])
-  @@index([status])
 }
