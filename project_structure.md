@@ -1,13 +1,13 @@
 # 📁 knowsamvidhan - Project Structure
 
-*Generated on: 5/2/2026, 12:24:11 PM*
+*Generated on: 5/3/2026, 12:17:44 PM*
 
 ## 📋 Quick Overview
 
 | Metric | Value |
 |--------|-------|
-| 📄 Total Files | 108 |
-| 📁 Total Folders | 82 |
+| 📄 Total Files | 119 |
+| 📁 Total Folders | 87 |
 | 🌳 Max Depth | 5 levels |
 | 🛠️ Tech Stack | React, Next.js, TypeScript, CSS, Node.js |
 
@@ -25,40 +25,40 @@
 
 ### By File Type
 
-- 🔷 **.ts** (TypeScript files): 40 files (37.0%)
-- ⚛️ **.tsx** (React TypeScript files): 39 files (36.1%)
-- 📄 **.sql** (Other files): 5 files (4.6%)
-- 🎨 **.svg** (SVG images): 5 files (4.6%)
-- 📖 **.md** (Markdown files): 4 files (3.7%)
-- ⚙️ **.json** (JSON files): 3 files (2.8%)
-- 🖼️ **.png** (PNG images): 3 files (2.8%)
-- 📄 **.mjs** (Other files): 2 files (1.9%)
-- 🚫 **.gitignore** (Git ignore): 1 files (0.9%)
-- 🖼️ **.ico** (Icon files): 1 files (0.9%)
-- 🎨 **.css** (Stylesheets): 1 files (0.9%)
-- 📄 **.** (Other files): 1 files (0.9%)
-- ⚙️ **.toml** (TOML files): 1 files (0.9%)
-- 📄 **.prisma** (Other files): 1 files (0.9%)
-- 📄 **.mp4** (Other files): 1 files (0.9%)
+- 🔷 **.ts** (TypeScript files): 44 files (37.0%)
+- ⚛️ **.tsx** (React TypeScript files): 43 files (36.1%)
+- 📄 **.sql** (Other files): 6 files (5.0%)
+- 🎨 **.svg** (SVG images): 5 files (4.2%)
+- 🖼️ **.png** (PNG images): 5 files (4.2%)
+- 📖 **.md** (Markdown files): 4 files (3.4%)
+- ⚙️ **.json** (JSON files): 3 files (2.5%)
+- 📄 **.mjs** (Other files): 2 files (1.7%)
+- 🚫 **.gitignore** (Git ignore): 1 files (0.8%)
+- 🖼️ **.ico** (Icon files): 1 files (0.8%)
+- 🎨 **.css** (Stylesheets): 1 files (0.8%)
+- 📄 **.** (Other files): 1 files (0.8%)
+- ⚙️ **.toml** (TOML files): 1 files (0.8%)
+- 📄 **.prisma** (Other files): 1 files (0.8%)
+- 📄 **.mp4** (Other files): 1 files (0.8%)
 
 ### By Category
 
-- **TypeScript**: 40 files (37.0%)
-- **React**: 39 files (36.1%)
-- **Other**: 10 files (9.3%)
-- **Assets**: 9 files (8.3%)
-- **Docs**: 4 files (3.7%)
-- **Config**: 4 files (3.7%)
-- **DevOps**: 1 files (0.9%)
-- **Styles**: 1 files (0.9%)
+- **TypeScript**: 44 files (37.0%)
+- **React**: 43 files (36.1%)
+- **Assets**: 11 files (9.2%)
+- **Other**: 11 files (9.2%)
+- **Docs**: 4 files (3.4%)
+- **Config**: 4 files (3.4%)
+- **DevOps**: 1 files (0.8%)
+- **Styles**: 1 files (0.8%)
 
 ### 📁 Largest Directories
 
-- **root**: 108 files
-- **app**: 71 files
-- **app\api**: 34 files
+- **root**: 119 files
+- **app**: 75 files
+- **app\api**: 36 files
 - **app\api\admin**: 20 files
-- **app\(user)**: 17 files
+- **app\(user)**: 18 files
 
 ## 🌳 Directory Structure
 
@@ -71,6 +71,8 @@ knowsamvidhan/
 │   │   ├── 📂 activity-logs/
 │   │   │   └── ⚛️ page.tsx
 │   │   ├── 📂 ad-dashboard/
+│   │   │   └── ⚛️ page.tsx
+│   │   ├── 📂 admin_profile/
 │   │   │   └── ⚛️ page.tsx
 │   │   ├── 📂 admin-xyz/
 │   │   │   ├── 📂 forgot-password/
@@ -125,6 +127,8 @@ knowsamvidhan/
 │   │   │   │   └── ⚛️ page.tsx
 │   │   │   └── ⚛️ page.tsx
 │   │   ├── 📂 user_preamble/
+│   │   │   └── ⚛️ page.tsx
+│   │   ├── 📂 user_profile/
 │   │   │   └── ⚛️ page.tsx
 │   │   ├── 📂 user_quiz/
 │   │   │   └── ⚛️ page.tsx
@@ -193,15 +197,19 @@ knowsamvidhan/
 │   │   │   │   ├── 🔷 route.ts
 │   │   │   │   └── 📂 verify/
 │   │   │   │   │   └── 🔷 route.ts
+│   │   ├── 📂 feedback/
+│   │   │   └── 🔷 route.ts
 │   │   ├── 📂 parts/
 │   │   │   ├── 📂 [slug]/
 │   │   │   │   └── 🔷 route.ts
 │   │   │   └── 🔷 route.ts
 │   │   ├── 📂 preamble/
 │   │   │   └── 🔷 route.ts
-│   │   └── 📂 schedules/
+│   │   ├── 📂 schedules/
 │   │   │   ├── 📂 [slug]/
 │   │   │   │   └── 🔷 route.ts
+│   │   │   └── 🔷 route.ts
+│   │   └── 📂 tts/
 │   │   │   └── 🔷 route.ts
 │   ├── 🖼️ favicon.ico
 │   ├── 🎨 globals.css
@@ -213,13 +221,18 @@ knowsamvidhan/
 │   ├── ⚛️ AIVideo.tsx
 │   ├── ⚛️ ConstitutionHero.tsx
 │   ├── ⚛️ Footer.tsx
-│   └── ⚛️ Navbar.tsx
+│   ├── ⚛️ Navbar.tsx
+│   ├── ⚛️ Profile.tsx
+│   └── ⚛️ speak.tsx
 ├── 🔵 🔍 **eslint.config.mjs**
 ├── 📚 lib/
 │   ├── 🔷 auth.ts
 │   ├── 🔷 email.ts
-│   └── 🔷 prisma.ts
+│   ├── 🔷 gemini.ts
+│   ├── 🔷 prisma.ts
+│   └── 🔷 profile.ts
 ├── 📄 LICENSE
+├── 🔷 middleware.ts
 ├── 🔷 next-env.d.ts
 ├── 🟡 ▲ **next.config.ts**
 ├── 🟡 🔒 **package-lock.json**
@@ -237,18 +250,21 @@ knowsamvidhan/
 │   │   │   └── 📄 migration.sql
 │   │   ├── 📂 20260502000000_add_registration_otp/
 │   │   │   └── 📄 migration.sql
+│   │   ├── 📂 20260502010000_add_feedback/
+│   │   │   └── 📄 migration.sql
 │   │   └── ⚙️ migration_lock.toml
 │   └── 📄 schema.prisma
 ├── 📖 project_structure.md
-├── 🔷 proxy.ts
 ├── 🌐 public/
 │   ├── 📄 ai-avatar.mp4
 │   ├── 🎨 file.svg
 │   ├── 🎨 globe.svg
 │   ├── 📂 image/
 │   │   ├── 🖼️ ashoka.png
+│   │   ├── 🖼️ avatar.png
 │   │   ├── 🖼️ book.png
-│   │   └── 🖼️ logo.png
+│   │   ├── 🖼️ logo.png
+│   │   └── 🖼️ quiz.png
 │   ├── 🎨 next.svg
 │   ├── 🎨 vercel.svg
 │   └── 🎨 window.svg

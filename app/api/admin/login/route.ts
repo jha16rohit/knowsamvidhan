@@ -1,14 +1,13 @@
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { signSessionToken } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
-    const { email, password } = (await req.json()) as {
-      email?: string;
-      password?: string;
-    };
+    const { email, password } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -17,8 +16,13 @@ export async function POST(req: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.trim().toLowerCase() },
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: email.trim(),
+          mode: "insensitive",
+        },
+      },
     });
 
     if (!user || user.isDeleted) {
@@ -30,16 +34,30 @@ export async function POST(req: Request) {
 
     if (user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Not authorized (admin only)" },
+        { error: "Unauthorized" },
         { status: 403 }
       );
     }
 
     if (user.status !== "ACTIVE") {
-      return NextResponse.json({ error: "Account inactive" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Account inactive" },
+        { status: 403 }
+      );
     }
 
+    console.log({
+      inputEmail: email,
+      dbEmail: user?.email,
+      passwordExists: !!user?.password,
+      role: user?.role,
+      status: user?.status,
+      hashPrefix: user?.password?.slice(0, 4),
+    });
+
     const isValid = await bcrypt.compare(password, user.password);
+
+    console.log("PASSWORD MATCH:", isValid);
 
     if (!isValid) {
       return NextResponse.json(
@@ -48,33 +66,39 @@ export async function POST(req: Request) {
       );
     }
 
-    const token = signSessionToken(
-      { id: user.id, email: user.email, role: user.role },
-      "7d"
-    );
-
-    const response = NextResponse.json({
-      message: "Admin login successful",
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        status: user.status,
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        lastLogin: new Date(),
       },
     });
 
-    response.cookies.set("token", token, {
+    const token = signSessionToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    const response = NextResponse.json({
+      success: true,
+    });
+
+    response.cookies.set("admin_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
       path: "/",
+      maxAge: 60 * 60 * 24 * 7,
     });
 
     return response;
+
   } catch (error) {
-    console.error("ADMIN LOGIN ERROR:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "Server error" },
+      { status: 500 }
+    );
   }
 }
