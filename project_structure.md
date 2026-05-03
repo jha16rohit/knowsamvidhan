@@ -232,7 +232,7 @@ knowsamvidhan/
 │   ├── 🔷 prisma.ts
 │   └── 🔷 profile.ts
 ├── 📄 LICENSE
-├── 🔷 middleware.ts
+├── 🔷 proxy.ts
 ├── 🔷 next-env.d.ts
 ├── 🟡 ▲ **next.config.ts**
 ├── 🟡 🔒 **package-lock.json**

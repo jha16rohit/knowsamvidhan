@@ -1,25 +1,48 @@
 import { NextResponse } from "next/server";
+import {
+  clearAuthCookies,
+  getRefreshTokenFromCookies,
+  verifyRefreshToken,
+} from "@/lib/auth";
+import {
+  revokeRefreshToken,
+  revokeAllUserSessions,
+} from "@/lib/session";
 
-export async function POST(req: Request) {
-  const cookieHeader = req.headers.get("cookie") || "";
-  const token = cookieHeader
-    .split("; ")
-    .find((cookie) => cookie.startsWith("user_token="))
-    ?.split("=")[1];
+export async function POST() {
+  try {
+    const userRefreshToken =
+      await getRefreshTokenFromCookies(false);
 
-  if (!token) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    const adminRefreshToken =
+      await getRefreshTokenFromCookies(true);
+
+    const token =
+      userRefreshToken || adminRefreshToken;
+
+    if (token) {
+      const payload = verifyRefreshToken(token);
+
+      await revokeRefreshToken(token);
+
+      if (payload?.id) {
+        await revokeAllUserSessions(payload.id);
+      }
+    }
+
+    await clearAuthCookies(false);
+    await clearAuthCookies(true);
+
+    return NextResponse.json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    console.error("LOGOUT ERROR:", error);
+
+    return NextResponse.json(
+      { error: "Server error" },
+      { status: 500 }
+    );
   }
-
-  const response = NextResponse.json({
-    message: "Logged out successfully",
-  });
-
-  response.cookies.set("user_token", "", {
-    httpOnly: true,
-    expires: new Date(0),
-    path: "/",
-  });
-
-  return response;
 }
