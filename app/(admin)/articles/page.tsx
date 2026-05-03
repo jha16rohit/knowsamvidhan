@@ -1,21 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import Link from "next/link";
 import {
-  LayoutDashboard,
-  List,
-  FileText,
-  AlignLeft,
-  Book,
-  CalendarDays,
-  History,
-  GraduationCap,
-  Users,
-  BarChart3,
-  Settings,
-  ShieldAlert,
-  BookOpen,
   Plus,
   Pencil,
   Trash2,
@@ -23,72 +9,29 @@ import {
   Star,
   X,
   Check,
-  Bell,
-  ShieldCheck,
+  Book,
   ChevronLeft,
   ChevronRight,
   Filter,
 } from "lucide-react";
 
+import AdminSidebar from "@/components/admin_sidebar";
+
+
 const ARTICLES_PER_PAGE = 10;
 
 export default function ArticlesPage() {
-  const openCount = 4;
-
-  const navItems = [
-    {
-      name: "Dashboard",
-      icon: LayoutDashboard,
-      active: false,
-      href: "/ad-dashboard",
-    },
-    { name: "Parts", icon: List, active: false, href: "/parts" },
-    { name: "Articles", icon: FileText, active: true, href: "/articles" },
-    { name: "Clauses", icon: AlignLeft, active: false, href: "/clauses" },
-    { name: "Preamble", icon: Book, active: false, href: "/preamble" },
-    {
-      name: "Schedules",
-      icon: CalendarDays,
-      active: false,
-      href: "/schedules",
-    },
-    { name: "Amendments", icon: History, active: false, href: "/amendments" },
-    { name: "Quizzes", icon: GraduationCap, active: false, href: "/quizzes" },
-    { name: "Users", icon: Users, active: false, href: "/users" },
-    { name: "Analytics", icon: BarChart3, active: false, href: "/analytics" },
-    {
-      name: "Alerts",
-      icon: Bell,
-      active: false,
-      href: "/alerts",
-      badge: openCount,
-    },
-    {
-      name: "Activity Logs",
-      icon: ShieldCheck,
-      active: false,
-      href: "/activity-logs",
-    },
-    { name: "Settings", icon: Settings, active: false, href: "/settings" },
-  ];
-
   type Article = {
     id: string;
-  
     articleNumber: string;
-  
     title: string;
-  
     shortSummary?: string;
     officialText?: string;
     simpleExplanation?: string;
     example?: string;
     tags?: string;
-  
     featured: boolean;
-  
     partId: string;
-  
     part?: {
       id: string;
       partNumber: string;
@@ -180,10 +123,7 @@ export default function ArticlesPage() {
 
   useEffect(() => {
     if (availableParts.length > 0 && !formData.part) {
-      setFormData((prev) => ({
-        ...prev,
-        part: availableParts[0].id,
-      }));
+      setFormData((prev) => ({ ...prev, part: availableParts[0].id }));
     }
   }, [availableParts, formData.part]);
 
@@ -223,9 +163,8 @@ export default function ArticlesPage() {
     return found ? found.label : partId;
   };
 
-  const getPartNumber = (article: Article) => {
-    return article.part?.partNumber ?? "";
-  };
+  const getPartNumber = (article: Article) =>
+    article.part?.partNumber ?? "";
 
   const handleOpenModal = (id: string | null = null) => {
     if (id !== null) {
@@ -270,7 +209,6 @@ export default function ArticlesPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const payload = {
       articleNumber: formData.id,
       title: formData.title,
@@ -282,7 +220,6 @@ export default function ArticlesPage() {
       featured: formData.featured,
       partId: formData.part,
     };
-
     try {
       if (editingId) {
         await fetch(`/api/admin/articles/${editingId}`, {
@@ -339,78 +276,22 @@ export default function ArticlesPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
+    // AdminSidebar is fixed at w-72, so offset main content by pl-72
+    <div className="min-h-screen bg-[#f8fafc] font-sans">
+      <AdminSidebar />
+
       {/* Toast */}
       {toastMessage && (
         <div className="fixed bottom-8 right-8 z-60 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
           <div className="w-6 h-6 bg-[#1a1a1a] rounded-full flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
-          <span className="text-sm font-bold text-gray-900">
-            {toastMessage}
-          </span>
+          <span className="text-sm font-bold text-gray-900">{toastMessage}</span>
         </div>
       )}
 
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
-            <BookOpen className="text-[#c19d60] w-4 h-4" />
-          </div>
-          <div>
-            <h1 className="font-semibold text-white text-sm tracking-wide">
-              KnowSamvidhan
-            </h1>
-            <p className="text-[6px] tracking-[0.25em] text-gray-400 mt-0.5">
-              CONSTITUTION · LEARN · MASTER
-            </p>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-2">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                item.active
-                  ? "bg-[#1e2638] text-[#f59e0b]"
-                  : "hover:bg-[#1e2638]/50 hover:text-white text-gray-400"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <item.icon
-                  className={`w-4 h-4 ${item.active ? "text-[#f59e0b]" : "text-gray-500"}`}
-                />
-                {item.name}
-              </div>
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
-                  {item.badge}
-                </span>
-              )}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800 relative">
-          <div className="flex items-center gap-2 mb-1">
-            <ShieldAlert className="w-4 h-4 text-[#f59e0b]" />
-            <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">
-              Admin
-            </span>
-          </div>
-          <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You&apos;re managing live content.
-            <br />
-            Edit with care.
-          </p>
-        </div>
-      </aside>
-
-      {/* Main */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      {/* Main content — offset for fixed sidebar (w-72 = 18rem) */}
+      <main className="pl-72 flex flex-col min-h-screen">
         <div className="flex-1 overflow-y-auto p-8 lg:p-10">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
@@ -502,7 +383,6 @@ export default function ArticlesPage() {
                       <Check className="w-4 h-4 text-[#f59e0b]" />
                     )}
                   </div>
-
                   {availableParts.map((part) => (
                     <div
                       key={part.id}
@@ -555,7 +435,7 @@ export default function ArticlesPage() {
             <>
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse min-w-200">
+                  <table className="w-full text-left border-collapse min-w-175">
                     <thead>
                       <tr className="border-b border-gray-200 bg-white">
                         <th className="px-6 py-4 text-[11px] font-bold tracking-widest text-gray-500 uppercase">
@@ -589,7 +469,7 @@ export default function ArticlesPage() {
                           </td>
                           <td className="px-6 py-5">
                             <span
-                              className="px-3 py-1 bg-white border border-[#f59e0b]/30 text-[#f59e0b] rounded-full text-xs font-semibold truncate max-w-50 inline-block"
+                              className="px-3 py-1 bg-white border border-[#f59e0b]/30 text-[#f59e0b] rounded-full text-xs font-semibold truncate max-w-48 inline-block"
                               title={article.part?.title}
                             >
                               {getPartNumber(article)}
@@ -649,7 +529,6 @@ export default function ArticlesPage() {
                       {totalPages}
                     </span>
                   </p>
-
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -658,7 +537,6 @@ export default function ArticlesPage() {
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-
                     {Array.from({ length: totalPages }, (_, i) => i + 1)
                       .filter(
                         (p) =>
@@ -694,7 +572,6 @@ export default function ArticlesPage() {
                           </button>
                         ),
                       )}
-
                     <button
                       onClick={() =>
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
@@ -736,11 +613,7 @@ export default function ArticlesPage() {
             </div>
 
             <div className="p-6 md:p-8 overflow-y-auto">
-              <form
-                id="article-form"
-                onSubmit={handleSave}
-                className="space-y-6"
-              >
+              <form id="article-form" onSubmit={handleSave} className="space-y-6">
                 {/* Part selector */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-800 mb-2">
@@ -764,7 +637,6 @@ export default function ArticlesPage() {
                         <path d="M6 9l6 6 6-6" />
                       </svg>
                     </div>
-
                     {isPartDropdownOpen && (
                       <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                         {availableParts.map((partOption) => (
@@ -920,10 +792,14 @@ export default function ArticlesPage() {
                             featured: !formData.featured,
                           })
                         }
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${formData.featured ? "bg-[#f59e0b]" : "bg-gray-200"}`}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                          formData.featured ? "bg-[#f59e0b]" : "bg-gray-200"
+                        }`}
                       >
                         <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.featured ? "translate-x-6" : "translate-x-1"}`}
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            formData.featured ? "translate-x-6" : "translate-x-1"
+                          }`}
                         />
                       </button>
                     </div>

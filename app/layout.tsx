@@ -13,6 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  icons: {
+    icon: "/image/logo.png",
+  },
   title: "know Samvidhan",
   description: "Acknowledge the Constitution of India in an interactive way",
 };

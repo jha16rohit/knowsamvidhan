@@ -211,7 +211,6 @@ knowsamvidhan/
 │   │   │   └── 🔷 route.ts
 │   │   └── 📂 tts/
 │   │   │   └── 🔷 route.ts
-│   ├── 🖼️ favicon.ico
 │   ├── 🎨 globals.css
 │   ├── ⚛️ layout.tsx
 │   └── 📂 reset-password/

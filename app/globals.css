@@ -24,3 +24,7 @@ body {
 .overflow-wrap-anywhere {
   overflow-wrap: anywhere;
 }
+
+nextjs-portal {
+  display: none !important;
+}

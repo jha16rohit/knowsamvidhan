@@ -1,15 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { 
-  LayoutDashboard, List, FileText, AlignLeft, Book, 
-  CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, ShieldCheck, BookOpen, Check, Bell, Activity, Bot
-} from 'lucide-react';
+import AdminSidebar from '@/components/admin_sidebar';
+import { ShieldAlert, ShieldCheck, Check, Bell, Activity, Bot } from 'lucide-react';
 
 export default function AlertsPage() {
-  // 1. Define state and data first so we can calculate the counts
   const [alerts, setAlerts] = useState([
     { 
       id: 'al1', 
@@ -70,35 +65,15 @@ export default function AlertsPage() {
   const [activeTab, setActiveTab] = useState<'open' | 'resolved' | 'all'>('open');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // 2. Calculate the counts dynamically based on the state
   const openCount = alerts.filter(a => a.status === 'open').length;
   const resolvedCount = alerts.filter(a => a.status === 'resolved').length;
   const allCount = alerts.length;
 
-  // 3. Define the Navigation, passing the openCount to the Alerts tab!
-  const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
-    { name: 'Parts', icon: List, active: false, href: '/parts' },
-    { name: 'Articles', icon: FileText, active: false, href: '/articles' },
-    { name: 'Clauses', icon: AlignLeft, active: false, href: '/clauses' },
-    { name: 'Preamble', icon: Book, active: false, href: '/preamble' },
-    { name: 'Schedules', icon: CalendarDays, active: false, href: '/schedules' },
-    { name: 'Amendments', icon: History, active: false, href: '/amendments' },
-    { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
-    { name: 'Users', icon: Users, active: false, href: '/users' },
-    { name: 'Analytics', icon: BarChart3, active: false, href: '/analytics' },
-    { name: 'Alerts', icon: Bell, active: true, href: '/alerts', badge: openCount }, // Badge added here!
-    { name: 'Activity Logs', icon: ShieldCheck, active: false, href: '/activity-logs' },
-    { name: 'Settings', icon: Settings, active: false, href: '/settings' },
-  ];
-
-  // Filtered List based on active tab
   const displayedAlerts = alerts.filter(alert => {
     if (activeTab === 'all') return true;
     return alert.status === activeTab;
   });
 
-  // Action: Resolve an alert
   const handleResolve = (id: string) => {
     setAlerts(alerts.map(alert => 
       alert.id === id ? { ...alert, status: 'resolved' } : alert
@@ -111,7 +86,6 @@ export default function AlertsPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Helper to render the correct icon
   const renderIcon = (type: string) => {
     switch(type) {
       case 'critical-activity':
@@ -175,56 +149,10 @@ export default function AlertsPage() {
       )}
 
       {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
-            <BookOpen className="text-[#c19d60] w-4 h-4" />
-          </div>
-          <div>
-            <h1 className="font-semibold text-white text-sm tracking-wide">KnowSamvidhan</h1>
-            <p className="text-[6px] tracking-[0.25em] text-gray-400 mt-0.5">CONSTITUTION · LEARN · MASTER</p>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-2">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                item.active 
-                  ? 'bg-[#1e2638] text-[#f59e0b]' 
-                  : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-                {item.name}
-              </div>
-              
-              {/* Dynamic Notification Badge rendering right here! */}
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
-                  {item.badge}
-                </span>
-              )}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800 relative">
-          <div className="flex items-center gap-2 mb-1">
-            <ShieldAlert className="w-4 h-4 text-[#f59e0b]" />
-            <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
-          </div>
-          <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You&apos;re managing live content.<br />Edit with care.
-          </p>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       {/* ================= MAIN CONTENT ================= */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <main className="pl-72 flex-1 flex flex-col min-w-0 overflow-hidden">
         <div className="flex-1 overflow-y-auto p-8 lg:p-10">
           
           {/* Header Section */}

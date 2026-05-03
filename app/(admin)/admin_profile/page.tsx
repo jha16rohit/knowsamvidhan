@@ -1,5 +1,5 @@
-import Profile from "@/components/Profile";
+import SamvidhanDashboard from "@/components/Profile";
 
 export default function AdminProfilePage() {
-  return <Profile view="admin" />;
+  return <SamvidhanDashboard view="user" />;
 }
