@@ -29,6 +29,7 @@ import {
   ShieldCheck,
   Siren,
   Users,
+  MessageCircle,
 } from "lucide-react";
 
 import type { LucideIcon } from "lucide-react";
@@ -97,15 +98,14 @@ const sidebarItems: SidebarItem[] = [
       },
 
       {
-        title: "Case Laws",
-        href: "/case-laws",
-        icon: Gavel,
-      },
-
-      {
         title: "Quizzes",
         href: "/quizzes",
         icon: GraduationCap,
+      },
+       {
+        title: "Feedbacks Analytics",
+        href: "/feedback",
+        icon: MessageCircle,
       },
     ],
   },
@@ -187,6 +187,7 @@ const sidebarItems: SidebarItem[] = [
         href: "/analytics/user_analytics",
         icon: Users,
       },
+     
     ],
   },
 
