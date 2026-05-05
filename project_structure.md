@@ -211,7 +211,6 @@ knowsamvidhan/
 │   │   │   └── 🔷 route.ts
 │   │   └── 📂 tts/
 │   │   │   └── 🔷 route.ts
-│   ├── 🖼️ favicon.ico
 │   ├── 🎨 globals.css
 │   ├── ⚛️ layout.tsx
 │   └── 📂 reset-password/
@@ -232,7 +231,7 @@ knowsamvidhan/
 │   ├── 🔷 prisma.ts
 │   └── 🔷 profile.ts
 ├── 📄 LICENSE
-├── 🔷 middleware.ts
+├── 🔷 proxy.ts
 ├── 🔷 next-env.d.ts
 ├── 🟡 ▲ **next.config.ts**
 ├── 🟡 🔒 **package-lock.json**

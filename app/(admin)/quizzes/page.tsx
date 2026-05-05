@@ -1,15 +1,10 @@
 "use client";
 
-// PATH: src/app/admin/quizzes/page.tsx
-
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import AdminSidebar from "@/components/admin_sidebar";
 import {
-  LayoutDashboard, List, FileText, AlignLeft, Book,
-  CalendarDays, History, GraduationCap, Users, BarChart3,
-  Settings, ShieldAlert, BookOpen, Bell, ShieldCheck,
-  Plus, Pencil, Trash2, Eye, Copy, ChevronLeft, ChevronRight,
-  Search, Filter, Check, ClipboardList, BarChart2,
+  GraduationCap, Plus, Pencil, Trash2, Eye, Copy, ChevronLeft, 
+  ChevronRight, Search, Filter, Check, ClipboardList, BarChart2,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -76,77 +71,6 @@ function makeQuestion(): QuestionForm {
   };
 }
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
-
-const NAV_ITEMS = [
-  { name: "Dashboard",     icon: LayoutDashboard, href: "/ad-dashboard",   active: false },
-  { name: "Parts",         icon: List,            href: "/parts",          active: false },
-  { name: "Articles",      icon: FileText,        href: "/articles",       active: false },
-  { name: "Clauses",       icon: AlignLeft,       href: "/clauses",        active: false },
-  { name: "Preamble",      icon: Book,            href: "/preamble",       active: false },
-  { name: "Schedules",     icon: CalendarDays,    href: "/schedules",      active: false },
-  { name: "Amendments",    icon: History,         href: "/amendments",     active: false },
-  { name: "Quizzes",       icon: GraduationCap,   href: "/quizzes",        active: true  },
-  { name: "Users",         icon: Users,           href: "/users",          active: false },
-  { name: "Analytics",     icon: BarChart3,       href: "/analytics",      active: false },
-  { name: "Alerts",        icon: Bell,            href: "/alerts",         active: false, badge: 4 },
-  { name: "Activity Logs", icon: ShieldCheck,     href: "/activity-logs",  active: false },
-  { name: "Settings",      icon: Settings,        href: "/settings",       active: false },
-];
-
-function Sidebar() {
-  return (
-    <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
-      {/* Logo */}
-      <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
-          <BookOpen className="text-[#c19d60] w-4 h-4" />
-        </div>
-        <div>
-          <h1 className="font-semibold text-white text-sm tracking-wide">KnowSamvidhan</h1>
-          <p className="text-[6px] tracking-[0.25em] text-gray-400 mt-0.5">CONSTITUTION · LEARN · MASTER</p>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-2">
-        {NAV_ITEMS.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-              item.active
-                ? "bg-[#1e2638] text-[#f59e0b]"
-                : "hover:bg-[#1e2638]/50 hover:text-white text-gray-400"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <item.icon className={`w-4 h-4 ${item.active ? "text-[#f59e0b]" : "text-gray-500"}`} />
-              {item.name}
-            </div>
-            {"badge" in item && (item.badge as number) > 0 && (
-              <span className="bg-red-500 text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
-                {item.badge}
-              </span>
-            )}
-          </Link>
-        ))}
-      </nav>
-
-      {/* Admin warning */}
-      <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800">
-        <div className="flex items-center gap-2 mb-1">
-          <ShieldAlert className="w-4 h-4 text-[#f59e0b]" />
-          <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
-        </div>
-        <p className="text-xs text-gray-400 leading-relaxed mt-1">
-          You&apos;re managing live content.<br />Edit with care.
-        </p>
-      </div>
-    </aside>
-  );
-}
-
 // ─── Toast ────────────────────────────────────────────────────────────────────
 
 function Toast({ message, onDone }: { message: string; onDone: () => void }) {
@@ -185,9 +109,9 @@ export default function QuizzesPage() {
     <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
       {toast && <Toast message={toast} onDone={() => setToast(null)} />}
 
-      <Sidebar />
+      <AdminSidebar />
 
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <main className="pl-72 flex-1 flex flex-col min-w-0 overflow-hidden">
         <div className="flex-1 overflow-y-auto">
           {view === "manage" ? (
             <ManageView

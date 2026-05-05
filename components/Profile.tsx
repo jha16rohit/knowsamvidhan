@@ -645,17 +645,11 @@ function ProfileCard({
     <div
       style={{
         ...card,
-
         padding: "34px 34px 28px",
-
         position: "relative",
-
         overflow: "hidden",
-
         marginBottom: 22,
-
         border: "1px solid rgba(255,255,255,0.38)",
-
         background: `
           linear-gradient(
             180deg,
@@ -663,9 +657,7 @@ function ProfileCard({
             rgba(255,255,255,0.56) 100%
           )
         `,
-
         backdropFilter: "blur(24px)",
-
         boxShadow: `
           0 20px 45px rgba(15,23,42,0.08),
           0 10px 24px rgba(249,115,22,0.06),

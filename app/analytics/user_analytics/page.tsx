@@ -2,29 +2,10 @@
 
 import { useCallback } from "react";
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import {LayoutDashboard,List,FileText,AlignLeft,Book,CalendarDays,History,GraduationCap,
-  Users,Settings,ShieldAlert,BookOpen,UserPlus,Search,Pencil,Trash2,Ban,ShieldCheck,X,Check,Bell,
-} from "lucide-react";
+import AdminSidebar from "@/components/admin_sidebar";
+import {Users, UserPlus,Search,Pencil,Trash2,Ban,ShieldCheck,X,Check} from "lucide-react";
 
 export default function UsersPage() {
-  const openCount = 4;
-
-  const navItems = [
-    { name: "Dashboard", icon: LayoutDashboard, active: false, href: "/ad-dashboard",},
-    { name: "Parts", icon: List, active: false, href: "/parts" },
-    { name: "Articles", icon: FileText, active: false, href: "/articles" },
-    { name: "Clauses", icon: AlignLeft, active: false, href: "/clauses" },
-    { name: "Preamble", icon: Book, active: false, href: "/preamble" },
-    { name: "Schedules", icon: CalendarDays, active: false, href: "/schedules",},
-    { name: "Amendments", icon: History, active: false, href: "/amendments" },
-    { name: "Quizzes", icon: GraduationCap, active: false, href: "/quizzes" },
-    { name: "Users", icon: Users, active: true, href: "/users" }, 
-    { name: "Alerts", icon: Bell, active: false, href: "/alerts", badge: openCount,},
-    { name: "Activity Logs", icon: ShieldCheck, active: false, href: "/activity-logs",},
-    { name: "Settings", icon: Settings, active: false, href: "/settings" },
-  ];
-
   // ================= TYPES =================
   type UIUser = {
     uid: string;
@@ -327,67 +308,10 @@ export default function UsersPage() {
       )}
 
       {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
-            <BookOpen className="text-[#c19d60] w-4 h-4" />
-          </div>
-          <div>
-            <h1 className="font-semibold text-white text-sm tracking-wide">
-              KnowSamvidhan
-            </h1>
-            <p className="text-[6px] tracking-[0.25em] text-gray-400 mt-0.5">
-              CONSTITUTION · LEARN · MASTER
-            </p>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-2">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                item.active
-                  ? "bg-[#1e2638] text-[#f59e0b]"
-                  : "hover:bg-[#1e2638]/50 hover:text-white text-gray-400"
-              }`}
-            >
-              {/* Left side: Icon and Name */}
-              <div className="flex items-center gap-3">
-                <item.icon
-                  className={`w-4 h-4 ${item.active ? "text-[#f59e0b]" : "text-gray-500"}`}
-                />
-                {item.name}
-              </div>
-
-              {/* Right side: Dynamic Notification Badge */}
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
-                  {item.badge}
-                </span>
-              )}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800 relative">
-          <div className="flex items-center gap-2 mb-1">
-            <ShieldAlert className="w-4 h-4 text-[#f59e0b]" />
-            <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">
-              Admin
-            </span>
-          </div>
-          <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You&apos;re managing live content.
-            <br />
-            Edit with care.
-          </p>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       {/* ================= MAIN CONTENT ================= */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-visible">
+      <main className="pl-72 flex-1 flex flex-col min-w-0 overflow-visible">
         <div className="flex-1 overflow-y-auto overflow-x-visible p-8 lg:p-10">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
             <div>

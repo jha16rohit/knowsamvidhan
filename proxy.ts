@@ -5,7 +5,8 @@ import jwt from "jsonwebtoken";
 type JwtPayload = {
   id?: string;
   email?: string;
-  role?: "USER" | "ADMIN";
+  role?: "USER" | "ADMIN" | "SUPER_ADMIN";
+  exp?: number;
 };
 
 const adminPublicRoutes = new Set([
@@ -50,55 +51,156 @@ const userOnlyRoutes = [
   "/logout",
 ];
 
+const withSecurityHeaders = (res: NextResponse) => {
+  res.headers.set("X-Frame-Options", "DENY");
+  res.headers.set("X-Content-Type-Options", "nosniff");
+  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  return res;
+};
+
 const verifyToken = (token?: string): JwtPayload | null => {
   if (!token || !process.env.JWT_SECRET) return null;
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return typeof decoded === "object" ? (decoded as JwtPayload) : null;
+
+    if (typeof decoded !== "object") return null;
+
+    return decoded as JwtPayload;
   } catch {
     return null;
   }
 };
 
+const isTokenExpired = (payload: JwtPayload | null) => {
+  if (!payload?.exp) return true;
+
+  return Date.now() >= payload.exp * 1000;
+};
+
+const clearAuthCookies = (response: NextResponse) => {
+  response.cookies.set("admin_access_token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    expires: new Date(0),
+    path: "/",
+  });
+
+  response.cookies.set("user_access_token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    expires: new Date(0),
+    path: "/",
+  });
+
+  return response;
+};
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const adminToken = request.cookies.get("admin_token")?.value;
-  const userToken = request.cookies.get("user_token")?.value;
 
-  if (adminPublicRoutes.has(pathname) || adminPublicApiRoutes.has(pathname)) {
+  const adminToken = request.cookies.get("admin_access_token")?.value;
+  const userToken = request.cookies.get("user_access_token")?.value;
+
+  // Allow public admin routes
+  if (
+    adminPublicRoutes.has(pathname) ||
+    adminPublicApiRoutes.has(pathname)
+  ) {
     return NextResponse.next();
   }
 
+  // =========================
+  // ADMIN ROUTE PROTECTION
+  // =========================
   const isAdminRoute =
     pathname.startsWith("/api/admin") ||
-    adminRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+    adminRoutes.some(
+      (route) =>
+        pathname === route || pathname.startsWith(`${route}/`)
+    );
 
   if (isAdminRoute) {
     const session = verifyToken(adminToken);
 
-    if (session?.role !== "ADMIN") {
+    if (!session || isTokenExpired(session)) {
       if (pathname.startsWith("/api/")) {
-        return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+        const response = NextResponse.json(
+          { error: "Unauthorized" },
+          { status: 401 }
+        );
+
+        return withSecurityHeaders(clearAuthCookies(response));
       }
 
-      return NextResponse.redirect(new URL("/admin-xyz", request.url));
+      const response = NextResponse.redirect(
+        new URL("/admin-xyz", request.url)
+      );
+
+      return withSecurityHeaders(clearAuthCookies(response));
+    }
+
+    if (
+      session.role !== "ADMIN" &&
+      session.role !== "SUPER_ADMIN"
+    ) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json(
+          { error: "Admin access required" },
+          { status: 403 }
+        );
+      }
+
+      return NextResponse.redirect(
+        new URL("/admin-xyz", request.url)
+      );
     }
   }
 
+  // =========================
+  // USER ROUTE PROTECTION
+  // =========================
   const isUserRoute = userOnlyRoutes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
+    (route) =>
+      pathname === route || pathname.startsWith(`${route}/`)
   );
 
   if (isUserRoute) {
     const session = verifyToken(userToken);
 
-    if (!session || (session.role !== "USER" && session.role !== "ADMIN")) {
-      return NextResponse.redirect(new URL("/user_login", request.url));
+    if (!session || isTokenExpired(session)) {
+      const response = NextResponse.redirect(
+        new URL("/user_login", request.url)
+      );
+
+      return withSecurityHeaders(clearAuthCookies(response));
+    }
+
+    if (
+      session.role !== "USER" &&
+      session.role !== "ADMIN" &&
+      session.role !== "SUPER_ADMIN"
+    ) {
+      return withSecurityHeaders(
+        NextResponse.redirect(
+          new URL("/user_login", request.url)
+        )
+      );
     }
   }
 
-  return NextResponse.next();
+  // =========================
+  // SECURITY HEADERS
+  // =========================
+  const response = withSecurityHeaders(NextResponse.next());
+
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+
+  return response;
 }
 
 export const config = {

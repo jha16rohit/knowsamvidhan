@@ -416,9 +416,7 @@ export async function getProfileDashboard(
     }),
   };
 
-  // ==========================================================
-  // QUIZ PROGRESS  (fix #5 — clear semantics: questions answered)
-  // ==========================================================
+
 
   const quizProgress: QuizProgress[] = user.quizAttempts
     .slice(0, 5)
@@ -431,9 +429,7 @@ export async function getProfileDashboard(
       total: a.totalQ,
     }));
 
-  // ==========================================================
-  // ASSEMBLE & RETURN
-  // ==========================================================
+
 
   return {
     user: {
