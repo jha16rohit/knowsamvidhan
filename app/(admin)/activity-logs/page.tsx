@@ -50,9 +50,11 @@ export default function ActivityLogsPage() {
     { id: 17, status: 'error', timestamp: 'Apr 28 13:40:10', action: 'FAILED_LOGIN', path: '/auth/login', details: 'sneha.k@college.in — Blocked by security rules' },
   ];
 
+  type FilterType = 'All' | 'Ok' | 'Warning' | 'Error';
+
   // States for interactive filtering
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<'All' | 'Ok' | 'Warning' | 'Error'>('All');
+  const [activeFilter, setActiveFilter] = useState<FilterType>('All');
 
   // Filter Logic: Combines Search input AND Tab selections
   const filteredLogs = initialLogs.filter(log => {
@@ -131,7 +133,7 @@ export default function ActivityLogsPage() {
             <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
           </div>
           <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You're managing live content.<br />Edit with care.
+            You&apos;re managing live content.<br />Edit with care.
           </p>
         </div>
       </aside>
@@ -167,7 +169,7 @@ export default function ActivityLogsPage() {
               {['All', 'Ok', 'Warning', 'Error'].map((filter) => (
                 <button
                   key={filter}
-                  onClick={() => setActiveFilter(filter as any)}
+                  onClick={() => setActiveFilter(filter as FilterType)}
                   className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     activeFilter === filter
                       ? 'bg-indigo-600 text-white shadow-sm'

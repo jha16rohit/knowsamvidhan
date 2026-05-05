@@ -25,6 +25,7 @@ export default function AdminLoginPage() {
 
       const res = await fetch("/api/admin/login", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -34,11 +35,25 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (res.ok) {
+        if (data.user) {
+          localStorage.setItem(
+            "user",
+            JSON.stringify({
+              id: data.user.id,
+              name: data.user.name,
+              email: data.user.email,
+              role: data.user.role,
+              avatar: data.user.avatar ?? null,
+            })
+          );
+        }
         router.push("/ad-dashboard");
       } else {
-        alert(data.error || "Login failed");
+        alert(
+          data.error ||
+            "Login failed"
+        );
       }
-
     } catch (err) {
       console.error(err);
       alert("Server error");

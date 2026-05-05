@@ -1,13 +1,24 @@
-// PATH: src/app/api/admin/quizzes/[id]/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // adjust import path as needed
+import { prisma } from "@/lib/prisma";
 
-// GET /api/admin/quizzes/[id]
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+type QuizQuestionInput = {
+  questionText: string;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+  correctAnswer: string;
+  explanation?: string;
+};
+
+export async function GET(
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await context.params;
     const quiz = await prisma.quiz.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         questions: { orderBy: { order: "asc" } },
       },
@@ -24,44 +35,42 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-// PUT /api/admin/quizzes/[id] — update quiz title/level/status + replace questions
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const body = await req.json();
-    const { title, level, status, questions } = body;
+    const { id } = await context.params;
+    const body = (await req.json()) as {
+      title?: string;
+      level?: string;
+      status?: string;
+      questions?: QuizQuestionInput[];
+    };
 
-    const existing = await prisma.quiz.findUnique({ where: { id: params.id } });
+    const existing = await prisma.quiz.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
     }
 
-    // Delete old questions and recreate (simplest approach for full quiz edit)
-    await prisma.question.deleteMany({ where: { quizId: params.id } });
+    await prisma.question.deleteMany({ where: { quizId: id } });
 
     const quiz = await prisma.quiz.update({
-      where: { id: params.id },
+      where: { id },
       data: {
-        ...(title && { title }),
-        ...(level && { level }),
-        ...(status && { status }),
-        ...(questions && {
+        ...(body.title && { title: body.title }),
+        ...(body.level && { level: body.level }),
+        ...(body.status && { status: body.status }),
+        ...(body.questions && {
           questions: {
-            create: questions.map((q: {
-              questionText: string;
-              optionA: string;
-              optionB: string;
-              optionC: string;
-              optionD: string;
-              correctAnswer: string;
-              explanation?: string;
-            }, idx: number) => ({
-              questionText: q.questionText,
-              optionA: q.optionA,
-              optionB: q.optionB,
-              optionC: q.optionC,
-              optionD: q.optionD,
-              correctAnswer: q.correctAnswer,
-              explanation: q.explanation || null,
+            create: body.questions.map((question, idx) => ({
+              questionText: question.questionText,
+              optionA: question.optionA,
+              optionB: question.optionB,
+              optionC: question.optionC,
+              optionD: question.optionD,
+              correctAnswer: question.correctAnswer,
+              explanation: question.explanation || null,
               order: idx,
             })),
           },
@@ -86,16 +95,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-// DELETE /api/admin/quizzes/[id]
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const existing = await prisma.quiz.findUnique({ where: { id: params.id } });
+    const { id } = await context.params;
+    const existing = await prisma.quiz.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
     }
 
-    // Questions cascade delete via Prisma schema onDelete: Cascade
-    await prisma.quiz.delete({ where: { id: params.id } });
+    await prisma.quiz.delete({ where: { id } });
 
     return NextResponse.json({ message: "Quiz deleted successfully" });
   } catch (error) {

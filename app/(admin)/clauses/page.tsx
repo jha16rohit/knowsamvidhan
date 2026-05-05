@@ -1,39 +1,55 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import Link from 'next/link';
+import AdminSidebar from '@/components/admin_sidebar';  
 import { 
-  LayoutDashboard, List, FileText, AlignLeft, Book, 
-  CalendarDays, History, GraduationCap, Users, BarChart3, 
-  Settings, ShieldAlert, BookOpen, Plus, Pencil, Trash2,
+  AlignLeft, Plus, Pencil, Trash2,
   Search, X, Check, Filter, ChevronLeft, ChevronRight,
-  Bell, ShieldCheck
 } from 'lucide-react';
 
 const CLAUSES_PER_PAGE = 10;
 
+type ArticleOption = {
+  id: string;
+  articleNumber: string;
+  title: string;
+  label: string;
+};
+
+type Clause = {
+  id: string;
+  clauseNumber: string;
+  title: string;
+  text?: string;
+  officialText?: string;
+  simpleExplanation?: string;
+  example?: string;
+  tags?: string;
+  featured: boolean;
+  articleId: string;
+  article?: {
+    id: string;
+    articleNumber: string;
+    title?: string;
+  };
+};
+
+type FormDataType = {
+  articleId: string;
+  clauseNumber: string;
+  title: string;
+  text: string;
+  officialText: string;
+  simpleExplanation: string;
+  example: string;
+  tags: string;
+  featured: boolean;
+};
+
 export default function ClausesPage() {
-  const openCount = 4;
-
-  const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, active: false, href: '/ad-dashboard' },
-    { name: 'Parts', icon: List, active: false, href: '/parts' },
-    { name: 'Articles', icon: FileText, active: false, href: '/articles' },
-    { name: 'Clauses', icon: AlignLeft, active: true, href: '/clauses' },
-    { name: 'Preamble', icon: Book, active: false, href: '/preamble' },
-    { name: 'Schedules', icon: CalendarDays, active: false, href: '/schedules' },
-    { name: 'Amendments', icon: History, active: false, href: '/amendments' },
-    { name: 'Quizzes', icon: GraduationCap, active: false, href: '/quizzes' },
-    { name: 'Users', icon: Users, active: false, href: '/users' },
-    { name: 'Analytics', icon: BarChart3, active: false, href: '/analytics' },
-    { name: 'Alerts', icon: Bell, active: false, href: '/alerts', badge: openCount },
-    { name: 'Activity Logs', icon: ShieldCheck, active: false, href: '/activity-logs' },
-    { name: 'Settings', icon: Settings, active: false, href: '/settings' },
-  ];
-
   // ─── State ────────────────────────────────────────────────────────────────
-  const [availableArticles, setAvailableArticles] = useState<any[]>([]);
-  const [clauses, setClauses] = useState<any[]>([]);
+  const [availableArticles, setAvailableArticles] = useState<ArticleOption[]>([]);
+  const [clauses, setClauses] = useState<Clause[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,10 +66,16 @@ export default function ClausesPage() {
   const [isArticleDropdownOpen, setIsArticleDropdownOpen] = useState(false);
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
-    articleId: '',
-    clauseNumber: '',
-    text: '',
+  const [formData, setFormData] = useState<FormDataType>({
+    articleId: "",
+    clauseNumber: "",
+    title: "",
+    text: "",
+    officialText: "",
+    simpleExplanation: "",
+    example: "",
+    tags: "",
+    featured: false,
   });
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -92,11 +114,11 @@ export default function ClausesPage() {
       .then((res) => res.json())
       .then((data) => {
         const list = data.articles ?? data;
-        const formatted = list.map((a: any) => ({
-          id: a.id,
-          label: `${a.articleNumber} — ${a.title}`,
-          articleNumber: a.articleNumber,
-          title: a.title,
+        const formatted = list.map((item: ArticleOption) => ({
+          id: item.id,
+          articleNumber: item.articleNumber,
+          title: item.title,
+          label: `${item.articleNumber} — ${item.title}`,
         }));
         setAvailableArticles(formatted);
       })
@@ -107,7 +129,7 @@ export default function ClausesPage() {
     if (availableArticles.length > 0 && !formData.articleId) {
       setFormData((prev) => ({ ...prev, articleId: availableArticles[0].id }));
     }
-  }, [availableArticles]);
+  }, [availableArticles, formData.articleId]);
 
   // ─── Fetch clauses (server-side: search + filter + pagination) ────────────
   const fetchClauses = useCallback(async () => {
@@ -151,7 +173,7 @@ export default function ClausesPage() {
     return found ? found.label : 'All Articles';
   };
 
-  const groupedClauses = clauses.reduce((acc: Record<string, any[]>, clause: any) => {
+  const groupedClauses = clauses.reduce((acc: Record<string, Clause[]>, clause: Clause) => {
     const key = clause.articleId;
     if (!acc[key]) acc[key] = [];
     acc[key].push(clause);
@@ -162,22 +184,54 @@ export default function ClausesPage() {
   const handleOpenModal = (id: string | null = null) => {
     if (id !== null) {
       const toEdit = clauses.find((c) => c.id === id);
+  
       if (toEdit) {
         setFormData({
           articleId: toEdit.articleId,
+  
           clauseNumber: toEdit.clauseNumber,
-          text: toEdit.text,
+  
+          title: toEdit.title,
+  
+          text: toEdit.text ?? "",
+  
+          officialText: toEdit.officialText ?? "",
+  
+          simpleExplanation: toEdit.simpleExplanation ?? "",
+  
+          example: toEdit.example ?? "",
+  
+          tags: toEdit.tags ?? "",
+  
+          featured: toEdit.featured,
         });
+  
         setEditingId(id);
       }
     } else {
       setFormData({
-        articleId: availableArticles[0]?.id ?? '',
-        clauseNumber: '',
-        text: '',
+        articleId: availableArticles[0]?.id ?? "",
+  
+        clauseNumber: "",
+  
+        title: "",
+  
+        text: "",
+  
+        officialText: "",
+  
+        simpleExplanation: "",
+  
+        example: "",
+  
+        tags: "",
+  
+        featured: false,
       });
+  
       setEditingId(null);
     }
+  
     setIsArticleDropdownOpen(false);
     setIsModalOpen(true);
   };
@@ -253,55 +307,10 @@ export default function ClausesPage() {
         </div>
       )}
 
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
-            <BookOpen className="text-[#c19d60] w-4 h-4" />
-          </div>
-          <div>
-            <h1 className="font-semibold text-white text-sm tracking-wide">KnowSamvidhan</h1>
-            <p className="text-[6px] tracking-[0.25em] text-gray-400 mt-0.5">CONSTITUTION · LEARN · MASTER</p>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-2">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                item.active 
-                  ? 'bg-[#1e2638] text-[#f59e0b]' 
-                  : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-                {item.name}
-              </div>
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
-                  {item.badge}
-                </span>
-              )}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800">
-          <div className="flex items-center gap-2 mb-1">
-            <ShieldAlert className="w-4 h-4 text-[#f59e0b]" />
-            <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
-          </div>
-          <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You're managing live content.<br />Edit with care.
-          </p>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       {/* Main */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <main className="pl-72 flex-1 flex flex-col min-w-0 overflow-hidden">
         <div className="flex-1 overflow-y-auto p-8 lg:p-10">
 
           {/* Header */}
@@ -346,13 +355,13 @@ export default function ClausesPage() {
             <div ref={filterDropdownRef} className="relative shrink-0">
               <div
                 onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-                className={`flex items-center gap-2 px-4 py-2.5 bg-white border rounded-xl cursor-pointer shadow-sm transition min-w-[200px] justify-between ${
+                className={`flex items-center gap-2 px-4 py-2.5 bg-white border rounded-xl cursor-pointer shadow-sm transition min-w-50 justify-between ${
                   isFilterDropdownOpen ? 'border-[#f59e0b]' : 'border-gray-200 hover:border-[#f59e0b]'
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <Filter className="w-4 h-4 text-gray-400 shrink-0" />
-                  <span className="text-sm text-gray-800 truncate max-w-[160px]">{getFilterLabel()}</span>
+                  <span className="text-sm text-gray-800 truncate `max-w-[160px]`">{getFilterLabel()}</span>
                 </div>
                 <svg
                   className={`w-4 h-4 text-gray-500 shrink-0 transition-transform ${isFilterDropdownOpen ? 'rotate-180' : ''}`}
@@ -363,7 +372,7 @@ export default function ClausesPage() {
               </div>
 
               {isFilterDropdownOpen && (
-                <div className="absolute z-50 mt-2 w-full min-w-[260px] bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute z-50 mt-2 w-full min-w-65 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                   <div
                     onClick={() => { setSelectedArticleFilter('all'); setIsFilterDropdownOpen(false); }}
                     className={`px-4 py-3 text-sm cursor-pointer transition flex items-center justify-between ${
@@ -413,13 +422,13 @@ export default function ClausesPage() {
                 <AlignLeft className="w-5 h-5 text-gray-500" />
               </div>
               <h3 className="text-lg font-serif font-bold text-gray-900 mb-1">No clauses found</h3>
-              <p className="text-sm text-gray-500">Try a different search or filter, or click "New clause".</p>
+              <p className="text-sm text-gray-500">Try a different search or filter, or click &quot;New clause&quot;.</p>
             </div>
           ) : (
             <>
               {/* Grouped by article */}
               {Object.entries(groupedClauses).map(([articleId, articleClauses]) => {
-                const articleMeta = (articleClauses as any[])[0]?.article;
+                const articleMeta = (articleClauses as Clause[])[0]?.article;
                 const artNumber = articleMeta?.articleNumber ?? '';
                 const artTitle = articleMeta?.title ?? '';
 
@@ -432,7 +441,7 @@ export default function ClausesPage() {
                         <h3 className="text-lg font-semibold text-gray-900">{artTitle}</h3>
                       </div>
                       <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-semibold">
-                        {(articleClauses as any[]).length} {(articleClauses as any[]).length === 1 ? 'clause' : 'clauses'}
+                      {articleClauses.length} {articleClauses.length === 1 ? 'clause' : 'clauses'}
                       </span>
                     </div>
 
@@ -446,7 +455,7 @@ export default function ClausesPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                          {(articleClauses as any[]).map((clause) => (
+                          {(articleClauses as Clause[]).map((clause) => (
                             <tr key={clause.id} className="hover:bg-gray-50/50 transition-colors">
                               <td className="px-6 py-5 text-sm font-semibold text-gray-900 align-top pt-5">{clause.clauseNumber}</td>
                               <td className="px-6 py-5 text-sm text-gray-600 leading-relaxed pr-10">{clause.text}</td>

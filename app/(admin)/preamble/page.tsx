@@ -1,330 +1,421 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+import React, { useEffect, useState } from "react";
+import AdminSidebar from "@/components/admin_sidebar";
+
 import {
-  LayoutDashboard, List, FileText, AlignLeft, Book,
-  CalendarDays, History, GraduationCap, Users, BarChart3,
-  Settings, ShieldAlert, BookOpen, Save, Plus, Trash2, Check, Loader2,
-  Bell, ShieldCheck,
-} from 'lucide-react';
+  Save,
+  Plus,
+  Trash2,
+  Check,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface NavItem {
-  name: string;
-  icon: React.ElementType;
-  active: boolean;
-  href: string;
-  badge?: number;
+interface Keyword {
+  word: string;
+  meaning: string;
+  icon: string;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+interface Timeline {
+  year: string;
+  event: string;
+}
 
-export default function PreamblePage() {
-  // Simulated open alerts count for the prototype
-  const openCount = 4;
+interface QuickFact {
+  label: string;
+  value: string;
+}
 
-  const navItems: NavItem[] = [
-    { name: 'Dashboard',     icon: LayoutDashboard, active: false, href: '/ad-dashboard'  },
-    { name: 'Parts',         icon: List,            active: false, href: '/parts'         },
-    { name: 'Articles',      icon: FileText,        active: false, href: '/articles'      },
-    { name: 'Clauses',       icon: AlignLeft,       active: false, href: '/clauses'       },
-    { name: 'Preamble',      icon: Book,            active: true,  href: '/preamble'      },
-    { name: 'Schedules',     icon: CalendarDays,    active: false, href: '/schedules'     },
-    { name: 'Amendments',    icon: History,         active: false, href: '/amendments'    },
-    { name: 'Quizzes',       icon: GraduationCap,   active: false, href: '/quizzes'       },
-    { name: 'Users',         icon: Users,           active: false, href: '/users'         },
-    { name: 'Analytics',     icon: BarChart3,       active: false, href: '/analytics'     },
-    { name: 'Alerts',        icon: Bell,            active: false, href: '/alerts', badge: openCount },
-    { name: 'Activity Logs', icon: ShieldCheck,     active: false, href: '/activity-logs' },
-    { name: 'Settings',      icon: Settings,        active: false, href: '/settings'      },
-  ];
+interface LandmarkCase {
+  year: string;
+  name: string;
+  description: string;
+}
 
-  // ─── State ──────────────────────────────────────────────────────────────────
+interface Note {
+  type: "amendment" | "did-you-know";
+  text: string;
+}
 
-  const [officialText,      setOfficialText]      = useState('');
-  const [simpleExplanation, setSimpleExplanation] = useState('');
-  const [whyItMatters,      setWhyItMatters]      = useState('');
-  const [keywords, setKeywords] = useState<{ word: string; definition: string }[]>([]);
+function Section({
+  title,
+  subtitle,
+  children,
+  defaultOpen = true,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
 
-  const [isLoading,    setIsLoading]    = useState(true);
-  const [isSaving,     setIsSaving]     = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [toastType,    setToastType]    = useState<'success' | 'error'>('success');
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+      >
+        <div className="text-left">
+          <p className="font-semibold text-gray-900 text-sm">{title}</p>
 
-  // ─── Fetch on mount ─────────────────────────────────────────────────────────
+          {subtitle && (
+            <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+          )}
+        </div>
+
+        {open ? (
+          <ChevronUp className="w-4 h-4 text-gray-400" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-gray-400" />
+        )}
+      </button>
+
+      {open && (
+        <div className="px-6 pb-6 pt-2 border-t border-gray-100">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+  return (
+    <label className="block text-xs font-semibold text-gray-700 mb-1.5 mt-4 first:mt-0">
+      {children}
+    </label>
+  );
+}
+
+function TextArea({
+  rows = 4,
+  value,
+  onChange,
+  placeholder,
+}: {
+  rows?: number;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <textarea
+      rows={rows}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-700 shadow-sm resize-y"
+    />
+  );
+}
+
+function Input({
+  value,
+  onChange,
+  placeholder,
+  className = "",
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  className?: string;
+}) {
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-800 shadow-sm ${className}`}
+    />
+  );
+}
+
+function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className="mt-3 w-full py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors flex justify-center items-center gap-2"
+    >
+      <Plus className="w-4 h-4" />
+      {label}
+    </button>
+  );
+}
+
+function RemoveBtn({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="p-1.5 text-gray-300 hover:text-red-500 transition-colors shrink-0"
+    >
+      <Trash2 className="w-4 h-4" />
+    </button>
+  );
+}
+
+export default function AdminPreamblePage() {
+  const [officialText, setOfficialText] = useState("");
+
+  const [simpleExplanation, setSimpleExplanation] = useState("");
+
+  const [whyItMatters, setWhyItMatters] = useState("");
+
+  const [keywords, setKeywords] = useState<Keyword[]>([]);
+
+  const [timeline, setTimeline] = useState<Timeline[]>([]);
+
+  const [quickFacts, setQuickFacts] = useState<QuickFact[]>([]);
+
+  const [landmarkCases, setLandmarkCases] = useState<LandmarkCase[]>([]);
+
+  const [notes, setNotes] = useState<Note[]>([]);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [toast, setToast] = useState<{
+    msg: string;
+    type: "success" | "error";
+  } | null>(null);
+
+  const parse = <T,>(raw: unknown, fallback: T): T => {
+    if (!raw) return fallback;
+
+    if (typeof raw !== "string") {
+      return raw as T;
+    }
+
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const showToast = (msg: string, type: "success" | "error" = "success") => {
+    setToast({ msg, type });
+
+    setTimeout(() => {
+      setToast(null);
+    }, 3000);
+  };
 
   useEffect(() => {
-    fetch('/api/admin/preamble')
-      .then((res) => res.json())
-      .then((data) => {
-        setOfficialText(data.officialText           ?? '');
-        setSimpleExplanation(data.simpleExplanation ?? '');
-        setWhyItMatters(data.whyItMatters           ?? '');
-        try {
-          const parsed = typeof data.keywords === 'string'
-            ? JSON.parse(data.keywords)
-            : data.keywords ?? [];
-          setKeywords(parsed);
-        } catch {
-          setKeywords([]);
-        }
+    fetch("/api/admin/preamble")
+      .then((r) => r.json())
+      .then((d) => {
+        setOfficialText(d.officialText ?? "");
+        setSimpleExplanation(d.simpleExplanation ?? "");
+        setWhyItMatters(d.whyItMatters ?? "");
+
+        setKeywords(parse(d.keywords, []));
+
+        setTimeline(parse(d.timeline, []));
+
+        setQuickFacts(parse(d.quickFacts, []));
+
+        setLandmarkCases(parse(d.landmarkCases, []));
+
+        setNotes(parse(d.notes, []));
       })
-      .catch(() => showToast('Failed to load preamble data.', 'error'))
+      .catch(() => showToast("Failed to load preamble data.", "error"))
       .finally(() => setIsLoading(false));
   }, []);
 
-  // ─── Toast helper ───────────────────────────────────────────────────────────
-
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    setToastMessage(message);
-    setToastType(type);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
-  // ─── Save ───────────────────────────────────────────────────────────────────
-
   const handleSave = async () => {
     setIsSaving(true);
+
     try {
-      const res = await fetch('/api/admin/preamble', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/preamble", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           officialText,
           simpleExplanation,
           whyItMatters,
           keywords: JSON.stringify(keywords),
+          timeline: JSON.stringify(timeline),
+          quickFacts: JSON.stringify(quickFacts),
+          landmarkCases: JSON.stringify(landmarkCases),
+          notes: JSON.stringify(notes),
         }),
       });
-      if (!res.ok) throw new Error('Save failed');
-      showToast('Preamble saved successfully.');
+
+      if (!res.ok) {
+        throw new Error();
+      }
+
+      showToast("Preamble saved successfully.");
     } catch {
-      showToast('Something went wrong. Please try again.', 'error');
+      showToast("Something went wrong. Please try again.", "error");
     } finally {
       setIsSaving(false);
     }
   };
 
-  // ─── Keyword helpers ────────────────────────────────────────────────────────
+  const updateKw = (i: number, f: keyof Keyword, v: string) =>
+    setKeywords((p) => p.map((k, idx) => (idx === i ? { ...k, [f]: v } : k)));
 
-  const updateKeyword = (index: number, field: 'word' | 'definition', value: string) => {
-    setKeywords((prev) => prev.map((kw, i) => i === index ? { ...kw, [field]: value } : kw));
-  };
+  const addKw = () =>
+    setKeywords((p) => [
+      ...p,
+      {
+        word: "",
+        meaning: "",
+        icon: "◆",
+      },
+    ]);
 
-  const addKeyword = () => {
-    setKeywords((prev) => [...prev, { word: '', definition: '' }]);
-  };
-
-  const removeKeyword = (index: number) => {
-    setKeywords((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // ─── Render ─────────────────────────────────────────────────────────────────
+  const removeKw = (i: number) =>
+    setKeywords((p) => p.filter((_, idx) => idx !== i));
 
   return (
-    <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
+    <div className="min-h-screen bg-[#f8fafc] font-sans relative">
+      <AdminSidebar />
 
-      {/* Toast */}
-      {toastMessage && (
-        <div className="fixed bottom-8 right-8 z-60 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${toastType === 'error' ? 'bg-red-500' : 'bg-[#1a1a1a]'}`}>
+      {toast && (
+        <div className="fixed bottom-8 right-8 z-50 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 flex items-center gap-3">
+          <div
+            className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+              toast.type === "error" ? "bg-red-500" : "bg-[#1a1a1a]"
+            }`}
+          >
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
-          <span className="text-sm font-bold text-gray-900">{toastMessage}</span>
+
+          <span className="text-sm font-bold text-gray-900">{toast.msg}</span>
         </div>
       )}
 
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#0a0f18] text-gray-300 flex flex-col shrink-0 min-h-screen">
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#c19d60] rounded-full flex items-center justify-center">
-            <BookOpen className="text-[#c19d60] w-4 h-4" />
-          </div>
-          <div>
-            <h1 className="font-semibold text-white text-sm tracking-wide">KnowSamvidhan</h1>
-            <p className="text-[6px] tracking-[0.25em] text-gray-400 mt-0.5">CONSTITUTION · LEARN · MASTER</p>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-2">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                item.active
-                  ? 'bg-[#1e2638] text-[#f59e0b]'
-                  : 'hover:bg-[#1e2638]/50 hover:text-white text-gray-400'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <item.icon className={`w-4 h-4 ${item.active ? 'text-[#f59e0b]' : 'text-gray-500'}`} />
-                {item.name}
-              </div>
-
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className="bg-[#ef4444] text-white flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 min-w-5 h-5">
-                  {item.badge}
-                </span>
-              )}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-4 m-4 bg-[#141b2d] rounded-xl border border-gray-800">
-          <div className="flex items-center gap-2 mb-1">
-            <ShieldAlert className="w-4 h-4 text-[#f59e0b]" />
-            <span className="text-[#f59e0b] text-[10px] font-bold tracking-wider uppercase">Admin</span>
-          </div>
-          <p className="text-xs text-gray-400 leading-relaxed mt-1">
-            You're managing live content.<br />Edit with care.
-          </p>
-        </div>
-      </aside>
-
-      {/* Main */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-8 lg:p-10">
-
-          {/* Header */}
+      <main className="ml-80 min-h-screen overflow-y-auto">
+        <div className="p-8 lg:p-10">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
             <div>
-              <p className="text-[#f59e0b] text-xs font-bold tracking-widest uppercase mb-2">Content</p>
-              <h2 className="text-4xl font-serif text-gray-900 mb-2 font-bold">Preamble content</h2>
-              <p className="text-sm text-gray-500">Edit the foundational Preamble page shown to learners.</p>
+              <p className="text-[#f59e0b] text-xs font-bold tracking-widest uppercase mb-2">
+                Content
+              </p>
+
+              <h2 className="text-4xl font-serif text-gray-900 mb-2 font-bold">
+                Preamble Content
+              </h2>
+
+              <p className="text-sm text-gray-500">
+                Edit all sections of the Preamble page.
+              </p>
             </div>
 
             <button
               onClick={handleSave}
               disabled={isSaving || isLoading}
-              className="bg-[#f59e0b] hover:bg-[#ea580c] disabled:opacity-60 disabled:cursor-not-allowed text-gray-900 px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-sm self-start md:self-auto mt-4 md:mt-0"
+              className="bg-[#f59e0b] hover:bg-[#ea580c] disabled:opacity-60 disabled:cursor-not-allowed text-gray-900 px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-sm"
             >
-              {isSaving
-                ? <Loader2 className="w-4 h-4 animate-spin" />
-                : <Save className="w-5 h-5" />
-              }
-              {isSaving ? 'Saving…' : 'Save changes'}
+              {isSaving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-5 h-5" />
+              )}
+
+              {isSaving ? "Saving..." : "Save Changes"}
             </button>
           </div>
 
-          {/* Loading skeleton */}
           {isLoading ? (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-              {[1, 2].map((i) => (
-                <div key={i} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-4 animate-pulse">
-                  {[8, 5, 4].map((rows) => (
-                    <div key={rows} className="space-y-2">
-                      <div className="h-4 bg-gray-100 rounded w-1/4" />
-                      <div className="h-4 bg-gray-100 rounded w-full" style={{ height: `${rows * 12}px` }} />
-                    </div>
-                  ))}
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 animate-pulse"
+                >
+                  <div className="h-4 bg-gray-100 rounded w-1/4 mb-4" />
+
+                  <div className="h-24 bg-gray-100 rounded" />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <Section
+                title="Official Text"
+                subtitle="The constitutional preamble text"
+              >
+                <Label>Official Text</Label>
 
-              {/* Left: Text fields */}
-              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 flex flex-col gap-6">
+                <TextArea
+                  rows={6}
+                  value={officialText}
+                  onChange={setOfficialText}
+                  placeholder="WE, THE PEOPLE OF INDIA..."
+                />
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">Official text</label>
-                  <textarea
-                    rows={8}
-                    value={officialText}
-                    onChange={(e) => setOfficialText(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-700 shadow-sm resize-y"
-                  />
-                </div>
+                <Label>Simple Explanation</Label>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">Simple explanation</label>
-                  <textarea
-                    rows={5}
-                    value={simpleExplanation}
-                    onChange={(e) => setSimpleExplanation(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-[#f59e0b] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-700 shadow-sm resize-y"
-                  />
-                </div>
+                <TextArea
+                  rows={4}
+                  value={simpleExplanation}
+                  onChange={setSimpleExplanation}
+                  placeholder="The Preamble is the opening statement..."
+                />
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">Why it matters</label>
-                  <textarea
-                    rows={4}
-                    value={whyItMatters}
-                    onChange={(e) => setWhyItMatters(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-sm text-gray-700 shadow-sm resize-y"
-                  />
-                </div>
-              </div>
+                <Label>Why It Matters</Label>
 
-              {/* Right: Keywords */}
-              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 flex flex-col">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-serif font-bold text-gray-900">Keywords</h3>
-                  <span className="text-xs text-gray-400 font-medium">
-                    {keywords.length} word{keywords.length !== 1 ? 's' : ''}
-                  </span>
-                </div>
+                <TextArea
+                  rows={3}
+                  value={whyItMatters}
+                  onChange={setWhyItMatters}
+                  placeholder="The Preamble sets the tone..."
+                />
+              </Section>
 
-                {keywords.length > 0 && (
-                  <div className="flex gap-3 mb-2 px-1">
-                    <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase w-1/3">Word</span>
-                    <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase flex-1">Definition</span>
-                  </div>
-                )}
+              <Section
+                title="Key Terms"
+                subtitle="Keyword cards shown to learners"
+              >
+                <div className="space-y-2">
+                  {keywords.map((kw, i) => (
+                    <div
+                      key={i}
+                      className="grid grid-cols-12 gap-2 items-center"
+                    >
+                      <Input
+                        className="col-span-2"
+                        value={kw.icon}
+                        onChange={(v) => updateKw(i, "icon", v)}
+                        placeholder="◆"
+                      />
 
-                <div className="flex-1 space-y-2.5 overflow-y-auto max-h-105 pr-1">
-                  {keywords.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                        <Book className="w-4 h-4 text-gray-400" />
+                      <Input
+                        className="col-span-3"
+                        value={kw.word}
+                        onChange={(v) => updateKw(i, "word", v)}
+                        placeholder="Word"
+                      />
+
+                      <Input
+                        className="col-span-6"
+                        value={kw.meaning}
+                        onChange={(v) => updateKw(i, "meaning", v)}
+                        placeholder="Definition..."
+                      />
+
+                      <div className="col-span-1 flex justify-center">
+                        <RemoveBtn onClick={() => removeKw(i)} />
                       </div>
-                      <p className="text-sm text-gray-400">No keywords yet. Click "Add keyword" to start.</p>
                     </div>
-                  ) : (
-                    keywords.map((kw, index) => (
-                      <div key={index} className="flex gap-2.5 items-center group">
-                        <input
-                          type="text"
-                          placeholder="Word"
-                          value={kw.word}
-                          onChange={(e) => updateKeyword(index, 'word', e.target.value)}
-                          className="w-1/3 px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-sm text-gray-800 shadow-sm"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Definition"
-                          value={kw.definition}
-                          onChange={(e) => updateKeyword(index, 'definition', e.target.value)}
-                          className="flex-1 px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] text-sm text-gray-600 shadow-sm"
-                        />
-                        <button
-                          onClick={() => removeKeyword(index)}
-                          className="p-1.5 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
-                          aria-label="Remove keyword"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))
-                  )}
+                  ))}
                 </div>
 
-                <button
-                  onClick={addKeyword}
-                  className="w-full mt-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors flex justify-center items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add keyword
-                </button>
-              </div>
-
+                <AddButton onClick={addKw} label="Add Keyword" />
+              </Section>
             </div>
           )}
-
         </div>
       </main>
     </div>

@@ -8,9 +8,42 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // handle login logic here
+  
+    if (!email || !password) {
+      alert("Please fill all fields");
+      return;
+    }
+  
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", 
+        body: JSON.stringify({ email, password }),
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        alert(data?.error || "Login failed");
+        return;
+      }
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      if (data.user.role === "ADMIN") {
+        window.location.replace("/ad-dashboard");
+      } else {
+        window.location.replace("/");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
   };
 
   return (
@@ -134,7 +167,7 @@ export default function LoginPage() {
         {/* Bottom quote */}
         <div style={{ zIndex: 1 }}>
           <p style={{ fontSize: 13, color: "#475569", margin: 0, fontStyle: "italic" }}>
-            "We the people of India..." — Preamble of the Constitution
+          &quot;We the people of India...&quot; — Preamble of the Constitution
           </p>
         </div>
       </div>

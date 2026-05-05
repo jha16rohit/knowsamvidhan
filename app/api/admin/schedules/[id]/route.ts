@@ -1,14 +1,14 @@
-// app/api/admin/schedules/[id]/route.ts
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// Helper
 function formatTopics(topics: string): string[] {
   return topics.split(",").map((t: string) => t.trim()).filter(Boolean);
 }
 
-// ✅ PUT (UPDATE)
+function parseTagDetails(raw: string): { tag: string; detail: string }[] {
+  try { return JSON.parse(raw); } catch { return []; }
+}
+
 export async function PUT(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -20,35 +20,42 @@ export async function PUT(
     ? body.topics.join(", ")
     : body.topics ?? "";
 
+  const tagDetails = JSON.stringify(
+    Array.isArray(body.tagDetails) ? body.tagDetails : []
+  );
+
   const updated = await prisma.schedule.update({
     where: { id },
     data: {
       shortId:     body.shortId,
       schedule:    body.schedule,
+      slug:        body.slug,
       title:       body.title,
       description: body.description ?? "",
       topics,
+      tagDetails,
     },
   });
 
   return NextResponse.json({
-    id:          updated.id,
-    shortId:     updated.shortId,
-    schedule:    updated.schedule,
-    title:       updated.title,
-    description: updated.description ?? "",
-    topics:      formatTopics(updated.topics),
+    schedule: {
+      id:          updated.id,
+      shortId:     updated.shortId,
+      schedule:    updated.schedule,
+      slug:        updated.slug,
+      title:       updated.title,
+      description: updated.description ?? "",
+      topics:      formatTopics(updated.topics),
+      tagDetails:  parseTagDetails(updated.tagDetails),
+    }
   });
 }
 
-// ✅ DELETE
 export async function DELETE(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
-
   await prisma.schedule.delete({ where: { id } });
-
   return NextResponse.json({ message: "Deleted" });
 }
