@@ -102,11 +102,7 @@ const sidebarItems: SidebarItem[] = [
         href: "/quizzes",
         icon: GraduationCap,
       },
-       {
-        title: "Feedbacks Analytics",
-        href: "/feedback",
-        icon: MessageCircle,
-      },
+      
     ],
   },
 
@@ -172,20 +168,25 @@ const sidebarItems: SidebarItem[] = [
 
       {
         title: "Audit Logs",
-        href: "/analytics/audit-logs",
+        href: "/analytics/audit_logs",
         icon: ClipboardList,
       },
 
-      {
-        title: "Database Monitoring",
-        href: "/analytics/database",
-        icon: Database,
-      },
+      // {
+      //   title: "Database Monitoring",
+      //   href: "/analytics/database",
+      //   icon: Database,
+      // },
 
       {
         title: "Users Analytics",
         href: "/analytics/user_analytics",
         icon: Users,
+      },
+       {
+        title: "Feedbacks Analytics",
+        href: "/feedback",
+        icon: MessageCircle,
       },
      
     ],
