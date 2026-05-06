@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import { getUserSession } from "@/lib/auth";
+import { getAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// DELETE /api/admin/feedback/hidden
-// Deletes all feedback where showOnSite = false
-export async function DELETE() {
+export async function GET() {
   try {
-    // ✅ Auth check
-    const session = await getUserSession();
+    // ✅ Auth check: only ADMIN can access this
+    const session = await getAdminSession();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -16,24 +14,21 @@ export async function DELETE() {
       where: { id: session.id },
       select: { id: true, role: true, status: true, isDeleted: true },
     });
-
+    
     if (!user || user.isDeleted || user.status !== "ACTIVE" || user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ✅ Delete all not-shown feedback
-    const result = await prisma.feedback.deleteMany({
-      where: { showOnSite: false },
+    // ✅ Fetch ALL feedback (admins see everything, not just shown)
+    const feedbacks = await prisma.feedback.findMany({
+      orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({
-      message: `Deleted ${result.count} feedback entries`,
-      count: result.count,
-    });
+    return NextResponse.json({ feedbacks });
   } catch (error) {
-    console.error("Admin feedback DELETE hidden error:", error);
+    console.error("Admin feedback GET error:", error);
     return NextResponse.json(
-      { error: "Failed to delete feedback" },
+      { error: "Failed to fetch feedback" },
       { status: 500 }
     );
   }
