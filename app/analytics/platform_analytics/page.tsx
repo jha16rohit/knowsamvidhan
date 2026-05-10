@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminSidebar from "@/components/admin_sidebar";
 import {
   Users, UserPlus, LogIn, Eye, MessageSquare, ExternalLink,
@@ -12,6 +12,20 @@ import {
 } from 'recharts';
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
+
+interface AnalyticsData {
+  totalUsers: number;
+  newUsersToday: number;
+  activeLoginsToday: number;
+  pageViewsToday: number;
+  totalFeedbacks: number;
+  trafficSources: { id: string; name: string; value: number }[];
+  dailyAnalytics: { id: string; date: string; dau: number; mau: number }[];
+  chatbotData: { category: string; resolved: number; unresolved: number }[];
+  totalBotQueries: number;
+  quizData: { day: string; quizzes: number; avgScore: number }[];
+  avgScorePeriod: number;
+}
 
 interface StatCardProps {
   icon: LucideIcon;
@@ -34,44 +48,18 @@ interface CardShellProps {
   className?: string;
 }
 
-// Plain interface avoids the broken TooltipProps<number,string>.payload issue in Recharts types
 interface DonutTooltipProps {
   active?: boolean;
   payload?: { name: string; value: number }[];
 }
 
-// ─── MOCK DATA ────────────────────────────────────────────────────────────────
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
 
-const retentionData = Array.from({ length: 30 }, (_, i) => ({
-  day: `${i + 1}`,
-  DAU: Math.floor(2800 + Math.sin(i * 0.4) * 600 + Math.random() * 200),
-  MAU: Math.floor(18000 + i * 120 + Math.random() * 400),
-}));
+const COLORS = ['#FF9800', '#FFA726', '#FFB74D', '#FFCC80', '#FFE0B2'];
 
-const trafficData: { name: string; value: number }[] = [
-  { name: 'Organic',  value: 42 },
-  { name: 'Direct',   value: 28 },
-  { name: 'Referral', value: 14 },
-  { name: 'Social',   value: 11 },
-  { name: 'Email',    value: 5  },
-];
-
-const TRAFFIC_COLORS = ['#FF9800', '#FFA726', '#FFB74D', '#FFCC80', '#FFE0B2'];
-
-const chatbotData = [
-  { category: 'Constitution', resolved: 340, unresolved: 42 },
-  { category: 'Preamble',     resolved: 210, unresolved: 18 },
-  { category: 'Articles',     resolved: 480, unresolved: 67 },
-  { category: 'Amendments',   resolved: 175, unresolved: 30 },
-  { category: 'DPSP',         resolved: 130, unresolved: 25 },
-  { category: 'FR',           resolved: 290, unresolved: 35 },
-];
-
-const quizData = Array.from({ length: 14 }, (_, i) => ({
-  day: `D${i + 1}`,
-  quizzes:  Math.floor(180 + Math.random() * 120),
-  avgScore: Math.floor(62  + Math.random() * 20),
-}));
+function fmt(n: number): string {
+  return n.toLocaleString("en-IN");
+}
 
 // ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
 
@@ -115,7 +103,6 @@ const CardShell = ({ title, subtitle, children, className = '' }: CardShellProps
   </div>
 );
 
-// Uses DonutTooltipProps (not Recharts' TooltipProps) to avoid the missing 'payload' type error
 const DonutTooltip = ({ active, payload }: DonutTooltipProps) => {
   if (active && payload && payload.length) {
     return (
@@ -131,7 +118,37 @@ const DonutTooltip = ({ active, payload }: DonutTooltipProps) => {
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 export default function AnalyticsPage() {
+  const [data, setData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch("/api/analytics")
+      .then((r) => r.json())
+      .then((json) => {
+        if (!json.error) setData(json);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex bg-[#F5F5F5] font-sans">
+        <AdminSidebar />
+        <main className="pl-72 flex-1 flex items-center justify-center">
+          <p className="text-gray-400 text-sm font-medium">Loading analytics…</p>
+        </main>
+      </div>
+    );
+  }
+
+  const totalTraffic = data?.trafficSources?.reduce((s, t) => s + t.value, 0) ?? 0;
+  const trafficPct = (val: number) => (totalTraffic > 0 ? Math.round((val / totalTraffic) * 100) : 0);
+
+  const dauLabel = data?.dailyAnalytics?.length
+    ? `${data.dailyAnalytics.length} days`
+    : "No data";
 
   return (
     <div className="min-h-screen flex bg-[#F5F5F5] font-sans">
@@ -156,11 +173,11 @@ export default function AnalyticsPage() {
           <section>
             <SectionLabel>Executive Summary</SectionLabel>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-2">
-              <StatCard icon={Users}         label="Total Registered Users" value="1,24,830" sub="Cumulative all time" />
-              <StatCard icon={UserPlus}      label="New Users Today"        value="384"       change="+18.2%" positive={true} />
-              <StatCard icon={LogIn}         label="Active Logins Today"    value="3,420"     change="+12.0%" positive={true} />
-              <StatCard icon={Eye}           label="Anonymous Visitors"     value="9,610"     sub="Guests not logged in" change="-3.4%" positive={false} />
-              <StatCard icon={MessageSquare} label="Total Feedbacks"        value="6,204"     action="View All" />
+              <StatCard icon={Users}         label="Total Registered Users" value={fmt(data?.totalUsers ?? 0)} sub="Cumulative all time" />
+              <StatCard icon={UserPlus}      label="New Users Today"        value={fmt(data?.newUsersToday ?? 0)} />
+              <StatCard icon={LogIn}         label="Active Logins Today"    value={fmt(data?.activeLoginsToday ?? 0)} />
+              <StatCard icon={Eye}           label="Anonymous Visitors"     value={fmt(data?.pageViewsToday ?? 0)} sub="Page views today" />
+              <StatCard icon={MessageSquare} label="Total Feedbacks"        value={fmt(data?.totalFeedbacks ?? 0)} action="View All" />
             </div>
           </section>
 
@@ -175,7 +192,7 @@ export default function AnalyticsPage() {
                   <ResponsiveContainer width={200} height={200}>
                     <PieChart>
                       <Pie
-                        data={trafficData}
+                        data={data?.trafficSources?.map((t) => ({ name: t.name, value: trafficPct(t.value) })) ?? []}
                         cx="50%"
                         cy="50%"
                         innerRadius={58}
@@ -186,10 +203,10 @@ export default function AnalyticsPage() {
                         onMouseLeave={() => setActiveIndex(null)}
                         strokeWidth={0}
                       >
-                        {trafficData.map((_, i) => (
+                        {(data?.trafficSources ?? []).map((_, i) => (
                           <Cell
                             key={i}
-                            fill={TRAFFIC_COLORS[i]}
+                            fill={COLORS[i % COLORS.length]}
                             opacity={activeIndex === null || activeIndex === i ? 1 : 0.5}
                           />
                         ))}
@@ -199,11 +216,11 @@ export default function AnalyticsPage() {
                   </ResponsiveContainer>
 
                   <div className="flex flex-col gap-2.5">
-                    {trafficData.map((item, i) => (
+                    {(data?.trafficSources ?? []).map((item, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: TRAFFIC_COLORS[i] }} />
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
                         <span className="text-xs text-gray-600 font-medium w-16">{item.name}</span>
-                        <span className="text-xs font-bold text-gray-900">{item.value}%</span>
+                        <span className="text-xs font-bold text-gray-900">{trafficPct(item.value)}%</span>
                       </div>
                     ))}
                   </div>
@@ -211,9 +228,9 @@ export default function AnalyticsPage() {
               </CardShell>
 
               {/* Area Chart – Retention DAU/MAU */}
-              <CardShell title="User Retention" subtitle="DAU & MAU trend — last 30 days">
+              <CardShell title="User Retention" subtitle={`DAU & MAU trend — ${dauLabel}`}>
                 <ResponsiveContainer width="100%" height={200}>
-                  <AreaChart data={retentionData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <AreaChart data={data?.dailyAnalytics ?? []} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="dauGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#FF9800" stopOpacity={0.35} />
@@ -225,18 +242,19 @@ export default function AnalyticsPage() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#aaa' }} interval={4} />
+                    <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#aaa' }} tickFormatter={(v: string) => v.slice(5)} interval={4} />
                     <YAxis tick={{ fontSize: 9, fill: '#aaa' }} />
                     <Tooltip
                       contentStyle={{ fontSize: 11, borderRadius: 10, border: '1px solid #eee' }}
                       labelStyle={{ fontWeight: 700, color: '#555' }}
                     />
-                    <Area type="monotone" dataKey="MAU" stroke="#FFB74D" strokeWidth={1.5} fill="url(#mauGrad)" dot={false} />
-                    <Area type="monotone" dataKey="DAU" stroke="#FF9800" strokeWidth={2}   fill="url(#dauGrad)" dot={false} />
+                    <Area type="monotone" dataKey="mau" stroke="#FFB74D" strokeWidth={1.5} fill="url(#mauGrad)" dot={false} name="MAU" />
+                    <Area type="monotone" dataKey="dau" stroke="#FF9800" strokeWidth={2}   fill="url(#dauGrad)" dot={false} name="DAU" />
                     <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 10, paddingTop: 8 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardShell>
+
             </div>
           </section>
 
@@ -250,10 +268,10 @@ export default function AnalyticsPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <Bot size={14} className="text-[#FF9800]" />
                   <span className="text-[11px] text-gray-500 font-medium">Total queries this month</span>
-                  <span className="ml-auto text-sm font-bold text-gray-900">1,837</span>
+                  <span className="ml-auto text-sm font-bold text-gray-900">{fmt(data?.totalBotQueries ?? 0)}</span>
                 </div>
                 <ResponsiveContainer width="100%" height={220}>
-                  <BarChart layout="vertical" data={chatbotData} margin={{ top: 0, right: 8, left: 0, bottom: 0 }} barSize={14}>
+                  <BarChart layout="vertical" data={data?.chatbotData ?? []} margin={{ top: 0, right: 8, left: 0, bottom: 0 }} barSize={14}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
                     <XAxis type="number" tick={{ fontSize: 9, fill: '#aaa' }} />
                     <YAxis dataKey="category" type="category" tick={{ fontSize: 10, fill: '#666' }} width={72} />
@@ -270,10 +288,10 @@ export default function AnalyticsPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <BookOpen size={14} className="text-[#FF9800]" />
                   <span className="text-[11px] text-gray-500 font-medium">Avg score this period</span>
-                  <span className="ml-auto text-sm font-bold text-gray-900">71.4%</span>
+                  <span className="ml-auto text-sm font-bold text-gray-900">{data?.avgScorePeriod ?? 0}%</span>
                 </div>
                 <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={quizData} margin={{ top: 0, right: 4, left: -20, bottom: 0 }} barSize={8} barGap={2}>
+                  <BarChart data={data?.quizData ?? []} margin={{ top: 0, right: 4, left: -20, bottom: 0 }} barSize={8} barGap={2}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#aaa' }} />
                     <YAxis tick={{ fontSize: 9, fill: '#aaa' }} />

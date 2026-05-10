@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import AdminSidebar from "@/components/admin_sidebar";
 import {
   MessageSquare,
-  Eye,
   Star,
   RotateCcw,
   Search,
@@ -264,7 +263,7 @@ export default function AdminFeedbackPage() {
           >
             {/* Search */}
             <div
-              className="flex items-center gap-2 flex-1 min-w-[220px] rounded-xl px-3.5 py-2.5"
+              className="flex items-center gap-2 flex-1 min-w-55 rounded-xl px-3.5 py-2.5"
               style={{ background: "rgba(248,244,238,0.8)", border: "1px solid rgba(235,220,195,0.6)" }}
             >
               <Search size={13} stroke="#9ca3af" strokeWidth={2} />

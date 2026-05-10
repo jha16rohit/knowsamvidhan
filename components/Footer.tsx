@@ -261,7 +261,7 @@ export default function FooterSection() {
           <div className="col-span-1 min-[480px]:col-span-2 md:col-span-1 lg:col-span-1">
             <div className="mb-4 sm:mb-5 flex items-center gap-3">
               <div className="h-10 w-10 sm:h-11 sm:w-11 shrink-0 overflow-hidden rounded-full border border-orange-500/40 bg-white">
-                <Image src="/image/logo.png" alt="KnowSamvidhan logo" width={40} height={40} className="h-full w-full object-cover" />
+                <Image src="/image/logo.png" alt="KnowSamvidhan logo" width={36} height={36} className="h-full w-full object-cover" />
               </div>
               <div>
                 <div className="text-sm sm:text-base font-bold text-slate-100">

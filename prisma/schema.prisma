@@ -166,17 +166,219 @@ model UserQuizAttempt {
 }
 
 model Feedback {
-  id        String   @id @default(uuid())
-  userId    String
-  rating    Int
-  name      String?
-  comment   String?
-  showOnSite  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  userId     String
+  rating     Int
+  name       String?
+  comment    String?
+  showOnSite Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([createdAt])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  sessionId String
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id            String         @id @default(cuid())
+  userId        String
+  ipAddress     String?
+  userAgent     String?
+  refreshTokens RefreshToken[]
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  expiresAt     DateTime
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PageView {
+  id        String   @id @default(uuid())
+  path      String
+  visitorId String?
+  ipAddress String?
+  userAgent String?
+  source    String? // Direct / Search / Social / Referral
+  visitedAt DateTime @default(now())
+
+  @@index([visitedAt])
+  @@index([source])
+}
+
+model TrafficSource {
+  id        String   @id @default(uuid())
+  name      String
+  value     Int
+  createdAt DateTime @default(now())
+}
+
+model DailyAnalytics {
+  id        String   @id @default(uuid())
+  date      DateTime
+  dau       Int
+  mau       Int
+  createdAt DateTime @default(now())
+
+  @@unique([date])
+  @@index([date])
+}
+
+model ChatbotQuery {
+  id        String   @id @default(uuid())
+  category  String
+  resolved  Boolean  @default(false)
+  question  String?
+  createdAt DateTime @default(now())
+
+  @@index([category])
+  @@index([createdAt])
+}
+
+enum AuditScope {
+  IAM
+  SECURITY
+  DATABASE
+  CONTENT
+  SETTINGS
+  SYSTEM
+}
+
+enum AuditSeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model AuditLog {
+  id String @id @default(uuid())
+
+  actorId    String?
+  actorEmail String?
+  actorName  String?
+  actorRole  Role?
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  action      String
+  description String?
+
+  scope    AuditScope
+  severity AuditSeverity @default(INFO)
+
+  entityType  String
+  entityId    String?
+  entityLabel String?
+
+  ipAddress String?
+  userAgent String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([scope])
+  @@index([severity])
+  @@index([actorId])
+  @@index([entityType])
+}
+
+model Alert {
+  id String @id @default(uuid())
+
+  status   AlertStatus   @default(OPEN)
+  severity AlertSeverity @default(MEDIUM)
+
+  title       String
+  description String
+
+  serviceName String
+  serviceIcon String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  acknowledgedAt DateTime?
+  dismissedAt    DateTime?
+
+  categories AlertCategory[]
+  metrics    AlertCategoryMetric[]
+
+  @@index([status])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+model AlertCategory {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+  color       String // Hex color code
+
+  alerts  Alert[]
+  metrics AlertCategoryMetric[]
+}
+
+model AlertCategoryMetric {
+  id         String   @id @default(uuid())
+  alertId    String
+  categoryId String
+  count      Int
+  total      Int
+  date       DateTime @default(now())
+
+  alert    Alert         @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  category AlertCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([alertId, categoryId, date])
+  @@index([categoryId])
+  @@index([date])
+}
+
+model AlertFrequencyMetric {
+  id             String   @id @default(uuid())
+  hour           Int // 0-23
+  date           DateTime
+  totalAlerts    Int
+  criticalAlerts Int
+  createdAt      DateTime @default(now())
+
+  @@unique([hour, date])
+  @@index([date])
+}
+
+model AlertHistoricalMetric {
+  id            String   @id @default(uuid())
+  date          DateTime @unique
+  openedCount   Int
+  resolvedCount Int
+  createdAt     DateTime @default(now())
+}
+
+model AlertHeatmapMetric {
+  id         String   @id @default(uuid())
+  dayOfWeek  Int // 0-6 (Sunday-Saturday)
+  hour       Int // 0-23
+  alertCount Int
+  date       DateTime @default(now())
+
+  @@unique([dayOfWeek, hour, date])
+  @@index([date])
 }
 
 model User {
@@ -197,38 +399,24 @@ model User {
   refreshTokens       RefreshToken[]
   sessions            Session[]
   quizAttempts        UserQuizAttempt[]
+  auditLogs           AuditLog[]
 
   @@index([email])
   @@index([role])
   @@index([status])
 }
 
-model RefreshToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  sessionId String                        
-  expiresAt DateTime
-  revoked   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)  
+enum AlertStatus {
+  OPEN
+  ACKED
+  DISMISSED
 }
 
-model Session {
-  id            String         @id @default(cuid())
-  userId        String
-  ipAddress     String?
-  userAgent     String?
-  refreshTokens RefreshToken[]
-  isActive      Boolean        @default(true)   
-  createdAt     DateTime       @default(now())
-  expiresAt     DateTime
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])       
-  @@index([expiresAt])     
+enum AlertSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
 }
 
 enum Role {

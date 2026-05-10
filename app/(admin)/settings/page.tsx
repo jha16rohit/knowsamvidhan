@@ -6,7 +6,7 @@ import {
   User, Bell, BookOpen, Eye, EyeOff, Check, Camera, ChevronRight,
 } from "lucide-react";
 
-// ─── Toast ────────────────────────────────────────────────
+// ─── Toast ────────────────────────────────────────
 function Toast({ message }: { message: string }) {
   return (
     <div className="fixed bottom-8 right-8 z-50 bg-white px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-gray-100 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">

@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "@/components/admin_sidebar";
-import {Users, UserPlus,Search,Pencil,Trash2,Ban,ShieldCheck,X,Check} from "lucide-react";
+import {Users, UserPlus,Search,Trash2,Ban,ShieldCheck,X,Check} from "lucide-react";
 
 export default function UsersPage() {
   // ================= TYPES =================
@@ -509,13 +509,6 @@ export default function UsersPage() {
                         {/* ACTIONS */}
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-4">
-                            <button
-                              onClick={() => handleOpenModal(user.uid)}
-                              className="text-gray-400 hover:text-gray-900 transition-colors"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
-
                             {user.status === "Active" ? (
                               <button
                                 onClick={() => toggleStatus(user.uid)}

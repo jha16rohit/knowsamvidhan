@@ -14,9 +14,7 @@ import {
   CalendarDays,
   ChevronDown,
   ClipboardList,
-  Database,
   FileText,
-  Gavel,
   GraduationCap,
   History,
   Landmark,
@@ -37,7 +35,6 @@ import type { LucideIcon } from "lucide-react";
 // ─────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────
-
 interface SidebarItem {
   title: string;
   href?: string;
@@ -115,12 +112,6 @@ const sidebarItems: SidebarItem[] = [
         title: "Threat Detection",
         href: "/security/threat-detection",
         icon: Siren,
-      },
-
-      {
-        title: "Security Alerts",
-        href: "/security/alerts",
-        icon: Bell,
       },
 
       {
@@ -244,8 +235,8 @@ export default function AdminSidebar() {
           <Image
             src="/image/logo.png"
             alt="KnowSamvidhan Logo"
-            width={40}
-            height={40}
+            width={36}
+            height={36}
             className="rounded-lg object-contain"
           />
         </div>

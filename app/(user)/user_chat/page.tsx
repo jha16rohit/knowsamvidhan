@@ -158,26 +158,24 @@ function Bubble({ msg }: { msg: Message }) {
         >
           {msg.text.split("\n").map((line, i) => (
             <p key={i} className={line === "" ? "h-2" : ""}>
-              {line
-                .split(/(\*\*[^*]+\*\*)/g)
-                .map((chunk, j) =>
-                  chunk.startsWith("**") && chunk.endsWith("**") ? (
-                    <strong
-                      key={j}
-                      className={
-                        isAI ? "font-semibold text-slate-900" : "font-semibold"
-                      }
-                    >
-                      {chunk.slice(2, -2)}
-                    </strong>
-                  ) : chunk.startsWith("*") && chunk.endsWith("*") ? (
-                    <em key={j} className="italic opacity-80">
-                      {chunk.slice(1, -1)}
-                    </em>
-                  ) : (
-                    chunk
-                  )
-                )}
+              {line.split(/(\*\*[^*]+\*\*)/g).map((chunk, j) =>
+                chunk.startsWith("**") && chunk.endsWith("**") ? (
+                  <strong
+                    key={j}
+                    className={
+                      isAI ? "font-semibold text-slate-900" : "font-semibold"
+                    }
+                  >
+                    {chunk.slice(2, -2)}
+                  </strong>
+                ) : chunk.startsWith("*") && chunk.endsWith("*") ? (
+                  <em key={j} className="italic opacity-80">
+                    {chunk.slice(1, -1)}
+                  </em>
+                ) : (
+                  chunk
+                ),
+              )}
             </p>
           ))}
         </div>
@@ -231,7 +229,7 @@ export default function ChatPage() {
         };
         setMessages((prev) => [...prev, aiMsg]);
       },
-      1400 + Math.random() * 800
+      1400 + Math.random() * 800,
     );
   };
 
@@ -263,7 +261,6 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#f7f5f2] font-[system-ui]">
-
       {/* ══ SIDEBAR ══════════════════════════════════════════════════ */}
       {sidebarOpen && (
         <div
@@ -288,14 +285,17 @@ export default function ChatPage() {
 
         {/* Brand */}
         <div className="flex items-center justify-between border-b-[1.5px] border-slate-200 px-5 py-4">
-          <Link href="/" className="flex items-center gap-2.5 no-underline group">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 no-underline group"
+          >
             <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border-[1.5px] border-amber-800/40 bg-amber-950/5 shadow-sm">
               <Image
                 src="/image/logo.png"
                 alt="Logo"
                 width={36}
                 height={36}
-                className="h-full w-full object-cover"
+                className="object-cover"
               />
             </div>
             <div>
@@ -358,7 +358,11 @@ export default function ChatPage() {
                   <Icon
                     size={13}
                     strokeWidth={2}
-                    className={i === 0 ? "text-amber-800 shrink-0" : "text-slate-400 shrink-0 group-hover:text-slate-600"}
+                    className={
+                      i === 0
+                        ? "text-amber-800 shrink-0"
+                        : "text-slate-400 shrink-0 group-hover:text-slate-600"
+                    }
                   />
                   <div className="flex-1 min-w-0">
                     <span
@@ -398,18 +402,23 @@ export default function ChatPage() {
               </p>
               <p className="text-[10px] text-slate-400">Free plan</p>
             </div>
-            <Settings size={13} strokeWidth={2} className="text-slate-400 shrink-0" />
+            <Settings
+              size={13}
+              strokeWidth={2}
+              className="text-slate-400 shrink-0"
+            />
           </div>
         </div>
       </aside>
 
       {/* ══ MAIN CHAT AREA ═══════════════════════════════════════════ */}
       <div className="relative flex flex-1 flex-col overflow-hidden min-w-0">
-
         {/* Subtle dot grid background */}
-        <div className="pointer-events-none absolute inset-0 opacity-40"
+        <div
+          className="pointer-events-none absolute inset-0 opacity-40"
           style={{
-            backgroundImage: "radial-gradient(circle, #92400e18 1px, transparent 1px)",
+            backgroundImage:
+              "radial-gradient(circle, #92400e18 1px, transparent 1px)",
             backgroundSize: "28px 28px",
           }}
         />
@@ -432,7 +441,11 @@ export default function ChatPage() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-amber-800/50 bg-amber-950/6 shadow-sm">
-                  <Scale size={17} strokeWidth={1.8} className="text-amber-800" />
+                  <Scale
+                    size={17}
+                    strokeWidth={1.8}
+                    className="text-amber-800"
+                  />
                 </div>
                 {/* Online dot */}
                 <span className="absolute bottom-0 right-0 flex h-3 w-3 items-center justify-center rounded-full border-2 border-white bg-emerald-600">
@@ -444,7 +457,11 @@ export default function ChatPage() {
                   Samvi <span className="text-amber-800">AI</span>
                 </p>
                 <p className="text-[10px] text-emerald-700 font-medium mt-0.5 flex items-center gap-1">
-                  <Circle size={6} fill="currentColor" className="text-emerald-500" />
+                  <Circle
+                    size={6}
+                    fill="currentColor"
+                    className="text-emerald-500"
+                  />
                   Online · Constitutional Expert
                 </p>
               </div>
@@ -472,13 +489,16 @@ export default function ChatPage() {
 
         {/* ── MESSAGES ── */}
         <div className="relative flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-10">
-
           {/* Empty state suggestions */}
           {messages.length === 1 && (
             <div className="mb-8">
               <div className="mb-7 text-center">
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border-[1.5px] border-amber-800/35 bg-white shadow-sm">
-                  <BookOpen size={22} strokeWidth={1.6} className="text-amber-800" />
+                  <BookOpen
+                    size={22}
+                    strokeWidth={1.6}
+                    className="text-amber-800"
+                  />
                 </div>
                 <h2 className="text-[20px] sm:text-[23px] font-black text-slate-900 tracking-tight leading-tight">
                   What shall we explore{" "}
@@ -506,7 +526,11 @@ export default function ChatPage() {
                       `}
                     >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-[1.5px] border-current/20 bg-white/60 shadow-sm">
-                        <Icon size={15} strokeWidth={2} className={s.iconColor} />
+                        <Icon
+                          size={15}
+                          strokeWidth={2}
+                          className={s.iconColor}
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className="block text-[12.5px] font-semibold leading-tight">
@@ -567,7 +591,11 @@ export default function ChatPage() {
             >
               {/* Doc icon */}
               <div className="mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border-[1.5px] border-slate-200 bg-slate-50">
-                <FileText size={14} strokeWidth={2} className="text-slate-500" />
+                <FileText
+                  size={14}
+                  strokeWidth={2}
+                  className="text-slate-500"
+                />
               </div>
 
               <textarea
@@ -604,7 +632,11 @@ export default function ChatPage() {
               >
                 {/* Shimmer */}
                 <span className="absolute inset-0 -skew-x-12 -translate-x-full `] `bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-[200%]" />
-                <Send size={14} strokeWidth={2} className="relative text-amber-100 -translate-x-px" />
+                <Send
+                  size={14}
+                  strokeWidth={2}
+                  className="relative text-amber-100 -translate-x-px"
+                />
               </button>
             </div>
 
