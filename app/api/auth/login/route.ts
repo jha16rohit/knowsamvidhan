@@ -12,11 +12,16 @@ import {
   createSession,
   createRefreshToken,
 } from "@/lib/session";
+import {
+  calculateAdaptiveRisk,
+  getSecurityRequestContext,
+  recordSecurityAudit,
+} from "@/lib/security-engine";
 
 export async function POST(req: Request) {
   try {
-    const ip =
-      req.headers.get("x-forwarded-for") || "unknown";
+    const securityContext = getSecurityRequestContext(req);
+    const ip = securityContext.ipAddress;
 
     const limiter = rateLimit({
       key: `login:${ip}`,
@@ -47,6 +52,16 @@ export async function POST(req: Request) {
     });
 
     if (!user || user.isDeleted) {
+      await recordSecurityAudit({
+        action: "LOGIN_FAILED",
+        description: `Invalid user login attempt for ${email}`,
+        severity: "LOW",
+        entityType: "Login",
+        entityLabel: email,
+        ipAddress: ip,
+        userAgent: securityContext.userAgent,
+      });
+
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
@@ -66,9 +81,67 @@ export async function POST(req: Request) {
     );
 
     if (!isMatch) {
+      await recordSecurityAudit({
+        action: "LOGIN_FAILED",
+        description: `Invalid password for ${user.email}`,
+        severity: "MEDIUM",
+        entityType: "Login",
+        entityId: user.id,
+        entityLabel: user.email,
+        ipAddress: ip,
+        userAgent: securityContext.userAgent,
+      });
+
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
+      );
+    }
+
+    const risk = await calculateAdaptiveRisk({
+      email: user.email,
+      userId: user.id,
+      ipAddress: ip,
+      userAgent: securityContext.userAgent,
+      country: securityContext.country,
+      deviceId: securityContext.deviceId,
+    });
+
+    if (risk.decision === "BLOCK") {
+      await recordSecurityAudit({
+        action: "LOGIN_BLOCKED_RBA",
+        description: `Risk engine blocked login with score ${risk.riskScore}`,
+        severity: "HIGH",
+        entityType: "Login",
+        entityId: user.id,
+        entityLabel: user.email,
+        ipAddress: ip,
+        userAgent: securityContext.userAgent,
+        metadata: risk,
+      });
+
+      return NextResponse.json(
+        { error: "Login blocked by security policy", risk },
+        { status: 403 },
+      );
+    }
+
+    if (risk.decision === "OTP") {
+      await recordSecurityAudit({
+        action: "LOGIN_STEP_UP_OTP",
+        description: `Risk engine requested OTP with score ${risk.riskScore}`,
+        severity: "MEDIUM",
+        entityType: "Login",
+        entityId: user.id,
+        entityLabel: user.email,
+        ipAddress: ip,
+        userAgent: securityContext.userAgent,
+        metadata: risk,
+      });
+
+      return NextResponse.json(
+        { requiresOtp: true, risk },
+        { status: 202 },
       );
     }
 
@@ -76,6 +149,7 @@ export async function POST(req: Request) {
       id: user.id,
       email: user.email,
       role: user.role as "USER" | "ADMIN",
+      deviceId: securityContext.deviceId,
     });
 
     const accessToken = signAccessToken(payload);
@@ -110,6 +184,18 @@ export async function POST(req: Request) {
       accessToken,
       refreshToken,
       isAdmin: user.role === "ADMIN",
+    });
+
+    await recordSecurityAudit({
+      action: "LOGIN_ALLOWED_RBA",
+      description: `Risk engine allowed login with score ${risk.riskScore}`,
+      severity: "INFO",
+      entityType: "Login",
+      entityId: user.id,
+      entityLabel: user.email,
+      ipAddress: ip,
+      userAgent: securityContext.userAgent,
+      metadata: risk,
     });
 
     return NextResponse.json({

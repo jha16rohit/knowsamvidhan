@@ -429,3 +429,179 @@ enum Status {
   BLOCKED
   SUSPENDED
 }
+
+enum SecurityDecision {
+  ALLOW
+  OTP
+  BLOCK
+}
+
+enum SecurityEventType {
+  RBA
+  BEHAVIORAL_BIOMETRICS
+  JWT_REVOCATION
+  PII_VAULT
+  RATE_LIMIT
+  TARPIT
+  SOC_ALERT
+  THREAT_INTEL
+}
+
+enum ThreatType {
+  SQL_INJECTION
+  XSS
+  CREDENTIAL_STUFFING
+  SESSION_HIJACKING
+  OTP_ABUSE
+  API_SCRAPING
+  BOT_SWARM
+  GEO_ANOMALY
+  DEVICE_MISMATCH
+}
+
+model SecurityRiskAssessment {
+  id              String           @id @default(uuid())
+  userId          String?
+  emailHash       String?
+  ipAddress       String?
+  country         String?
+  deviceId        String?
+  userAgent       String?
+  riskScore       Int
+  trustScore      Int
+  decision        SecurityDecision
+  signals         Json
+  behaviorScore   Int              @default(0)
+  modelVersion    String           @default("cyberguard-v4.2")
+  createdAt       DateTime         @default(now())
+
+  @@index([userId])
+  @@index([ipAddress])
+  @@index([decision])
+  @@index([createdAt])
+}
+
+model BehavioralProfile {
+  id                 String   @id @default(uuid())
+  userId             String
+  deviceId           String?
+  baseline           Json
+  sampleCount        Int      @default(0)
+  anomalyScore       Int      @default(0)
+  classification     String   @default("human")
+  lastObservedAt     DateTime @default(now())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([userId, deviceId])
+  @@index([anomalyScore])
+  @@index([lastObservedAt])
+}
+
+model JwtRevocation {
+  id          String   @id @default(uuid())
+  jti         String   @unique
+  userId      String?
+  sessionId   String?
+  deviceId    String?
+  reason      String
+  revokedById String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([expiresAt])
+}
+
+model DeviceTrust {
+  id             String   @id @default(uuid())
+  userId         String
+  deviceId       String
+  trustScore     Int      @default(50)
+  userAgentHash  String?
+  ipPrefix       String?
+  country        String?
+  lastSeenAt     DateTime @default(now())
+  trustedUntil   DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, deviceId])
+  @@index([trustScore])
+  @@index([lastSeenAt])
+}
+
+model PiiVaultRecord {
+  id              String   @id @default(uuid())
+  ownerType       String
+  ownerId         String
+  fieldName       String
+  encryptedValue  String
+  maskedValue     String
+  keyVersion      String
+  lastAccessedBy  String?
+  lastAccessedAt  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([ownerType, ownerId, fieldName])
+  @@index([maskedValue])
+  @@index([lastAccessedAt])
+}
+
+model RateLimitEvent {
+  id             String   @id @default(uuid())
+  key            String
+  ipAddress      String?
+  userId         String?
+  endpoint       String?
+  attempts       Int
+  delayMs        Int      @default(0)
+  blockedUntil   DateTime?
+  fingerprint    String?
+  createdAt      DateTime @default(now())
+
+  @@index([key])
+  @@index([ipAddress])
+  @@index([blockedUntil])
+  @@index([createdAt])
+}
+
+model ThreatIntelligenceEvent {
+  id            String            @id @default(uuid())
+  type          ThreatType
+  severity      AlertSeverity
+  confidence    Int
+  ipAddress     String?
+  country       String?
+  endpoint      String?
+  payloadHash   String?
+  prediction    Json?
+  mitigated     Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+
+  @@index([type])
+  @@index([severity])
+  @@index([ipAddress])
+  @@index([createdAt])
+}
+
+model SecurityIncident {
+  id              String        @id @default(uuid())
+  incidentNumber  String        @unique
+  title           String
+  severity        AlertSeverity
+  status          String        @default("Investigating")
+  rootCause       Json?
+  timeline        Json          @default("[]")
+  recoveryPercent Int           @default(0)
+  openedAt        DateTime      @default(now())
+  resolvedAt      DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([severity])
+  @@index([status])
+  @@index([openedAt])
+}

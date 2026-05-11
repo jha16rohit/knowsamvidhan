@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import jwt, { type SignOptions, type JwtPayload } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
@@ -7,8 +8,11 @@ export type SessionRole = "USER" | "ADMIN";
 
 export type SessionPayload = {
   id: string;
+  sub: string;
   email: string;
   role: SessionRole;
+  jti: string;
+  device_id?: string;
 };
 
 const ACCESS_TOKEN_EXPIRES = "15m";
@@ -71,8 +75,12 @@ const validatePayload = (
   ) {
     return {
       id: decoded.id,
+      sub: typeof decoded.sub === "string" ? decoded.sub : decoded.id,
       email: decoded.email,
       role: decoded.role,
+      jti: typeof decoded.jti === "string" ? decoded.jti : "legacy-token",
+      device_id:
+        typeof decoded.device_id === "string" ? decoded.device_id : undefined,
     };
   }
 
@@ -217,8 +225,11 @@ export const getUserSession =
 
     return {
       id: user.id,
+      sub: payload.sub,
       email: user.email,
       role: user.role as SessionRole,
+      jti: payload.jti,
+      device_id: payload.device_id,
     };
   };
 
@@ -254,8 +265,11 @@ export const getAdminSession =
 
     return {
       id: user.id,
+      sub: payload.sub,
       email: user.email,
       role: "ADMIN",
+      jti: payload.jti,
+      device_id: payload.device_id,
     };
   };
 
@@ -274,14 +288,21 @@ export const buildSessionPayload = ({
   id,
   email,
   role,
+  deviceId,
+  jti,
 }: {
   id: string;
   email: string;
   role: SessionRole;
+  deviceId?: string;
+  jti?: string;
 }): SessionPayload => {
   return {
     id,
+    sub: id,
     email,
     role,
+    jti: jti || crypto.randomUUID(),
+    device_id: deviceId,
   };
 };

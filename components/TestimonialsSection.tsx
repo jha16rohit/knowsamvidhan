@@ -158,7 +158,7 @@ export default function TestimonialsSection() {
               className="absolute top-5 right-6 text-6xl leading-none font-serif text-orange-100 select-none pointer-events-none group-hover:text-orange-200 transition-colors duration-200"
               aria-hidden="true"
             >
-              "
+              &quot;
             </div>
 
             {/* Comment */}

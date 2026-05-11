@@ -296,6 +296,7 @@ export default function ChatPage() {
                 width={36}
                 height={36}
                 className="object-cover"
+                style={{ width: 'auto', height: 'auto' }}
               />
             </div>
             <div>

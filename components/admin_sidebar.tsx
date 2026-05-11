@@ -103,14 +103,14 @@ const sidebarItems: SidebarItem[] = [
     ],
   },
 
-  {
+{
     title: "Security",
     icon: ShieldAlert,
 
     children: [
       {
-        title: "Threat Detection",
-        href: "/security/threat-detection",
+        title: "Threat Analysis",
+        href: "/security/threat_analysis",
         icon: Siren,
       },
 
@@ -135,6 +135,56 @@ const sidebarItems: SidebarItem[] = [
       {
         title: "User Activity",
         href: "/security/users",
+        icon: Activity,
+      },
+
+      {
+        title: "Behavioral Profiles",
+        href: "/security/behavioral-profiles",
+        icon: Users,
+      },
+
+      {
+        title: "Device Trust",
+        href: "/security/device-trust",
+        icon: ShieldCheck,
+      },
+
+      {
+        title: "Threat Intelligence",
+        icon: Siren,
+        children: [
+          {
+            title: "SQL Injection",
+            href: "/security/threat-intel/sql-injection",
+            icon: Bug,
+          },
+          {
+            title: "XSS Attacks",
+            href: "/security/threat-intel/xss",
+            icon: Bug,
+          },
+          {
+            title: "Credential Stuffing",
+            href: "/security/threat-intel/credential-stuffing",
+            icon: Lock,
+          },
+          {
+            title: "Session Hijacking",
+            href: "/security/threat-intel/session-hijacking",
+            icon: Lock,
+          },
+          {
+            title: "Bot Swarm",
+            href: "/security/threat-intel/bot-swarm",
+            icon: Activity,
+          },
+        ],
+      },
+
+      {
+        title: "Rate Limiting",
+        href: "/security/rate-limiting",
         icon: Activity,
       },
     ],
@@ -238,6 +288,7 @@ export default function AdminSidebar() {
             width={36}
             height={36}
             className="rounded-lg object-contain"
+            style={{ width: 'auto', height: 'auto' }}
           />
         </div>
 
@@ -258,12 +309,15 @@ export default function AdminSidebar() {
           const isOpen = openMenus.includes(item.title);
 
           if (!item.children) {
+            if (!item.href) {
+              return null;
+            }
             const Icon = item.icon;
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.title}
-                href={item.href!}
+                href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 text-sm font-medium ${
                   isActive
                     ? "bg-orange-500 text-white shadow-lg"
@@ -324,13 +378,62 @@ export default function AdminSidebar() {
                 <div className="px-2 pb-3 space-y-1">
                   {item.children.map((child) => {
                     const ChildIcon = child.icon;
-
                     const isChildActive = pathname === child.href;
+                    const hasNestedChildren = child.children && child.children.length > 0;
+                    const nestedMenuKey = `${item.title}-${child.title}`;
+                    const isNestedOpen = openMenus.includes(nestedMenuKey);
+
+                    if (hasNestedChildren) {
+                      return (
+                        <div key={child.title} className="rounded-lg border border-gray-800 bg-[#0f172a]/50 overflow-hidden">
+                          <button
+                            onClick={() => toggleMenu(nestedMenuKey)}
+                            className="w-full flex items-center justify-between px-3 py-3 hover:bg-[#1b2740] transition-all"
+                          >
+                            <div className="flex items-center gap-3">
+                              <ChildIcon className="w-4 h-4 text-amber-500" />
+                              <span className="text-sm text-gray-300 font-medium">{child.title}</span>
+                            </div>
+                            <ChevronDown
+                              className={`w-3 h-3 text-gray-500 transition-transform duration-200 ${
+                                isNestedOpen ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
+                          {isNestedOpen && child.children && (
+                            <div className="px-2 pb-2 space-y-1 border-t border-gray-800/50">
+                              {child.children.map((subChild) => {
+                                const SubIcon = subChild.icon;
+                                const isSubActive = pathname === subChild.href;
+                                return subChild.href ? (
+                                  <Link
+                                    key={subChild.title}
+                                    href={subChild.href}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+                                      isSubActive
+                                        ? "bg-orange-500/20 text-orange-300"
+                                        : "text-gray-400 hover:text-white hover:bg-[#1b2740]"
+                                    }`}
+                                  >
+                                    <SubIcon className="w-3.5 h-3.5" />
+                                    {subChild.title}
+                                  </Link>
+                                ) : null;
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    if (!child.href) {
+                      return null;
+                    }
 
                     return (
                       <Link
                         key={child.title}
-                        href={child.href!}
+                        href={child.href}
                         className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 ${
                           isChildActive
                             ? "bg-orange-500/20 text-orange-300 border border-orange-500/30"

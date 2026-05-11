@@ -184,6 +184,7 @@ export default function Navbar() {
                     height={36}
                     priority
                     className="object-cover"
+                    style={{ width: 'auto', height: 'auto' }}
                   />
                 </div>
               </div>
@@ -473,6 +474,7 @@ export default function Navbar() {
                   width={36}
                   height={36}
                   className="object-cover"
+                  style={{ width: 'auto', height: 'auto' }}
                 />
               </div>
             </div>
