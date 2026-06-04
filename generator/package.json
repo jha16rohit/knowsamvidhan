@@ -1,0 +1,24 @@
+{
+  "name": "security-attack-generator",
+  "version": "1.0.0",
+  "description": "Security attack simulation test suite for KnowSamvidhan",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js all",
+    "test:brute-force": "node index.js 1",
+    "test:sql": "node index.js 2",
+    "test:xss": "node index.js 3",
+    "test:ddos": "node index.js 4",
+    "test:credential": "node index.js 5",
+    "test:session": "node index.js 6",
+    "test:bot": "node index.js 7"
+  },
+  "keywords": [
+    "security",
+    "testing",
+    "attack-simulation",
+    "penetration-testing"
+  ],
+  "author": "KnowSamvidhan Team",
+  "license": "MIT"
+}

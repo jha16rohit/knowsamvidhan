@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ClipboardList,
   FileText,
+  Globe,
   GraduationCap,
   History,
   Landmark,
@@ -104,91 +105,41 @@ const sidebarItems: SidebarItem[] = [
   },
 
 {
-    title: "Security",
-    icon: ShieldAlert,
+        title: "Security",
+        icon: ShieldAlert,
 
-    children: [
-      {
-        title: "Threat Analysis",
-        href: "/security/threat_analysis",
-        icon: Siren,
-      },
-
-      {
-        title: "Fraud Monitoring",
-        href: "/security/fraud-monitoring",
-        icon: ShieldCheck,
-      },
-
-      {
-        title: "Breach Reports",
-        href: "/security/breach-reports",
-        icon: Bug,
-      },
-
-      {
-        title: "Authentication Logs",
-        href: "/security/auth-logs",
-        icon: Lock,
-      },
-
-      {
-        title: "User Activity",
-        href: "/security/users",
-        icon: Activity,
-      },
-
-      {
-        title: "Behavioral Profiles",
-        href: "/security/behavioral-profiles",
-        icon: Users,
-      },
-
-      {
-        title: "Device Trust",
-        href: "/security/device-trust",
-        icon: ShieldCheck,
-      },
-
-      {
-        title: "Threat Intelligence",
-        icon: Siren,
         children: [
           {
-            title: "SQL Injection",
-            href: "/security/threat-intel/sql-injection",
-            icon: Bug,
+            title: "Threat Analysis",
+            href: "/security/threat_analysis",
+            icon: Siren,
           },
+
           {
-            title: "XSS Attacks",
-            href: "/security/threat-intel/xss",
-            icon: Bug,
+            title: "Fraud Monitoring",
+            href: "/security/fraud-monitoring",
+            icon: ShieldCheck,
           },
+
           {
-            title: "Credential Stuffing",
-            href: "/security/threat-intel/credential-stuffing",
+            title: "Authentication Logs",
+            href: "/security/auth-logs",
             icon: Lock,
           },
+
           {
-            title: "Session Hijacking",
-            href: "/security/threat-intel/session-hijacking",
-            icon: Lock,
+            title: "User Activity",
+            href: "/security/users",
+            icon: Activity,
           },
+
           {
-            title: "Bot Swarm",
-            href: "/security/threat-intel/bot-swarm",
+            title: "Rate Limiting",
+            href: "/security/rate-limiting",
             icon: Activity,
           },
         ],
       },
-
-      {
-        title: "Rate Limiting",
-        href: "/security/rate-limiting",
-        icon: Activity,
-      },
-    ],
-  },
 
   {
     title: "Analytics Dashboard",

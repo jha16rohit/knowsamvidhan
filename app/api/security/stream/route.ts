@@ -183,16 +183,27 @@ async function fetchSecurityData() {
       type: item.label.length > 18 ? item.label.split(" ").slice(0, 2).join(" ") : item.label,
       score,
       severity: severityFromScore(score),
-      lastSeen: `${Math.floor(Math.random() * 60) + 5}m ago`,
+      lastSeen: item.time,
       action: "Block",
     };
   });
 
-  const heatmap = isSafe ? [] : countryPool.slice(0, 7).map((country) => ({
-    ...country,
-    requests: Math.floor(Math.random() * 5000),
-    intensity: Math.min(0.95, Math.random()),
-  }));
+  const heatCountryAttacks = await prisma.threatIntelligenceEvent.groupBy({
+    by: ["country"],
+    _count: true,
+    where: { createdAt: { gte: dayAgo } },
+  });
+
+  const heatmap = isSafe ? [] : countryPool.slice(0, 7).map((country) => {
+    const attackData = heatCountryAttacks.find((c) => c.country === country.code);
+    const requests = attackData?._count || 0;
+    const maxRequests = Math.max(...heatCountryAttacks.map((c) => c._count), 1);
+    return {
+      ...country,
+      requests,
+      intensity: Math.min(0.95, requests / maxRequests),
+    };
+  });
 
   const fraudProfiles = users.slice(0, 8).map((user) => {
     const userSessions = sessions.filter((session) => session.userId === user.id);

@@ -171,8 +171,8 @@ model Feedback {
   rating     Int
   name       String?
   comment    String?
-  showOnSite Boolean  @default(false)
   createdAt  DateTime @default(now())
+  showOnSite Boolean  @default(false)
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -183,13 +183,13 @@ model RefreshToken {
   id        String   @id @default(cuid())
   token     String   @unique
   userId    String
-  sessionId String
   expiresAt DateTime
   revoked   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String
   session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Session {
@@ -197,10 +197,10 @@ model Session {
   userId        String
   ipAddress     String?
   userAgent     String?
-  refreshTokens RefreshToken[]
   isActive      Boolean        @default(true)
   createdAt     DateTime       @default(now())
   expiresAt     DateTime
+  refreshTokens RefreshToken[]
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -213,7 +213,7 @@ model PageView {
   visitorId String?
   ipAddress String?
   userAgent String?
-  source    String? // Direct / Search / Social / Referral
+  source    String?
   visitedAt DateTime @default(now())
 
   @@index([visitedAt])
@@ -229,13 +229,31 @@ model TrafficSource {
 
 model DailyAnalytics {
   id        String   @id @default(uuid())
-  date      DateTime
+  date      DateTime @unique
   dau       Int
   mau       Int
   createdAt DateTime @default(now())
 
-  @@unique([date])
   @@index([date])
+}
+
+model Conversation {
+  id String @id @default(uuid())
+  title String?
+  userId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messages ChatMessage[]
+  user User? @relation(fields: [userId], references: [id])
+}
+
+model ChatMessage {
+  id String @id @default(uuid())
+  role String
+  content String
+  createdAt DateTime @default(now())
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id])
 }
 
 model ChatbotQuery {
@@ -249,47 +267,24 @@ model ChatbotQuery {
   @@index([createdAt])
 }
 
-enum AuditScope {
-  IAM
-  SECURITY
-  DATABASE
-  CONTENT
-  SETTINGS
-  SYSTEM
-}
-
-enum AuditSeverity {
-  INFO
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
 model AuditLog {
-  id String @id @default(uuid())
-
-  actorId    String?
-  actorEmail String?
-  actorName  String?
-  actorRole  Role?
-
-  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
-
+  id          String        @id @default(uuid())
+  actorId     String?
+  actorEmail  String?
+  actorName   String?
+  actorRole   Role?
   action      String
   description String?
-
-  scope    AuditScope
-  severity AuditSeverity @default(INFO)
-
+  scope       AuditScope
+  severity    AuditSeverity @default(INFO)
   entityType  String
   entityId    String?
   entityLabel String?
-
-  ipAddress String?
-  userAgent String?
-  metadata  Json?
-  createdAt DateTime @default(now())
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime      @default(now())
+  actor       User?         @relation(fields: [actorId], references: [id])
 
   @@index([createdAt])
   @@index([scope])
@@ -299,25 +294,19 @@ model AuditLog {
 }
 
 model Alert {
-  id String @id @default(uuid())
-
-  status   AlertStatus   @default(OPEN)
-  severity AlertSeverity @default(MEDIUM)
-
-  title       String
-  description String
-
-  serviceName String
-  serviceIcon String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id             String                @id @default(uuid())
+  status         AlertStatus           @default(OPEN)
+  severity       AlertSeverity         @default(MEDIUM)
+  title          String
+  description    String
+  serviceName    String
+  serviceIcon    String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
   acknowledgedAt DateTime?
   dismissedAt    DateTime?
-
-  categories AlertCategory[]
-  metrics    AlertCategoryMetric[]
+  metrics        AlertCategoryMetric[]
+  categories     AlertCategory[]       @relation("AlertToAlertCategory")
 
   @@index([status])
   @@index([severity])
@@ -325,25 +314,23 @@ model Alert {
 }
 
 model AlertCategory {
-  id          String  @id @default(uuid())
-  name        String  @unique
+  id          String                @id @default(uuid())
+  name        String                @unique
   description String?
-  color       String // Hex color code
-
-  alerts  Alert[]
-  metrics AlertCategoryMetric[]
+  color       String
+  metrics     AlertCategoryMetric[]
+  alerts      Alert[]               @relation("AlertToAlertCategory")
 }
 
 model AlertCategoryMetric {
-  id         String   @id @default(uuid())
+  id         String        @id @default(uuid())
   alertId    String
   categoryId String
   count      Int
   total      Int
-  date       DateTime @default(now())
-
-  alert    Alert         @relation(fields: [alertId], references: [id], onDelete: Cascade)
-  category AlertCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  date       DateTime      @default(now())
+  alert      Alert         @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  category   AlertCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([alertId, categoryId, date])
   @@index([categoryId])
@@ -352,7 +339,7 @@ model AlertCategoryMetric {
 
 model AlertFrequencyMetric {
   id             String   @id @default(uuid())
-  hour           Int // 0-23
+  hour           Int
   date           DateTime
   totalAlerts    Int
   criticalAlerts Int
@@ -372,8 +359,8 @@ model AlertHistoricalMetric {
 
 model AlertHeatmapMetric {
   id         String   @id @default(uuid())
-  dayOfWeek  Int // 0-6 (Sunday-Saturday)
-  hour       Int // 0-23
+  dayOfWeek  Int
+  hour       Int
   alertCount Int
   date       DateTime @default(now())
 
@@ -393,17 +380,182 @@ model User {
   avatar              String?
   lastLogin           DateTime?
   isDeleted           Boolean              @default(false)
+  auditLogs           AuditLog[]
   feedbacks           Feedback[]
   passwordResetTokens PasswordResetToken[]
   posts               Post[]
   refreshTokens       RefreshToken[]
   sessions            Session[]
   quizAttempts        UserQuizAttempt[]
-  auditLogs           AuditLog[]
+  conversations       Conversation[]
 
   @@index([email])
   @@index([role])
   @@index([status])
+}
+
+model SecurityRiskAssessment {
+  id            String           @id @default(uuid())
+  userId        String?
+  emailHash     String?
+  ipAddress     String?
+  country       String?
+  deviceId      String?
+  userAgent     String?
+  riskScore     Int
+  trustScore    Int
+  decision      SecurityDecision
+  signals       Json
+  behaviorScore Int              @default(0)
+  modelVersion  String           @default("cyberguard-v4.2")
+  createdAt     DateTime         @default(now())
+
+  @@index([userId])
+  @@index([ipAddress])
+  @@index([decision])
+  @@index([createdAt])
+}
+
+model BehavioralProfile {
+  id             String   @id @default(uuid())
+  userId         String
+  deviceId       String?
+  baseline       Json
+  sampleCount    Int      @default(0)
+  anomalyScore   Int      @default(0)
+  classification String   @default("human")
+  lastObservedAt DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, deviceId])
+  @@index([anomalyScore])
+  @@index([lastObservedAt])
+}
+
+model JwtRevocation {
+  id          String   @id @default(uuid())
+  jti         String   @unique
+  userId      String?
+  sessionId   String?
+  deviceId    String?
+  reason      String
+  revokedById String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([expiresAt])
+}
+
+model DeviceTrust {
+  id            String    @id @default(uuid())
+  userId        String
+  deviceId      String
+  trustScore    Int       @default(50)
+  userAgentHash String?
+  ipPrefix      String?
+  country       String?
+  lastSeenAt    DateTime  @default(now())
+  trustedUntil  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([userId, deviceId])
+  @@index([trustScore])
+  @@index([lastSeenAt])
+}
+
+model PiiVaultRecord {
+  id             String    @id @default(uuid())
+  ownerType      String
+  ownerId        String
+  fieldName      String
+  encryptedValue String
+  maskedValue    String
+  keyVersion     String
+  lastAccessedBy String?
+  lastAccessedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([ownerType, ownerId, fieldName])
+  @@index([maskedValue])
+  @@index([lastAccessedAt])
+}
+
+model RateLimitEvent {
+  id           String    @id @default(uuid())
+  key          String
+  ipAddress    String?
+  userId       String?
+  endpoint     String?
+  attempts     Int
+  delayMs      Int       @default(0)
+  blockedUntil DateTime?
+  fingerprint  String?
+  createdAt    DateTime  @default(now())
+
+  @@index([key])
+  @@index([ipAddress])
+  @@index([blockedUntil])
+  @@index([createdAt])
+}
+
+model ThreatIntelligenceEvent {
+  id          String        @id @default(uuid())
+  type        ThreatType
+  severity    AlertSeverity
+  confidence  Int
+  ipAddress   String?
+  country     String?
+  endpoint    String?
+  payloadHash String?
+  prediction  Json?
+  mitigated   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+
+  @@index([type])
+  @@index([severity])
+  @@index([ipAddress])
+  @@index([createdAt])
+}
+
+model SecurityIncident {
+  id              String        @id @default(uuid())
+  incidentNumber  String        @unique
+  title           String
+  severity        AlertSeverity
+  status          String        @default("Investigating")
+  rootCause       Json?
+  timeline        Json          @default("[]")
+  recoveryPercent Int           @default(0)
+  openedAt        DateTime      @default(now())
+  resolvedAt      DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([severity])
+  @@index([status])
+  @@index([openedAt])
+}
+
+enum AuditScope {
+  IAM
+  SECURITY
+  DATABASE
+  CONTENT
+  SETTINGS
+  SYSTEM
+}
+
+enum AuditSeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
 enum AlertStatus {
@@ -457,151 +609,4 @@ enum ThreatType {
   BOT_SWARM
   GEO_ANOMALY
   DEVICE_MISMATCH
-}
-
-model SecurityRiskAssessment {
-  id              String           @id @default(uuid())
-  userId          String?
-  emailHash       String?
-  ipAddress       String?
-  country         String?
-  deviceId        String?
-  userAgent       String?
-  riskScore       Int
-  trustScore      Int
-  decision        SecurityDecision
-  signals         Json
-  behaviorScore   Int              @default(0)
-  modelVersion    String           @default("cyberguard-v4.2")
-  createdAt       DateTime         @default(now())
-
-  @@index([userId])
-  @@index([ipAddress])
-  @@index([decision])
-  @@index([createdAt])
-}
-
-model BehavioralProfile {
-  id                 String   @id @default(uuid())
-  userId             String
-  deviceId           String?
-  baseline           Json
-  sampleCount        Int      @default(0)
-  anomalyScore       Int      @default(0)
-  classification     String   @default("human")
-  lastObservedAt     DateTime @default(now())
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  @@unique([userId, deviceId])
-  @@index([anomalyScore])
-  @@index([lastObservedAt])
-}
-
-model JwtRevocation {
-  id          String   @id @default(uuid())
-  jti         String   @unique
-  userId      String?
-  sessionId   String?
-  deviceId    String?
-  reason      String
-  revokedById String?
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
-
-  @@index([userId])
-  @@index([sessionId])
-  @@index([expiresAt])
-}
-
-model DeviceTrust {
-  id             String   @id @default(uuid())
-  userId         String
-  deviceId       String
-  trustScore     Int      @default(50)
-  userAgentHash  String?
-  ipPrefix       String?
-  country        String?
-  lastSeenAt     DateTime @default(now())
-  trustedUntil   DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  @@unique([userId, deviceId])
-  @@index([trustScore])
-  @@index([lastSeenAt])
-}
-
-model PiiVaultRecord {
-  id              String   @id @default(uuid())
-  ownerType       String
-  ownerId         String
-  fieldName       String
-  encryptedValue  String
-  maskedValue     String
-  keyVersion      String
-  lastAccessedBy  String?
-  lastAccessedAt  DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([ownerType, ownerId, fieldName])
-  @@index([maskedValue])
-  @@index([lastAccessedAt])
-}
-
-model RateLimitEvent {
-  id             String   @id @default(uuid())
-  key            String
-  ipAddress      String?
-  userId         String?
-  endpoint       String?
-  attempts       Int
-  delayMs        Int      @default(0)
-  blockedUntil   DateTime?
-  fingerprint    String?
-  createdAt      DateTime @default(now())
-
-  @@index([key])
-  @@index([ipAddress])
-  @@index([blockedUntil])
-  @@index([createdAt])
-}
-
-model ThreatIntelligenceEvent {
-  id            String            @id @default(uuid())
-  type          ThreatType
-  severity      AlertSeverity
-  confidence    Int
-  ipAddress     String?
-  country       String?
-  endpoint      String?
-  payloadHash   String?
-  prediction    Json?
-  mitigated     Boolean           @default(false)
-  createdAt     DateTime          @default(now())
-
-  @@index([type])
-  @@index([severity])
-  @@index([ipAddress])
-  @@index([createdAt])
-}
-
-model SecurityIncident {
-  id              String        @id @default(uuid())
-  incidentNumber  String        @unique
-  title           String
-  severity        AlertSeverity
-  status          String        @default("Investigating")
-  rootCause       Json?
-  timeline        Json          @default("[]")
-  recoveryPercent Int           @default(0)
-  openedAt        DateTime      @default(now())
-  resolvedAt      DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-
-  @@index([severity])
-  @@index([status])
-  @@index([openedAt])
 }

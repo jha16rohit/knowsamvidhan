@@ -26,7 +26,20 @@ export async function GET() {
   } catch (error) {
     console.error("USER GET ERROR:", error);
     return NextResponse.json(
-      { error: "Failed to fetch preamble" },
+      { 
+        error: "Failed to fetch preamble",
+        message: error instanceof Error ? error.message : "Unknown error",
+        fallback: {
+          officialText: "",
+          simpleExplanation: "",
+          whyItMatters: "",
+          keywords: "[]",
+          timeline: "[]",
+          quickFacts: "[]",
+          landmarkCases: "[]",
+          notes: "[]",
+        }
+      },
       { status: 500 }
     );
   }

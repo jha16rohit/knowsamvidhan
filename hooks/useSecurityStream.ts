@@ -21,6 +21,11 @@ export interface ThreatAnalysisData {
     badIpScore: number;
     deviceMismatch: number;
     aiConfidence: number;
+    trustedDevices: number;
+    untrustedDevices: number;
+    pendingReview: number;
+    openIncidents: number;
+    criticalIncidents: number;
   };
   chartData: Array<{ hour: string; failed: number; critical: number }>;
   severityDistribution: Array<{ name: string; value: number; color: string }>;
@@ -46,6 +51,29 @@ export interface ThreatAnalysisData {
     confidence: number;
     signals: Array<{ label: string; value: number }>;
   };
+  deviceTrust: {
+    total: number;
+    trusted: number;
+    untrusted: number;
+    pending: number;
+    devices: Array<{
+      id: string;
+      userId: string;
+      deviceId: string;
+      trustScore: number;
+      country: string;
+      lastSeenAt: Date;
+    }>;
+  };
+  incidents: Array<{
+    id: string;
+    incidentNumber: string;
+    title: string;
+    severity: string;
+    status: string;
+    openedAt: Date;
+    recoveryPercent: number;
+  }>;
   settings: Array<{ key: string; label: string; enabled: boolean }>;
 }
 

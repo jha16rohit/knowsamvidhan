@@ -47,6 +47,8 @@ export async function GET() {
       recentPageViews,
       auditSecurityEvents,
       frequencyRows,
+      deviceTrustData,
+      incidents,
     ] = await Promise.all([
       prisma.alert.findMany({
         orderBy: { createdAt: "desc" },
@@ -79,6 +81,14 @@ export async function GET() {
         where: { date: { gte: dayAgo } },
         orderBy: [{ date: "asc" }, { hour: "asc" }],
       }),
+      prisma.deviceTrust.findMany({
+        orderBy: { trustScore: "asc" },
+        take: 20,
+      }),
+      prisma.securityIncident.findMany({
+        orderBy: { openedAt: "desc" },
+        take: 10,
+      }),
     ]);
 
     const activeThreats = openAlerts || alerts.length;
@@ -100,19 +110,19 @@ export async function GET() {
       const hourAlerts = alerts.filter((a) => new Date(a.createdAt).getHours() === hour);
       return {
         hour: `${String(hour).padStart(2, "0")}:00`,
-        failed: isSafe ? 0 : (row?.totalAlerts || hourAlerts.length),
-        critical: isSafe ? 0 : (row?.criticalAlerts || hourAlerts.filter((a) => a.severity === "CRITICAL").length),
+        failed: row?.totalAlerts || hourAlerts.length,
+        critical: row?.criticalAlerts || hourAlerts.filter((a) => a.severity === "CRITICAL").length,
       };
     });
 
     const severityDistribution = [
-      { name: "Low", value: isSafe ? 0 : alerts.filter((a) => a.severity === "LOW").length, color: "#22c55e" },
-      { name: "Medium", value: isSafe ? 0 : mediumAlerts, color: "#facc15" },
-      { name: "High", value: isSafe ? 0 : highAlerts, color: "#f97316" },
-      { name: "Critical", value: isSafe ? 0 : criticalAlerts, color: "#ef4444" },
+      { name: "Low", value: alerts.filter((a) => a.severity === "LOW").length, color: "#22c55e" },
+      { name: "Medium", value: mediumAlerts, color: "#facc15" },
+      { name: "High", value: highAlerts, color: "#f97316" },
+      { name: "Critical", value: criticalAlerts, color: "#ef4444" },
     ];
 
-    const feedSource = isSafe ? [] : [
+    const feedSource = [
       ...alerts.map((alert) => ({
         ip: `10.${alert.id.charCodeAt(0)}.${alert.id.charCodeAt(1)}.${alert.id.charCodeAt(2)}`,
         country: countryPool[alert.id.charCodeAt(0) % countryPool.length].code,
@@ -133,11 +143,9 @@ export async function GET() {
       })),
     ];
 
-    const liveFeed = feedSource.length > 0
-      ? feedSource.slice(0, 9)
-      : [];
+    const liveFeed = feedSource.slice(0, 9);
 
-    const registry = isSafe ? [] : liveFeed.slice(0, 7).map((item, index) => {
+    const registry = liveFeed.slice(0, 7).map((item, index) => {
       const score = clamp(92 - index * 8 + (item.severity === "critical" ? 8 : 0), 32, 98);
       return {
         ip: item.ip,
@@ -145,7 +153,7 @@ export async function GET() {
         type: item.label.length > 18 ? item.label.split(" ").slice(0, 2).join(" ") : item.label,
         score,
         severity: severityFromScore(score),
-        lastSeen: `${Math.floor(Math.random() * 60) + 5}m ago`,
+        lastSeen: item.time,
         action: "Block",
       };
     });
@@ -155,7 +163,7 @@ export async function GET() {
       const countryCode = view.ipAddress?.split(".")[0] || "XX";
       countryStats.set(countryCode, (countryStats.get(countryCode) || 0) + 1);
     });
-    const heatmap = isSafe ? [] : countryPool.slice(0, 7).map((country, index) => {
+    const heatmap = countryPool.slice(0, 7).map((country, index) => {
       const requests = countryStats.get(country.code) || 0;
       return {
         ...country,
@@ -164,30 +172,42 @@ export async function GET() {
       };
     });
 
+    const trustedDevices = deviceTrustData.filter(d => d.trustScore >= 70).length;
+    const untrustedDevices = deviceTrustData.filter(d => d.trustScore < 30).length;
+    const pendingReview = deviceTrustData.filter(d => d.trustScore >= 30 && d.trustScore < 70).length;
+
+    const openIncidents = incidents.filter(i => i.status !== "Resolved").length;
+    const criticalIncidents = incidents.filter(i => i.severity === "CRITICAL").length;
+
     return NextResponse.json({
       updatedAt: now.toISOString(),
       status: isSafe ? "secure" : "threat_detected",
       isSecure: isSafe,
       kpis: {
-        activeThreats: isSafe ? 0 : activeThreats,
-        critical: isSafe ? 0 : criticalAlerts,
-        high: isSafe ? 0 : highAlerts,
-        medium: isSafe ? 0 : mediumAlerts,
-        suspiciousLogins: isSafe ? 0 : suspiciousLogins,
-        botAttacks: isSafe ? 0 : botAttacks,
-        apiAbuse: isSafe ? 0 : apiAbuse,
-        trafficSpikes: isSafe ? 0 : Math.round(recentPageViews.length / 2),
-        geoAnomalies: isSafe ? 0 : new Set(recentSessions.map((s) => s.ipAddress)).size,
-        failedOtps: isSafe ? 0 : failedOtps,
-        badIpScore: isSafe ? 0 : clamp(50 + failedOtps * 2, 0, 100),
-        deviceMismatch: isSafe ? 0 : recentSessions.filter((s) => !s.userAgent).length,
+        activeThreats,
+        critical: criticalAlerts,
+        high: highAlerts,
+        medium: mediumAlerts,
+        suspiciousLogins,
+        botAttacks,
+        apiAbuse,
+        trafficSpikes: Math.round(recentPageViews.length / 2),
+        geoAnomalies: new Set(recentSessions.map((s) => s.ipAddress)).size,
+        failedOtps,
+        badIpScore: clamp(50 + failedOtps * 2, 0, 100),
+        deviceMismatch: recentSessions.filter((s) => !s.userAgent).length,
         aiConfidence: isSafe ? 100 : clamp(70 + criticalAlerts * 3, 0, 100),
+        trustedDevices,
+        untrustedDevices,
+        pendingReview,
+        openIncidents,
+        criticalIncidents,
       },
       chartData,
       severityDistribution,
-      liveFeed,
-      heatmap,
-      registry,
+      liveFeed: isSafe ? [] : liveFeed,
+      heatmap: isSafe ? [] : heatmap,
+      registry: isSafe ? [] : registry,
       anomaly: {
         confidence: isSafe ? 0 : clamp(60 + failedOtps * 2 + botAttacks, 0, 100),
         signals: isSafe ? [
@@ -200,6 +220,29 @@ export async function GET() {
           { label: "Geo anomalies", value: Math.min(100, registry.length * 10) },
         ],
       },
+      deviceTrust: {
+        total: deviceTrustData.length,
+        trusted: trustedDevices,
+        untrusted: untrustedDevices,
+        pending: pendingReview,
+        devices: deviceTrustData.slice(0, 10).map(d => ({
+          id: d.id,
+          userId: d.userId,
+          deviceId: d.deviceId,
+          trustScore: d.trustScore,
+          country: d.country,
+          lastSeenAt: d.lastSeenAt,
+        })),
+      },
+      incidents: incidents.map(i => ({
+        id: i.id,
+        incidentNumber: i.incidentNumber,
+        title: i.title,
+        severity: i.severity.toLowerCase(),
+        status: i.status,
+        openedAt: i.openedAt,
+        recoveryPercent: i.recoveryPercent,
+      })),
       settings: [
         { key: "device", label: "Device fingerprint mismatch", enabled: true },
         { key: "geo", label: "Geo-location anomaly", enabled: true },
