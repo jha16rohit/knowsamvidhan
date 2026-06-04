@@ -1,13 +1,13 @@
 
 
 ╔════════════════════════════════════════════════════════════╗
-║       SECURITY ATTACK SIMULATION TEST SUITE                ║
+║       SECURITY ATTACK SIMULATION TEST SUITE               ║
 ║                                                            ║
 ║  This suite tests security monitoring capabilities         ║
 ║  WITHOUT causing actual harm to the system                 ║
 ╚════════════════════════════════════════════════════════════╝
 
-🕒 Started At: 5/12/2026, 11:17:02 AM
+🕒 Started At: 5/12/2026, 9:33:05 PM
 
 ✅ Server is running on http://localhost:3000
 Server Status Code: 200
@@ -30,7 +30,7 @@ RUNNING: Brute Force Attack
 DESCRIPTION: Simulates multiple failed login attempts
 ============================================================
 
-(node:17312) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/brute-force.js is not specified and it doesn't parse as CommonJS.
+(node:27440) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/brute-force.js is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
@@ -73,7 +73,7 @@ RUNNING: SQL Injection
 DESCRIPTION: Tests SQL injection payload detection
 ============================================================
 
-(node:29864) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/sql-injection.js is not specified and it doesn't parse as CommonJS.
+(node:33748) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/sql-injection.js is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
@@ -126,7 +126,7 @@ RUNNING: XSS Attack
 DESCRIPTION: Tests cross-site scripting detection
 ============================================================
 
-(node:13444) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/xss-attack.js is not specified and it doesn't parse as CommonJS.
+(node:37256) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/xss-attack.js is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
@@ -179,7 +179,7 @@ RUNNING: DDoS Simulation
 DESCRIPTION: Simulates high-volume attack
 ============================================================
 
-(node:7408) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/ddos-simulation.js is not specified and it doesn't parse as CommonJS.
+(node:25672) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/ddos-simulation.js is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
@@ -211,7 +211,7 @@ RUNNING: Credential Stuffing
 DESCRIPTION: Tests leaked credentials against login
 ============================================================
 
-(node:22736) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/credential-stuffing.js is not specified and it doesn't parse as CommonJS.
+(node:13508) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/credential-stuffing.js is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
@@ -244,7 +244,7 @@ RUNNING: Session Hijacking
 DESCRIPTION: Tests stolen session token usage
 ============================================================
 
-(node:35608) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/session-hijack.js is not specified and it doesn't parse as CommonJS.
+(node:12780) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/session-hijack.js is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
@@ -275,7 +275,7 @@ RUNNING: Bot Detection
 DESCRIPTION: Tests automated bot detection
 ============================================================
 
-(node:34600) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/bot-detection.js is not specified and it doesn't parse as CommonJS.
+(node:31264) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/knowsamvidhan/generator/tests/bot-detection.js is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to D:\knowsamvidhan\generator\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
@@ -305,7 +305,7 @@ Test Exit Code: 0
 
 
 ╔════════════════════════════════════════════════════════════╗
-║                    ALL TESTS COMPLETE                      ║
+║                    ALL TESTS COMPLETE                     ║
 ╚════════════════════════════════════════════════════════════╝
 
 📊 After running tests, verify security monitoring:
@@ -314,4 +314,4 @@ Test Exit Code: 0
    3. Review /security/auth-logs
    4. Check /security/fraud-monitoring
 
-🕒 Completed At: 5/12/2026, 11:18:27 AM
+🕒 Completed At: 5/12/2026, 9:33:56 PM

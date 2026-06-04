@@ -148,7 +148,7 @@ function runTest(test) {
 async function runAllTests() {
   log("\n");
   log("╔════════════════════════════════════════════════════════════╗");
-  log("║       SECURITY ATTACK SIMULATION TEST SUITE               ║");
+  log("║       SECURITY ATTACK SIMULATION TEST SUITE                ║");
   log("║                                                            ║");
   log("║  This suite tests security monitoring capabilities         ║");
   log("║  WITHOUT causing actual harm to the system                 ║");
@@ -197,7 +197,7 @@ async function runAllSequentially() {
 
   log("\n");
   log("╔════════════════════════════════════════════════════════════╗");
-  log("║                    ALL TESTS COMPLETE                     ║");
+  log("║                    ALL TESTS COMPLETE                      ║");
   log("╚════════════════════════════════════════════════════════════╝");
 
   log("\n📊 After running tests, verify security monitoring:");

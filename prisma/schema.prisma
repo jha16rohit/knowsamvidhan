@@ -237,6 +237,25 @@ model DailyAnalytics {
   @@index([date])
 }
 
+model Conversation {
+  id String @id @default(uuid())
+  title String?
+  userId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messages ChatMessage[]
+  user User? @relation(fields: [userId], references: [id])
+}
+
+model ChatMessage {
+  id String @id @default(uuid())
+  role String
+  content String
+  createdAt DateTime @default(now())
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+}
+
 model ChatbotQuery {
   id        String   @id @default(uuid())
   category  String
@@ -368,6 +387,7 @@ model User {
   refreshTokens       RefreshToken[]
   sessions            Session[]
   quizAttempts        UserQuizAttempt[]
+  conversations       Conversation[]
 
   @@index([email])
   @@index([role])

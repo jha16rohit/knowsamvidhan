@@ -16,7 +16,6 @@ import {
   Radar,
   RefreshCw,
   Shield,
-  ShieldCheck,
   Siren,
   Zap,
   AlertTriangle,
@@ -137,8 +136,9 @@ function Panel({ title, subtitle, children, isSecure }: PanelProps) {
 export default function ThreatAnalysisPage() {
   const { data: streamData, isConnected } = useThreatAnalysis();
   const [loading, setLoading] = useState(false);
+  const [apiData, setApiData] = useState<ThreatAnalysisData | null>(null);
 
-  const data: ThreatAnalysisData = streamData || {
+  const data: ThreatAnalysisData = streamData || apiData || {
     status: "secure",
     isSecure: true,
     kpis: {
@@ -172,27 +172,51 @@ export default function ThreatAnalysisPage() {
     settings: [],
   };
 
-  const isSecure = data.isSecure === true;
+  const isSecure = data?.isSecure === true;
 
-  const kpis = data.kpis;
-  const chartData = data.chartData;
-  const severity = data.severityDistribution;
+  const kpis = data?.kpis ?? {
+    activeThreats: 0,
+    critical: 0,
+    high: 0,
+    medium: 0,
+    suspiciousLogins: 0,
+    botAttacks: 0,
+    apiAbuse: 0,
+    trafficSpikes: 0,
+    geoAnomalies: 0,
+    failedOtps: 0,
+    badIpScore: 0,
+    deviceMismatch: 0,
+    aiConfidence: 100,
+    trustedDevices: 0,
+    untrustedDevices: 0,
+    pendingReview: 0,
+    openIncidents: 0,
+    criticalIncidents: 0,
+  };
+  const chartData = data?.chartData || [];
+  const severity = data?.severityDistribution || [];
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      await fetch("/api/security/threat-analysis", {
-        cache: "no-store",
-      });
+      const res = await fetch("/api/security/threat-analysis", { cache: "no-store" });
+      const json = await res.json();
+      if (json && json.kpis) {
+        setApiData(json);
+      }
+    } catch (e) {
+      console.error("Failed to load threat data", e);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (!isConnected) return;
     load();
-  }, [isConnected, load]);
+    const interval = setInterval(load, 10000);
+    return () => clearInterval(interval);
+  }, [load]);
 
   const failedColor = isSecure ? "#10b981" : "#f59e0b";
 
@@ -568,7 +592,7 @@ export default function ThreatAnalysisPage() {
                     {(data.deviceTrust?.devices || []).slice(0, 5).map((device) => (
                       <div key={device.id} className="flex items-center justify-between border-b border-zinc-800/50 py-2">
                         <div>
-                          <p className="text-sm text-zinc-300 font-mono text-xs">{device.deviceId?.slice(0, 16)}...</p>
+                          <p className="text-xs text-zinc-300 font-mono">{device.deviceId?.slice(0, 16)}...</p>
                           <p className="text-xs text-zinc-500">{device.country || "Unknown"}</p>
                         </div>
                         <span className={`rounded-full border px-2 py-0.5 text-xs font-bold ${

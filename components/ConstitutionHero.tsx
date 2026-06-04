@@ -260,18 +260,40 @@ export default function Hero() {
   // ── Fetch preamble ──────────────────────────────────────────────────────────
   useEffect(() => {
     fetch("/api/preamble")
-      .then((r) => r.json())
-      .then(setPreambleData)
-      .catch((e) => console.error("preamble fetch error:", e))
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error(`HTTP error! status: ${r.status}`);
+        }
+        return r.json();
+      })
+      .then(data => {
+        // Ensure we have valid data
+        setPreambleData(data || {});
+      })
+      .catch((e) => {
+        console.error("preamble fetch error:", e);
+        setPreambleData({}); // Set empty object on error
+      })
       .finally(() => setLoadingPreamble(false));
   }, []);
 
   // ── Fetch parts ─────────────────────────────────────────────────────────────
   useEffect(() => {
     fetch("/api/parts")
-      .then((r) => r.json())
-      .then(setParts)
-      .catch((e) => console.error("parts fetch error:", e))
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error(`HTTP error! status: ${r.status}`);
+        }
+        return r.json();
+      })
+      .then(data => {
+        // Ensure we always have an array
+        setParts(Array.isArray(data) ? data : []);
+      })
+      .catch((e) => {
+        console.error("parts fetch error:", e);
+        setParts([]); // Set empty array on error
+      })
       .finally(() => setLoadingParts(false));
   }, []);
 
@@ -285,18 +307,40 @@ export default function Hero() {
   // ── Fetch featured articles ─────────────────────────────────────────────────
   useEffect(() => {
     fetch("/api/featured_articles")
-      .then((r) => r.json())
-      .then(setFeaturedArticles)
-      .catch((e) => console.error("featured articles fetch error:", e))
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error(`HTTP error! status: ${r.status}`);
+        }
+        return r.json();
+      })
+      .then(data => {
+        // Ensure we always have an array
+        setFeaturedArticles(Array.isArray(data) ? data : []);
+      })
+      .catch((e) => {
+        console.error("featured articles fetch error:", e);
+        setFeaturedArticles([]); // Set empty array on error
+      })
       .finally(() => setLoadingArticles(false));
   }, []);
 
   // ── Fetch amendments ────────────────────────────────────────────────────────
   useEffect(() => {
     fetch("/api/random_amendments")
-      .then((r) => r.json())
-      .then(setAmendments)
-      .catch((e) => console.error("amendments fetch error:", e))
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error(`HTTP error! status: ${r.status}`);
+        }
+        return r.json();
+      })
+      .then(data => {
+        // Ensure we always have an array
+        setAmendments(Array.isArray(data) ? data : []);
+      })
+      .catch((e) => {
+        console.error("amendments fetch error:", e);
+        setAmendments([]); // Set empty array on error
+      })
       .finally(() => setLoadingAmendments(false));
   }, []);
 

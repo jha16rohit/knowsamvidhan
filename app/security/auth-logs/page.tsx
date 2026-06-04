@@ -5,17 +5,10 @@ import AdminSidebar from "@/components/admin_sidebar";
 import {
   AlertTriangle,
   Ban,
-  Bot,
-  Fingerprint,
-  Globe2,
   KeyRound,
   Lock,
   RefreshCw,
   Shield,
-  ShieldAlert,
-  Siren,
-  UserX,
-  Zap,
 } from "lucide-react";
 import { ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from "recharts";
 

@@ -33,8 +33,16 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const parts = await prisma.part.findMany({
-    orderBy: { createdAt: "asc" },
-  });
-  return NextResponse.json(parts);
+  try {
+    const parts = await prisma.part.findMany({
+      orderBy: { createdAt: "asc" },
+    });
+    return NextResponse.json(parts);
+  } catch (error) {
+    console.error("Database connection error:", error);
+    return NextResponse.json(
+      { error: "Database connection failed. Please try again later." },
+      { status: 500 }
+    );
+  }
 }

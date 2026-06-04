@@ -110,19 +110,19 @@ export async function GET() {
       const hourAlerts = alerts.filter((a) => new Date(a.createdAt).getHours() === hour);
       return {
         hour: `${String(hour).padStart(2, "0")}:00`,
-        failed: isSafe ? 0 : (row?.totalAlerts || hourAlerts.length),
-        critical: isSafe ? 0 : (row?.criticalAlerts || hourAlerts.filter((a) => a.severity === "CRITICAL").length),
+        failed: row?.totalAlerts || hourAlerts.length,
+        critical: row?.criticalAlerts || hourAlerts.filter((a) => a.severity === "CRITICAL").length,
       };
     });
 
     const severityDistribution = [
-      { name: "Low", value: isSafe ? 0 : alerts.filter((a) => a.severity === "LOW").length, color: "#22c55e" },
-      { name: "Medium", value: isSafe ? 0 : mediumAlerts, color: "#facc15" },
-      { name: "High", value: isSafe ? 0 : highAlerts, color: "#f97316" },
-      { name: "Critical", value: isSafe ? 0 : criticalAlerts, color: "#ef4444" },
+      { name: "Low", value: alerts.filter((a) => a.severity === "LOW").length, color: "#22c55e" },
+      { name: "Medium", value: mediumAlerts, color: "#facc15" },
+      { name: "High", value: highAlerts, color: "#f97316" },
+      { name: "Critical", value: criticalAlerts, color: "#ef4444" },
     ];
 
-    const feedSource = isSafe ? [] : [
+    const feedSource = [
       ...alerts.map((alert) => ({
         ip: `10.${alert.id.charCodeAt(0)}.${alert.id.charCodeAt(1)}.${alert.id.charCodeAt(2)}`,
         country: countryPool[alert.id.charCodeAt(0) % countryPool.length].code,
@@ -143,11 +143,9 @@ export async function GET() {
       })),
     ];
 
-    const liveFeed = feedSource.length > 0
-      ? feedSource.slice(0, 9)
-      : [];
+    const liveFeed = feedSource.slice(0, 9);
 
-    const registry = isSafe ? [] : liveFeed.slice(0, 7).map((item, index) => {
+    const registry = liveFeed.slice(0, 7).map((item, index) => {
       const score = clamp(92 - index * 8 + (item.severity === "critical" ? 8 : 0), 32, 98);
       return {
         ip: item.ip,
@@ -165,7 +163,7 @@ export async function GET() {
       const countryCode = view.ipAddress?.split(".")[0] || "XX";
       countryStats.set(countryCode, (countryStats.get(countryCode) || 0) + 1);
     });
-    const heatmap = isSafe ? [] : countryPool.slice(0, 7).map((country, index) => {
+    const heatmap = countryPool.slice(0, 7).map((country, index) => {
       const requests = countryStats.get(country.code) || 0;
       return {
         ...country,
@@ -186,18 +184,18 @@ export async function GET() {
       status: isSafe ? "secure" : "threat_detected",
       isSecure: isSafe,
       kpis: {
-        activeThreats: isSafe ? 0 : activeThreats,
-        critical: isSafe ? 0 : criticalAlerts,
-        high: isSafe ? 0 : highAlerts,
-        medium: isSafe ? 0 : mediumAlerts,
-        suspiciousLogins: isSafe ? 0 : suspiciousLogins,
-        botAttacks: isSafe ? 0 : botAttacks,
-        apiAbuse: isSafe ? 0 : apiAbuse,
-        trafficSpikes: isSafe ? 0 : Math.round(recentPageViews.length / 2),
-        geoAnomalies: isSafe ? 0 : new Set(recentSessions.map((s) => s.ipAddress)).size,
-        failedOtps: isSafe ? 0 : failedOtps,
-        badIpScore: isSafe ? 0 : clamp(50 + failedOtps * 2, 0, 100),
-        deviceMismatch: isSafe ? 0 : recentSessions.filter((s) => !s.userAgent).length,
+        activeThreats,
+        critical: criticalAlerts,
+        high: highAlerts,
+        medium: mediumAlerts,
+        suspiciousLogins,
+        botAttacks,
+        apiAbuse,
+        trafficSpikes: Math.round(recentPageViews.length / 2),
+        geoAnomalies: new Set(recentSessions.map((s) => s.ipAddress)).size,
+        failedOtps,
+        badIpScore: clamp(50 + failedOtps * 2, 0, 100),
+        deviceMismatch: recentSessions.filter((s) => !s.userAgent).length,
         aiConfidence: isSafe ? 100 : clamp(70 + criticalAlerts * 3, 0, 100),
         trustedDevices,
         untrustedDevices,
@@ -207,9 +205,9 @@ export async function GET() {
       },
       chartData,
       severityDistribution,
-      liveFeed,
-      heatmap,
-      registry,
+      liveFeed: isSafe ? [] : liveFeed,
+      heatmap: isSafe ? [] : heatmap,
+      registry: isSafe ? [] : registry,
       anomaly: {
         confidence: isSafe ? 0 : clamp(60 + failedOtps * 2 + botAttacks, 0, 100),
         signals: isSafe ? [

@@ -1,4 +1,4 @@
-const http = require('http');
+import http from "http";
 
 const testEndpoint = (path, headers = {}) => {
   return new Promise((resolve) => {
